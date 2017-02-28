@@ -85,6 +85,10 @@ public class MockAccountOpe extends IAccountOpe {
 		int maxBuyAmount = (int)(m_money/price);
 		int realBuyAmount = Math.min(maxBuyAmount, amount);
 		realBuyAmount = realBuyAmount/100*100; 
+		if(realBuyAmount <=0 ) 
+		{
+			return 0;
+		}
 		
 		// 获取持有对象
 		HoldStock cHoldStock = null;

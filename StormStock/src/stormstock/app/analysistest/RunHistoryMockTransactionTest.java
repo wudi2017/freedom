@@ -82,12 +82,14 @@ public class RunHistoryMockTransactionTest {
 			if(fRatio < -0.02)
 			{
 				out_sr.bCreate = true;
+				out_sr.fMaxPositionRatio = 0.15f;
+				
 			}
 	
 		}
 		@Override
 		public int strategy_create_max_count() {
-			return 3;
+			return 8;
 		}
 
 	}
@@ -96,11 +98,11 @@ public class RunHistoryMockTransactionTest {
 		@Override
 		public void strategy_clear(TranContext ctx, ClearResult out_sr) {
 			HoldStock cHoldStock = ctx.target().holdStock();
-			if(cHoldStock.investigationDays >= 10) // 调查天数控制
+			if(cHoldStock.investigationDays >= 5) // 调查天数控制
 			{
 				out_sr.bClear = true;
 			}
-			if(cHoldStock.profitRatio() > 0.03 || cHoldStock.profitRatio() < -0.03) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.02 || cHoldStock.profitRatio() < -0.02) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}
@@ -117,7 +119,7 @@ public class RunHistoryMockTransactionTest {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2011-01-01", "2011-12-01");
+		cTranEngine.setHistoryTimeSpan("2011-01-01", "2012-01-01");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();

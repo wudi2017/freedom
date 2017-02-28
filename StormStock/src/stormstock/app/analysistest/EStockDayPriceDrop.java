@@ -104,7 +104,7 @@ public class EStockDayPriceDrop {
 		
 		// 最高最低之间存在大阴线
 		
-		BLog.output("TEST", "%s fAveWave %.4f\n", list.get(iCheck).date(), fAveWave);
+		//BLog.output("TEST", "%s fAveWave %.4f\n", list.get(iCheck).date(), fAveWave);
 		boolean bDaYin = false;
 		for(int i = indexHigh; i<=indexLow; i++)
 		{

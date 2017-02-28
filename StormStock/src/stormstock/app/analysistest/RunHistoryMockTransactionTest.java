@@ -25,7 +25,7 @@ public class RunHistoryMockTransactionTest {
 	public static class TranStockSet extends ITranStockSetFilter {
 		@Override
 		public boolean tran_stockset_byLatestStockInfo(StockInfo cStockInfo) {
-			if(cStockInfo.ID.compareTo("000000") >= 0 && cStockInfo.ID.compareTo("001000") <= 0) {	
+			if(cStockInfo.ID.compareTo("000000") >= 0 && cStockInfo.ID.compareTo("002000") <= 0) {	
 				return true;
 			}
 			return false;
@@ -45,7 +45,9 @@ public class RunHistoryMockTransactionTest {
 			{
 				//BLog.output("TEST", "StrategySelect %s\n", ctx.date());
 				out_sr.bSelect = true;
-				out_sr.fPriority = -cResultCheckPriceDrop.maxDropRate;
+				
+				float fMidleDeviateParam = EStockDayPriceMidleDeviateParam.checkMidleDeviateParam(cStockDayList, cStockDayList.size()-1);
+				out_sr.fPriority = -fMidleDeviateParam;
 			}
 		}
 
@@ -65,10 +67,20 @@ public class RunHistoryMockTransactionTest {
 
 			EStockTimePriceDropStable cEStockTimePriceDropStable = new EStockTimePriceDropStable();
 			
-			ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
-			if (cResultXiaCuoQiWen.bCheck)
+//			ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
+//			if (cResultXiaCuoQiWen.bCheck)
+//			{
+//				//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
+//				out_sr.bCreate = true;
+//			}
+			
+			// 建仓为跌幅一定时
+			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
+			float fNowPrice = ctx.target().stock().getLatestPrice();
+			float fRatio = (fNowPrice - fYesterdayClosePrice)/fYesterdayClosePrice;
+			
+			if(fRatio < -0.02)
 			{
-				//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
 				out_sr.bCreate = true;
 			}
 	
@@ -84,7 +96,7 @@ public class RunHistoryMockTransactionTest {
 		@Override
 		public void strategy_clear(TranContext ctx, ClearResult out_sr) {
 			HoldStock cHoldStock = ctx.target().holdStock();
-			if(cHoldStock.investigationDays >= 20) // 调查天数控制
+			if(cHoldStock.investigationDays >= 10) // 调查天数控制
 			{
 				out_sr.bClear = true;
 			}

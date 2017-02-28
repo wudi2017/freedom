@@ -149,6 +149,10 @@ public class StockDay {
 	{
 		return (open() + close()) / 2;
 	}
+	public float wave()
+	{
+		return (high() - low()) / low();
+	}
 	public float volume()
 	{
 		if(isEndTran())

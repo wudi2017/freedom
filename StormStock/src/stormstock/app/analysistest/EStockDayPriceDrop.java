@@ -29,6 +29,8 @@ public class EStockDayPriceDrop {
 	// 检查iCheck是否满足短期急跌
 	public ResultCheckPriceDrop checkPriceDrop(List<StockDay> list, int iCheck)
 	{
+		float fAveWave = EStockDayPriceWave.checkPriceAveWave(list, iCheck);
+		
 		ResultCheckPriceDrop cResultCheck = new ResultCheckPriceDrop();
 		
 		// 检查日判断
@@ -54,7 +56,7 @@ public class EStockDayPriceDrop {
 		}
 		//BLog.output("TEST", " %d %d \n", indexHigh, indexLow);
 		
-		//  查找下滑最高点
+		// 查找下滑最高点
 		float ave3Next = 0.0f;
 		int checkTimes = 0;
 		int indexHigh = 0;
@@ -91,7 +93,7 @@ public class EStockDayPriceDrop {
 
 		// 最大跌幅
 		float MaxDropRate = (fStockDayLow_midle-fStockDayHigh_midle)/fStockDayLow_midle;
-		if(MaxDropRate < -0.15)
+		if(MaxDropRate < -2*fAveWave && MaxDropRate < -0.08)
 		{
 			cResultCheck.maxDropRate = MaxDropRate;
 		}
@@ -101,6 +103,8 @@ public class EStockDayPriceDrop {
 		}
 		
 		// 最高最低之间存在大阴线
+		
+		BLog.output("TEST", "%s fAveWave %.4f\n", list.get(iCheck).date(), fAveWave);
 		boolean bDaYin = false;
 		for(int i = indexHigh; i<=indexLow; i++)
 		{
@@ -109,12 +113,11 @@ public class EStockDayPriceDrop {
 			StockDay cCheckDayBefore = list.get(i-1);
 			float fCheckRateOpen = (cCheckDay.close() - cCheckDay.open())/cCheckDay.open();
 			float fCheckRateYesterday = (cCheckDay.close() - cCheckDayBefore.close())/cCheckDayBefore.close();
-			if(fCheckRateYesterday < -0.06
-					&& fCheckRateOpen < -0.04)
+			if(fCheckRateYesterday < -fAveWave
+					&& fCheckRateOpen < -fAveWave*0.6)
 			{
 				bDaYin = true;
 			}
-			//BLog.output("TEST", "%s fCheckRateYesterday %.4f\n", list.get(i).date(), fCheckRateYesterday);
 		}
 		if(bDaYin)
 		{
@@ -182,9 +185,9 @@ public class EStockDayPriceDrop {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002474"; // 300163 300165
+		String stockID = "002367"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2014-01-01", "2015-01-01");
+				cStockDataIF.getHistoryData(stockID, "2016-09-01", "2017-03-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -196,10 +199,10 @@ public class EStockDayPriceDrop {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-09-13"))
-			{
-				BThread.sleep(1);
-			}
+//			if(cCurStockDay.date().equals("2016-09-13"))
+//			{
+//				BThread.sleep(1);
+//			}
 			ResultCheckPriceDrop cResultCheckPriceDrop = cEStockDayPriceDrop.checkPriceDrop(list, i);
 			if (cResultCheckPriceDrop.bCheck)
 			{

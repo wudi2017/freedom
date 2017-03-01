@@ -29,7 +29,9 @@ public class EStockDayPriceDrop {
 	// 检查iCheck是否满足短期急跌
 	public ResultCheckPriceDrop checkPriceDrop(List<StockDay> list, int iCheck)
 	{
+		String curDate = list.get(iCheck).date();
 		float fAveWave = EStockDayPriceWave.checkPriceAveWave(list, iCheck);
+		//BLog.output("TEST", " (%s) %.4f\n", curDate, fAveWave);
 		
 		ResultCheckPriceDrop cResultCheck = new ResultCheckPriceDrop();
 		
@@ -42,12 +44,12 @@ public class EStockDayPriceDrop {
 		}
 		
 		// 最低点在临近日判断
-		int iCheckForm = iCheck-5;
+		int iCheckForm = iCheck-10;
 		int iCheckTo = iCheck;
 		int indexLow = StockUtils.indexLow(list, iCheckForm, iCheckTo);
 		StockDay cStockDayLow = list.get(indexLow);
 		float fStockDayLow_midle = cStockDayLow.midle();
-		if(iCheckTo - indexLow <= 3 && iCheckTo - indexLow > 0)
+		if(iCheckTo - indexLow <= 5 && iCheckTo - indexLow > 0)
 		{
 		}
 		else
@@ -56,12 +58,13 @@ public class EStockDayPriceDrop {
 		}
 		//BLog.output("TEST", " %d %d \n", indexHigh, indexLow);
 		
-		// 查找下滑最高点
-		float ave3Next = 0.0f;
+		// 查找下滑最高点,连续3日附近均价都小于高点
+		float ave3Next = StockUtils.GetAveNear(list, 1, indexLow-1);
 		int checkTimes = 0;
 		int indexHigh = 0;
 		for(int i = indexLow; i>iBegin; i--)
 		{
+			String tmpDate = list.get(i).date();
 			float ave3 = StockUtils.GetAveNear(list, 1, i);
 			if(ave3 < ave3Next)
 			{
@@ -70,6 +73,7 @@ public class EStockDayPriceDrop {
 			else
 			{
 				checkTimes=0;
+				ave3Next = ave3;
 			}
 			
 			if(checkTimes>=3)
@@ -77,8 +81,8 @@ public class EStockDayPriceDrop {
 				indexHigh = i+3;
 				break;
 			}
-			ave3Next = ave3;
 		}
+		//BLog.output("TEST", "(%s) %s - %s \n", curDate, list.get(indexHigh).date(), list.get(indexLow).date());
 		float fStockDayHigh_midle = 0.0f;
 		if(indexHigh != 0)
 		{
@@ -88,12 +92,10 @@ public class EStockDayPriceDrop {
 		{
 			return cResultCheck;
 		}
-		//BLog.output("TEST", "%s - %s \n", list.get(indexHigh).date(), list.get(indexLow).date());
 		
-
 		// 最大跌幅
 		float MaxDropRate = (fStockDayLow_midle-fStockDayHigh_midle)/fStockDayLow_midle;
-		if(MaxDropRate < -2*fAveWave && MaxDropRate < -0.08)
+		if(MaxDropRate < -1.5*fAveWave)
 		{
 			cResultCheck.maxDropRate = MaxDropRate;
 		}
@@ -103,7 +105,6 @@ public class EStockDayPriceDrop {
 		}
 		
 		// 最高最低之间存在大阴线
-		
 		//BLog.output("TEST", "%s fAveWave %.4f\n", list.get(iCheck).date(), fAveWave);
 		boolean bDaYin = false;
 		for(int i = indexHigh; i<=indexLow; i++)
@@ -139,7 +140,6 @@ public class EStockDayPriceDrop {
 //		{
 //			return cResultCheck;
 //		}
-		
 
 		cResultCheck.bCheck = true;
 		return cResultCheck;
@@ -185,9 +185,9 @@ public class EStockDayPriceDrop {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002367"; // 300163 300165
+		String stockID = "000151"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-09-01", "2017-03-01");
+				cStockDataIF.getHistoryData(stockID, "2010-09-01", "2012-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -199,10 +199,11 @@ public class EStockDayPriceDrop {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-//			if(cCurStockDay.date().equals("2016-09-13"))
-//			{
-//				BThread.sleep(1);
-//			}
+			if(cCurStockDay.date().equals("2016-11-02"))
+			{
+				BThread.sleep(1);
+			}
+			
 			ResultCheckPriceDrop cResultCheckPriceDrop = cEStockDayPriceDrop.checkPriceDrop(list, i);
 			if (cResultCheckPriceDrop.bCheck)
 			{
@@ -210,6 +211,7 @@ public class EStockDayPriceDrop {
 				s_StockDayListCurve.markCurveIndex(i, "D");
 				//i=i+2;
 			}
+
         } 
 		
 		s_StockDayListCurve.generateImage();

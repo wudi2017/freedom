@@ -27,9 +27,9 @@ public class RunSingleTest {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "600329"; // 300163 300165 000401 600439
+		String stockID = "000151"; // 300163 300165 000401 600439
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-08-01", "2017-01-01");
+				cStockDataIF.getHistoryData(stockID, "2016-09-01", "2017-03-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -43,7 +43,7 @@ public class RunSingleTest {
 		for(int iDayCheck = 0; iDayCheck < list.size(); iDayCheck++)  
         {  
 			StockDay cCurStockDay = list.get(iDayCheck);
-
+			
 			
 			
 //			// ÈÕÏ¸½Ú¼ì²é

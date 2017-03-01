@@ -3,6 +3,7 @@ package stormstock.app.analysistest;
 import java.util.List;
 
 import stormstock.app.analysistest.EStockDayPriceDrop.ResultCheckPriceDrop;
+import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
 import stormstock.app.analysistest.EStockTimePriceDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
 import stormstock.fw.tranbase.account.AccountPublicDef.HoldStock;
@@ -40,15 +41,25 @@ public class RunHistoryMockTransactionTest {
 			
 			EStockDayPriceDrop cEStockDayPriceDrop = new EStockDayPriceDrop();
 			
+			// 价格下挫
 			ResultCheckPriceDrop cResultCheckPriceDrop = cEStockDayPriceDrop.checkPriceDrop(cStockDayList, cStockDayList.size()-1);
 			if(cResultCheckPriceDrop.bCheck)
 			{
-				//BLog.output("TEST", "StrategySelect %s\n", ctx.date());
-				out_sr.bSelect = true;
 				
-				float fMidleDeviateParam = EStockDayPriceMidleDeviateParam.checkMidleDeviateParam(cStockDayList, cStockDayList.size()-1);
-				out_sr.fPriority = -fMidleDeviateParam;
+				// 量能缩量
+				//VOLUMELEVEL volLev = EStockDayVolumeLevel.checkVolumeLevel(cStockDayList, cStockDayList.size()-1);
+				//if (volLev == VOLUMELEVEL.DEATH)
+				//{
+					//BLog.output("TEST", "StrategySelect %s\n", ctx.date());
+					out_sr.bSelect = true;
+					
+					float fMidleDeviateParam = EStockDayPriceMidleDeviateParam.checkMidleDeviateParam(cStockDayList, cStockDayList.size()-1);
+					out_sr.fPriority = -fMidleDeviateParam;
+				//}
+
 			}
+			
+
 		}
 
 		@Override
@@ -67,25 +78,28 @@ public class RunHistoryMockTransactionTest {
 
 			EStockTimePriceDropStable cEStockTimePriceDropStable = new EStockTimePriceDropStable();
 			
-//			ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
+//			ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_single(list_stockTime, list_stockTime.size()-1);
 //			if (cResultXiaCuoQiWen.bCheck)
 //			{
 //				//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
 //				out_sr.bCreate = true;
+//				out_sr.fMaxPositionRatio = 0.15f;
 //			}
 			
 			// 建仓为跌幅一定时
 			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
 			float fRatio = (fNowPrice - fYesterdayClosePrice)/fYesterdayClosePrice;
-			
-			if(fRatio < -0.02)
+			if(fRatio < -0.01)
 			{
 				out_sr.bCreate = true;
-				out_sr.fMaxPositionRatio = 0.15f;
+				out_sr.fMaxPositionRatio = 0.2f;
 				
 			}
-	
+			
+//			out_sr.bCreate = true;
+//			out_sr.fMaxPositionRatio = 0.15f;
+			
 		}
 		@Override
 		public int strategy_create_max_count() {
@@ -98,7 +112,7 @@ public class RunHistoryMockTransactionTest {
 		@Override
 		public void strategy_clear(TranContext ctx, ClearResult out_sr) {
 			HoldStock cHoldStock = ctx.target().holdStock();
-			if(cHoldStock.investigationDays >= 5) // 调查天数控制
+			if(cHoldStock.investigationDays >= 10) // 调查天数控制
 			{
 				out_sr.bClear = true;
 			}

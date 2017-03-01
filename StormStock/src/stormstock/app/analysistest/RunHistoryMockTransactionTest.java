@@ -90,10 +90,10 @@ public class RunHistoryMockTransactionTest {
 			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
 			float fRatio = (fNowPrice - fYesterdayClosePrice)/fYesterdayClosePrice;
-			if(fRatio < -0.01)
+			if(fRatio < -0.02)
 			{
 				out_sr.bCreate = true;
-				out_sr.fMaxPositionRatio = 0.2f;
+				out_sr.fMaxPositionRatio = 0.15f;
 				
 			}
 			
@@ -112,11 +112,11 @@ public class RunHistoryMockTransactionTest {
 		@Override
 		public void strategy_clear(TranContext ctx, ClearResult out_sr) {
 			HoldStock cHoldStock = ctx.target().holdStock();
-			if(cHoldStock.investigationDays >= 10) // 调查天数控制
+			if(cHoldStock.investigationDays >= 20) // 调查天数控制
 			{
 				out_sr.bClear = true;
 			}
-			if(cHoldStock.profitRatio() > 0.02 || cHoldStock.profitRatio() < -0.02) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.1) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}

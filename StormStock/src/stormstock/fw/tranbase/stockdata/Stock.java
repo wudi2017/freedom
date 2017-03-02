@@ -107,7 +107,7 @@ public class Stock {
 	{
 		if(m_stockDayList.size() == 0) return 0.0f;
 		float value = 0.0f;
-		int iE = StockUtils.indexDayKBeforeDate(m_stockDayList, date);
+		int iE = StockUtils.indexDayKBeforeDate(m_stockDayList, date, true);
 		int iB = iE-count+1;
 		if(iB<0) iB=0;
 		float sum = 0.0f;
@@ -128,7 +128,7 @@ public class Stock {
 	{
 		if(m_stockDayList.size() == 0) return 0.0f;
 		float value = 0.0f;
-		int iE = StockUtils.indexDayKBeforeDate(m_stockDayList, date);
+		int iE = StockUtils.indexDayKBeforeDate(m_stockDayList, date, true);
 		int iB = iE-count+1;
 		if(iB<0) iB=0;
 		for(int i = iB; i <= iE; i++)  
@@ -148,7 +148,7 @@ public class Stock {
 	{
 		if(m_stockDayList.size() == 0) return 0.0f;
 		float value = 10000.0f;
-		int iE = StockUtils.indexDayKBeforeDate(m_stockDayList, date);
+		int iE = StockUtils.indexDayKBeforeDate(m_stockDayList, date, true);
 		int iB = iE-count+1;
 		if(iB<0) iB=0;
 		for(int i = iB; i <= iE; i++)  

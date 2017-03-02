@@ -4,9 +4,12 @@ import java.util.List;
 
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BThread;
+import stormstock.fw.base.BImageCurve.CurvePoint;
 import stormstock.fw.tranbase.stockdata.StockDataIF;
 import stormstock.fw.tranbase.stockdata.StockDay;
+import stormstock.fw.tranbase.stockdata.StockTime;
 import stormstock.fw.tranbase.stockdata.StockUtils;
+import stormstock.fw.tranbase.stockdata.StockDataIF.ResultDayDetail;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 public class EStockDayPriceUpShadowLineTestPress {
@@ -18,7 +21,7 @@ public class EStockDayPriceUpShadowLineTestPress {
 		public boolean bCheck;
 	}
 	
-	public static ResultCheckUpShadowLineTestPress checkUpShadowLineTestPress(List<StockDay> list, int iCheck)
+	public static ResultCheckUpShadowLineTestPress checkUpShadowLineTestPress(String stockId, List<StockDay> list, int iCheck)
 	{
 		ResultCheckUpShadowLineTestPress cResultCheckUpShadowLineTestPress = new ResultCheckUpShadowLineTestPress();
 
@@ -30,7 +33,12 @@ public class EStockDayPriceUpShadowLineTestPress {
 			return cResultCheckUpShadowLineTestPress;
 		}
 		
-		// 当天突破前一个月最高点,是阳线
+		/*
+		 * *********************************************************************************
+		 * 当日特征描述
+		 */
+		
+		// 当天突破前一个月最高点
 		int iHighMonth = StockUtils.indexHigh(list, iEnd-20, iEnd);
 		if(iHighMonth==iEnd)
 		{	
@@ -40,8 +48,9 @@ public class EStockDayPriceUpShadowLineTestPress {
 			return cResultCheckUpShadowLineTestPress;
 		}
 		StockDay cCurStockDay = list.get(iHighMonth);
+		String curDate = cCurStockDay.date();
 		BLog.output("TEST", "date %s Open %.3f Close %.3f\n", 
-				cCurStockDay.date(), cCurStockDay.open(), cCurStockDay.close());
+				curDate, cCurStockDay.open(), cCurStockDay.close());
 		
 		// 当天中阳线， 不带大上影线
 		float wave = EStockDayPriceWave.checkPriceAveWave(list, iEnd);
@@ -64,7 +73,7 @@ public class EStockDayPriceUpShadowLineTestPress {
 			
 		}
 		BLog.output("TEST", "date %s wave %.4f curAccRate %.4f curAccRateOpen %.4f fUpShadowRatio %.2f\n", 
-				cCurStockDay.date(), wave, curAccRate, curAccRateOpen, fUpShadowRatio);
+				curDate, wave, curAccRate, curAccRateOpen, fUpShadowRatio);
 		
 		// 当天是突破所有压力线
 		float MA5_Cur = StockUtils.GetMA(list, 5, iEnd);
@@ -81,9 +90,20 @@ public class EStockDayPriceUpShadowLineTestPress {
 		{
 			return cResultCheckUpShadowLineTestPress;
 		}
-		BLog.output("TEST", "date %s\n", cCurStockDay.date());
+		BLog.output("TEST", "date %s Topo MA...\n", curDate);
 		
-		//当天都在高位运行
+		//当天大多都在高位运行
+		StockDataIF cStockDataIF = new StockDataIF();
+		ResultDayDetail cResultDayDetail = cStockDataIF.getDayDetail(stockId, curDate, "09:30:00", "15:00:00");
+		if(0 == cResultDayDetail.error)
+		{
+
+		}
+		else
+		{
+			return cResultCheckUpShadowLineTestPress;
+		}
+		
 		
 		//前期60天内，试探压力位居多，上影线触摸压力位，为了试盘
 		
@@ -125,7 +145,7 @@ public class EStockDayPriceUpShadowLineTestPress {
 			{
 				BThread.sleep(1);
 				
-				ResultCheckUpShadowLineTestPress cResultCheckUpShadowLineTestPress = EStockDayPriceUpShadowLineTestPress.checkUpShadowLineTestPress(list, i);
+				ResultCheckUpShadowLineTestPress cResultCheckUpShadowLineTestPress = EStockDayPriceUpShadowLineTestPress.checkUpShadowLineTestPress(stockID, list, i);
 				if (cResultCheckUpShadowLineTestPress.bCheck)
 				{
 					BLog.output("TEST", "### CheckPoint %s\n", cCurStockDay.date());

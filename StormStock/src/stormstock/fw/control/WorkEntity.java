@@ -41,8 +41,8 @@ public class WorkEntity {
 			StockDataIF stockDataIF = GlobalUserObj.getCurStockDataIF();
 			ResultHistoryData cResultHistoryData = stockDataIF.getHistoryData("999999");
 			List<StockDay> cStocDayListShangZheng = cResultHistoryData.resultList;
-			int iB = StockUtils.indexDayKAfterDate(cStocDayListShangZheng, m_beginDate);
-			int iE = StockUtils.indexDayKBeforeDate(cStocDayListShangZheng, m_endDate);
+			int iB = StockUtils.indexDayKAfterDate(cStocDayListShangZheng, m_beginDate, true);
+			int iE = StockUtils.indexDayKBeforeDate(cStocDayListShangZheng, m_endDate, true);
 			
 			for(int i = iB; i <= iE; i++)  
 	        {  

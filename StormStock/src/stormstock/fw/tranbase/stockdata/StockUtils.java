@@ -122,14 +122,23 @@ public class StockUtils {
 		return index;
 	}
 	
-	// 查找日期索引，返回list中某日期（含）之后的第一天index索引
-	static public int indexDayKAfterDate(List<StockDay> dayklist, String dateStr)
+	// 查找日期索引，返回list中某日期（含/不含）之后的第一天index索引
+	static public int indexDayKAfterDate(List<StockDay> dayklist, String dateStr, boolean bContainSelf)
 	{
 		int index = 0;
 		for(int k = 0; k<dayklist.size(); k++ )
 		{
 			StockDay cDayKDataTmp = dayklist.get(k);
-			if(cDayKDataTmp.date().compareTo(dateStr) >= 0)
+			boolean bFind = false;
+			if(bContainSelf)
+			{
+				bFind = cDayKDataTmp.date().compareTo(dateStr) >= 0;
+			}
+			else
+			{
+				bFind = cDayKDataTmp.date().compareTo(dateStr) > 0;
+			}
+			if(bFind)
 			{
 				index = k;
 				break;
@@ -138,14 +147,23 @@ public class StockUtils {
 		return index;
 	}
 	
-	// 查找日期索引，返回list中某日期（含）之前的第一天index索引
-	static public int indexDayKBeforeDate(List<StockDay> dayklist, String dateStr)
+	// 查找日期索引，返回list中某日期（含/不含）之前的第一天index索引
+	static public int indexDayKBeforeDate(List<StockDay> dayklist, String dateStr, boolean bContainSelf)
 	{
 		int index = 0;
 		for(int k = dayklist.size()-1; k >= 0; k-- )
 		{
 			StockDay cDayKDataTmp = dayklist.get(k);
-			if(cDayKDataTmp.date().compareTo(dateStr) <= 0)
+			boolean bFind = false;
+			if(bContainSelf)
+			{
+				bFind = cDayKDataTmp.date().compareTo(dateStr) <= 0;
+			}
+			else
+			{
+				bFind = cDayKDataTmp.date().compareTo(dateStr) < 0;
+			}
+			if(bFind)
 			{
 				index = k;
 				break;

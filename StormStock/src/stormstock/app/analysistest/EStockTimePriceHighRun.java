@@ -14,9 +14,39 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 public class EStockTimePriceHighRun {
 	
-	public static boolean checkHighRun(String StockId, String date, List<StockTime> list, int iCheck)
+	public static boolean checkHighRun(String StockId, String date, List<StockTime> list)
 	{
-		return false;
+		boolean bResult = false;
+		
+		// 查找昨日收盘价
+		float fBeforeClose = 0.0f;
+		StockDataIF cStockDataIF = new StockDataIF();
+		ResultHistoryData cResultHistoryData = cStockDataIF.getHistoryData(StockId);
+		if(cResultHistoryData.error == 0)
+		{
+			int iBefore = StockUtils.indexDayKBeforeDate(cResultHistoryData.resultList, date, false);
+			if(iBefore>=0)
+			{
+				StockDay cStockDay = cResultHistoryData.resultList.get(iBefore);
+				fBeforeClose = cStockDay.close();
+				BLog.output("TEST", " BeforeDate %s fBeforeClose %.3f\n", cStockDay.date(), fBeforeClose);
+			}
+		}
+		else
+		{
+			return bResult;
+		}
+		
+		// 今日收盘价
+		float fClose = 0.0f;
+		int iBegin = 0;
+		int iClose = list.size()-1;
+		fClose = list.get(iClose).price;
+		BLog.output("TEST", "%s fClose %.3f\n", date, fClose);
+		
+		// 近日在
+		
+		return bResult;
 	}
 	
 	/*
@@ -34,7 +64,6 @@ public class EStockTimePriceHighRun {
 				cStockDataIF.getHistoryData(stockID, "2016-09-01", "2017-03-01");
 		List<StockDay> listDay = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, listDay.size());
-		
 		for(int iDayCheck = 0; iDayCheck < listDay.size(); iDayCheck++)  
         {  
 			StockDay cCurStockDay = listDay.get(iDayCheck);
@@ -47,29 +76,14 @@ public class EStockTimePriceHighRun {
 				List<StockTime> listTime = cResultDayDetail.resultList;
 				
 				
-				
 				s_StockTimeListCurve.setCurve(listTime);
 				//////////////////////////////////////////////////////////////////////
+				boolean bCheck = EStockTimePriceHighRun.checkHighRun(stockID, date, listTime);
+				if(bCheck)
+				{
+					BLog.output("TEST", "CheckPoint %s\n", date);
+				}
 				
-				
-				for(int i = 0; i < listTime.size(); i++)  
-		        {
-					StockTime cCurStockTime = listTime.get(i);
-					if(cCurStockTime.time.equals("15:00:00"))
-					{
-						BThread.sleep(1);
-						
-						boolean bCheck = EStockTimePriceHighRun.checkHighRun(stockID, date, listTime, i);
-						if(bCheck)
-						{
-							s_StockTimeListCurve.markCurveIndex(i, "x");
-						}
-						
-					}
-					
-		        }
-				
-	
 				//////////////////////////////////////////////////////////////////////
 				s_StockTimeListCurve.generateImage();
 			}

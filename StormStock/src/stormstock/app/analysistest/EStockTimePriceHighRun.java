@@ -12,6 +12,11 @@ import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultDayDetail;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
+/**
+ * 检查日内分时满足当天高位运行
+ * @author wudi
+ *
+ */
 public class EStockTimePriceHighRun {
 	
 	public static boolean checkHighRun(String StockId, String date, List<StockTime> list)
@@ -29,7 +34,7 @@ public class EStockTimePriceHighRun {
 			{
 				StockDay cStockDay = cResultHistoryData.resultList.get(iBefore);
 				fBeforeClose = cStockDay.close();
-				BLog.output("TEST", " BeforeDate %s fBeforeClose %.3f\n", cStockDay.date(), fBeforeClose);
+				//BLog.output("TEST", " BeforeDate %s fBeforeClose %.3f\n", cStockDay.date(), fBeforeClose);
 			}
 		}
 		else
@@ -42,10 +47,64 @@ public class EStockTimePriceHighRun {
 		int iBegin = 0;
 		int iClose = list.size()-1;
 		fClose = list.get(iClose).price;
-		BLog.output("TEST", "%s fClose %.3f\n", date, fClose);
+		//BLog.output("TEST", "%s fClose %.3f\n", date, fClose);
 		
-		// 近日在
+		// 今日最高点
+		int iHigh = StockUtils.indexStockTimeHigh(list, 0, list.size()-1);
+		float fHigh = list.get(iHigh).price;
+		//BLog.output("TEST", "%s fHigh %.3f\n", date, fHigh);
 		
+		// 今日收阳线
+		if(fClose>fBeforeClose)
+		{
+		}
+		else
+		{
+			return bResult;
+		}
+		
+
+		
+		// 当日全天价格大多以上在1/3增幅以上
+		float checkSep13 = (fHigh - fBeforeClose)/3 + fBeforeClose;
+		int iCheckCnt = 0;
+		for(int i=0;i<list.size();i++)
+		{
+			float curPrice = list.get(i).price;
+			if(curPrice>checkSep13)
+			{
+				iCheckCnt++;
+			}
+		}
+		if(iCheckCnt > list.size()*0.66)
+		{
+		}
+		else
+		{
+			return bResult;
+		}
+		//BLog.output("TEST", "%s checkSep13 %.3f iCheckCnt %d\n", date, checkSep13, iCheckCnt);
+		// 当日下午价格全在在1/2增幅以上
+		float checkSep12 = (fHigh - fBeforeClose)/2 + fBeforeClose;
+		iCheckCnt = 0;
+		for(int i=list.size()/2;i<list.size();i++)
+		{
+			float curPrice = list.get(i).price;
+			if(curPrice<checkSep12)
+			{
+				iCheckCnt++;
+			}
+		}
+		if(iCheckCnt==0)
+		{
+		}
+		else
+		{
+			return bResult;
+		}
+		
+		
+		bResult = true;
 		return bResult;
 	}
 	
@@ -67,7 +126,7 @@ public class EStockTimePriceHighRun {
 		for(int iDayCheck = 0; iDayCheck < listDay.size(); iDayCheck++)  
         {  
 			StockDay cCurStockDay = listDay.get(iDayCheck);
-		
+			//BLog.output("TEST", "date %s\n", cCurStockDay.date());
 			if(cCurStockDay.date().equals(date))
 			{
 				
@@ -86,6 +145,7 @@ public class EStockTimePriceHighRun {
 				
 				//////////////////////////////////////////////////////////////////////
 				s_StockTimeListCurve.generateImage();
+				break;
 			}
         }
 

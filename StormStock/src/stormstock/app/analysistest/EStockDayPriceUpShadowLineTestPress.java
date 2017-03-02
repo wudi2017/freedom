@@ -40,7 +40,7 @@ public class EStockDayPriceUpShadowLineTestPress {
 		
 		// 当天突破前一个月最高点
 		int iHighMonth = StockUtils.indexHigh(list, iEnd-20, iEnd);
-		if(iHighMonth==iEnd)
+		if(iHighMonth!=iEnd)
 		{	
 		}
 		else
@@ -59,7 +59,7 @@ public class EStockDayPriceUpShadowLineTestPress {
 		float fUpShadowRatio = 0.0f;
 		if(cCurStockDay.high() - cCurStockDay.low()>0)
 		{
-			fUpShadowRatio = (cCurStockDay.high() - cCurStockDay.close())/(cCurStockDay.high() - cCurStockDay.low());
+			fUpShadowRatio = (cCurStockDay.high() - cCurStockDay.close())/(cCurStockDay.close() - cCurStockDay.low());
 		}
 		else
 		{
@@ -67,13 +67,13 @@ public class EStockDayPriceUpShadowLineTestPress {
 		}
 		
 		if(curAccRate > 0.6*wave
-				&& fUpShadowRatio < 0.33
+				&& fUpShadowRatio <= 0.33
 				&& curAccRateOpen > 0)
 		{
 			
 		}
-		BLog.output("TEST", "date %s wave %.4f curAccRate %.4f curAccRateOpen %.4f fUpShadowRatio %.2f\n", 
-				curDate, wave, curAccRate, curAccRateOpen, fUpShadowRatio);
+//		BLog.output("TEST", "date %s wave %.4f curAccRate %.4f curAccRateOpen %.4f fUpShadowRatio %.2f\n", 
+//				curDate, wave, curAccRate, curAccRateOpen, fUpShadowRatio);
 		
 		// 当天是突破所有压力线
 		float MA5_Cur = StockUtils.GetMA(list, 5, iEnd);
@@ -90,29 +90,51 @@ public class EStockDayPriceUpShadowLineTestPress {
 		{
 			return cResultCheckUpShadowLineTestPress;
 		}
-		BLog.output("TEST", "date %s Topo MA...\n", curDate);
+		//BLog.output("TEST", "date %s Topo MA...\n", curDate);
 		
 		//当天大多都在高位运行
 		StockDataIF cStockDataIF = new StockDataIF();
 		ResultDayDetail cResultDayDetail = cStockDataIF.getDayDetail(stockId, curDate, "09:30:00", "15:00:00");
 		if(0 == cResultDayDetail.error)
 		{
-
+			boolean bHighRun = EStockTimePriceHighRun.checkHighRun(stockId, curDate, cResultDayDetail.resultList);
+			if(bHighRun)
+			{
+			}
+			else
+			{
+				return cResultCheckUpShadowLineTestPress;
+			}
 		}
 		else
 		{
 			return cResultCheckUpShadowLineTestPress;
 		}
 		
+		/*
+		 * *********************************************************************************
+		 * 参考近期历史描述
+		 */
 		
-		//前期60天内，试探压力位居多，上影线触摸压力位，为了试盘
+		// 累计涨幅不能过大
+		int iLowMonth = StockUtils.indexLow(list, iEnd-20, iEnd);
+		float lowPriceMonth = list.get(iLowMonth).midle();
+		float fMonthAccRate = (cCurStockDay.midle() - lowPriceMonth)/lowPriceMonth;
+		//BLog.output("TEST", "date %s fMonthAccRate %.3f\n", curDate, fMonthAccRate);
+		if(fMonthAccRate < 0.19f)
+		{
+		}
+		else
+		{
+			return cResultCheckUpShadowLineTestPress;
+		}
+		// 前期60天内，试探压力位居多，上影线触摸压力位，为了试盘
 		
 		// 大阳线不是尾盘拉高，，目的为了吃货
 		
 		// 大阴线急跌居多，为了震仓
 		
 		// 大阴线不能是巨量，不是出货
-		
 		
 		cResultCheckUpShadowLineTestPress.bCheck = true;
 		return cResultCheckUpShadowLineTestPress;
@@ -129,9 +151,9 @@ public class EStockDayPriceUpShadowLineTestPress {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "300217"; // 300163 300165
+		String stockID = "300227"; // 300217 300227 300217
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-04-01", "2017-01-01");
+				cStockDataIF.getHistoryData(stockID, "2012-04-01", "2016-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -141,7 +163,7 @@ public class EStockDayPriceUpShadowLineTestPress {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-09-06"))
+			if(cCurStockDay.date().equals("2012-08-03"))
 			{
 				BThread.sleep(1);
 				

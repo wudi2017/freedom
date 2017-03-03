@@ -6,7 +6,14 @@ import java.util.List;
 
 import stormstock.fw.tranbase.stockdata.StockDay;
 
-public class EStockDayVolumeWave {
+/**
+ * 计算某日的参考均量阙值 TSD
+ * 说明：去除异常量的 60日平均量均值
+ * 备注：至少60交易日才能计算出
+ * @author wudi
+ *
+ */
+public class EStockDayVolumeThreshold {
 
 	public static float get(List<StockDay> list, int iCheck)
 	{

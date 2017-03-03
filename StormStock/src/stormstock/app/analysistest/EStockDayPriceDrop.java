@@ -30,7 +30,7 @@ public class EStockDayPriceDrop {
 	public ResultCheckPriceDrop checkPriceDrop(List<StockDay> list, int iCheck)
 	{
 		String curDate = list.get(iCheck).date();
-		float fAveWave = EStockDayPriceWave.checkPriceAveWave(list, iCheck);
+		float fAveWave = EStockDayPriceWaveThreshold.get(list, iCheck);
 		//BLog.output("TEST", " (%s) %.4f\n", curDate, fAveWave);
 		
 		ResultCheckPriceDrop cResultCheck = new ResultCheckPriceDrop();

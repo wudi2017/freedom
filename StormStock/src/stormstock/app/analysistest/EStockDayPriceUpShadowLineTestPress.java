@@ -53,7 +53,7 @@ public class EStockDayPriceUpShadowLineTestPress {
 				curDate, cCurStockDay.open(), cCurStockDay.close());
 		
 		// 当天中阳线， 不带大上影线
-		float wave = EStockDayPriceWave.checkPriceAveWave(list, iEnd);
+		float wave = EStockDayPriceWaveThreshold.get(list, iEnd);
 		float curAccRate = StockUtils.GetInreaseRatio(list, iEnd);
 		float curAccRateOpen = StockUtils.GetInreaseRatioRefOpen(list, iEnd);
 		float fUpShadowRatio = 0.0f;

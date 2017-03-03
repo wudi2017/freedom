@@ -10,9 +10,16 @@ import stormstock.fw.tranbase.stockdata.StockDataIF;
 import stormstock.fw.tranbase.stockdata.StockDay;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
-public class EStockDayPriceWave {
+/**
+ * 计算某日的参考价格波动阙值 TSD
+ * 说明：去除异常量的 排名前20波动日的均值
+ * 备注：至少60交易日才能计算出
+ * @author wudi
+ *
+ */
+public class EStockDayPriceWaveThreshold {
 
-	public static float checkPriceAveWave(List<StockDay> list, int iCheck)
+	public static float get(List<StockDay> list, int iCheck)
 	{
 		float fResultCheckPriceWave = 0.0f;
 		
@@ -87,7 +94,7 @@ public class EStockDayPriceWave {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			float fResultCheckPriceWave = EStockDayPriceWave.checkPriceAveWave(list, i);
+			float fResultCheckPriceWave = EStockDayPriceWaveThreshold.get(list, i);
 			BLog.output("TEST", "Check stockID(%s) refWave(%.3f)\n", cCurStockDay.date(), 
 					fResultCheckPriceWave);
 			

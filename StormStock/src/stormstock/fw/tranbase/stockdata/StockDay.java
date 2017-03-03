@@ -164,7 +164,28 @@ public class StockDay {
 			return 0.0f;
 		}
 	}
-	
+	public float entityHigh() // 实体高点
+	{
+		if(open()>close())
+		{
+			return open();
+		}
+		else
+		{
+			return close();
+		}
+	}
+	public float entityLow() // 实体低点
+	{
+		if(open()<close())
+		{
+			return open();
+		}
+		else
+		{
+			return close();
+		}
+	}
 	
 	/**
 	 * 成员 *********************************************************************

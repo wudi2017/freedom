@@ -1,5 +1,7 @@
 package stormstock.app.analysistest;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import stormstock.fw.base.BLog;
@@ -10,6 +12,7 @@ import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 public class EStockComplexEatChipCheck {
+	
 	public static boolean check(String stockId, List<StockDay> list, int iCheck)
 	{
 		boolean bCheck = false;
@@ -151,16 +154,111 @@ public class EStockComplexEatChipCheck {
 			return false;
 		}
 		
-		// 区间密集成交区 高低点，均值（排除最低5天与最高5天后，取值计算）
+		// 波动区间区间密集成交区 高低点，均值（排除最低5天与最高5天后，取值计算）
 		// 密集成交区 应该在一定范围内才合理
+		float fIntervalWaveHigh = 0.0f;
+		float fIntervalWaveLow = 0.0f;
+		int iXM5M10 = 0; 
+		int iXM10M20 = 0; 
+		{
+			List<Float> checkList = new ArrayList<Float>();
+			for(int i=iBegin+20; i<=iEnd; i++)
+			{
+				StockDay cTmpStockDay = list.get(i);
+				float fHigh = cTmpStockDay.high();
+				float fLow = cTmpStockDay.low();
+				checkList.add(fHigh);
+				checkList.add(fLow);
+			}
+			Collections.sort(checkList);
+			
+			// 均线交叉计算
+			for(int i=iBegin+20; i<=iEnd; i++)
+			{
+				float M5 = StockUtils.GetMA(list, 5, i);
+				float M10 = StockUtils.GetMA(list, 10, i);
+				
+				float M5_B1 = StockUtils.GetMA(list, 5, i-1);
+				float M10_B1 = StockUtils.GetMA(list,10, i-1);
+				if((M10_B1-M5_B1)*(M10-M5) <= 0)
+				{
+					iXM5M10++;
+					i=i+3;
+				}
+			}
+			
+			for(int i=iBegin+20; i<=iEnd; i++)
+			{
+				float M10 = StockUtils.GetMA(list, 10, i);
+				float M20 = StockUtils.GetMA(list, 20, i);
+				
+				float M10_B1 = StockUtils.GetMA(list, 10, i-1);
+				float M20_B1 = StockUtils.GetMA(list,20, i-1);
+				if((M20_B1-M10_B1)*(M20-M10) <= 0)
+				{
+					iXM10M20++;
+				}
+			}
+			
+			//检查边
+			float fHighAve = 0.0f;
+			for(int i=0;i<30;i++)
+			{
+				fHighAve=fHighAve+checkList.get(checkList.size()-1-i);
+			}
+			fHighAve = fHighAve/30;
+			fIntervalWaveHigh = fHighAve;
+			
+			float fLowAve = 0.0f;
+			for(int i=0;i<30;i++)
+			{
+				fLowAve=fLowAve+checkList.get(i);
+			}
+			fLowAve = fLowAve/30;
+			fIntervalWaveLow = fLowAve;
+		}
+		float fIntervalWave = (fIntervalWaveHigh-fIntervalWaveLow)/fIntervalWaveLow;
+//		BLog.output("TEST", "WaveInterval  H(%.3f) L(%.3f) Wave(%.3f) iXM5M10(%d) iXM10M20(%d)\n", 
+//				fIntervalWaveHigh, fIntervalWaveLow, fIntervalWave, iXM5M10, iXM10M20);
+//		if(fIntervalWave<0.15 && iXM5M10>=5 && iXM10M20>=3)
+//		{
+//		}
+//		else
+//		{
+//			return bCheck;
+//		}
 		
 		// 最后日突破密集成交区高点（不是最高点，是前若干天的均值）
+//		if(cCurStockDay.high() > fIntervalWaveHigh)
+//		{
+//			
+//		}
+//		else
+//		{
+//			return bCheck;
+//		}
 		
 		// 密集成交区均值用于判断回踩买入位置
 		
 		// 交易日在60/30日均线一下运行居多， 在以上运行少（贴着支撑位上方走）
 		
-		// 累积涨幅不能过高，存在大回调风险
+		// 中长累积涨幅不能过高，存在大回调风险
+		int iBeginIndexLong = iBegin-120;
+		if(iBeginIndexLong<0) iBeginIndexLong = 0;
+		
+		int iIndexLongLow = StockUtils.indexLow(list, iBeginIndexLong, iCheck);
+		StockDay cStockDayLongLow = list.get(iIndexLongLow);
+		
+		float fLeiji = (cCurStockDay.close() - cStockDayLongLow.close())/cStockDayLongLow.close();
+		//BLog.output("TEST", "BeginIndexLong %s fLeiji %.3f\n", cStockDayLongLow.date(),fLeiji);
+		if(fLeiji < 0.50)
+		{
+			
+		}
+		else
+		{
+			return bCheck;
+		}
 		
 		// 日内细节判断
 		// 异常波动天，大阴线满足吓人趋势（存在急跌 尾盘跌，下穿重要支撑位最好） 
@@ -168,6 +266,46 @@ public class EStockComplexEatChipCheck {
 		
 		bCheck = true;
 		return bCheck;
+	}
+	
+	
+	public static class PriceWaveInterval
+	{
+		public int iBegin;
+		public float hHigh;
+		public float fLow;
+	}
+	public static PriceWaveInterval checkPriceWaveInterval(List<StockDay> list, int iCheck)
+	{
+		PriceWaveInterval cPriceWaveInterval = new PriceWaveInterval();
+		
+		for(int iBeginIndex=iCheck-20; iBeginIndex>0&&iBeginIndex>iCheck-60; iBeginIndex--)
+		{
+			List<Float> checkList = new ArrayList<Float>();
+			for(int i=iBeginIndex;i<=iCheck;i++)
+			{
+				StockDay cStockDay = list.get(i);
+				float fHigh = cStockDay.high();
+				float fLow = cStockDay.low();
+				checkList.add(fHigh);
+				checkList.add(fLow);
+			}
+			Collections.sort(checkList);
+			
+			int iCheckCnt = iCheck-iBeginIndex;
+			for(int i=0; i<iCheckCnt%10; i++)
+			{
+				checkList.remove(0);
+				checkList.remove(checkList.size()-1);
+			}
+			
+			//检查上边
+			for(int i=0;i<iCheckCnt%5;i++)
+			{
+				
+			}
+		}
+		return cPriceWaveInterval;
 	}
 	/*
 	 * ********************************************************************
@@ -179,7 +317,7 @@ public class EStockComplexEatChipCheck {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "300217"; // 300217 300227
+		String stockID = "300217"; // 300217 300227 300163 300165 00
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2011-01-01", "2017-03-01");
 		List<StockDay> list = cResultHistoryData.resultList;
@@ -192,7 +330,7 @@ public class EStockComplexEatChipCheck {
 			StockDay cCurStockDay = list.get(i);
 			//BLog.output("TEST", "cCurStockDay %s \n", cCurStockDay.date());
 			
-			if(cCurStockDay.date().equals("2016-09-06"))
+			if(cCurStockDay.date().equals("2014-06-13"))
 			{
 				BThread.sleep(1);
 
@@ -204,7 +342,7 @@ public class EStockComplexEatChipCheck {
 			{
 				BLog.output("TEST", "### CheckPoint %s\n", cCurStockDay.date());
 				s_StockDayListCurve.markCurveIndex(i, "D");
-				//i=i+2;
+				i=i+20;
 			}
         } 
 		

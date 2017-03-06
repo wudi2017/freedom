@@ -54,7 +54,7 @@ public class EDIAbnormity {
 		
 		cEDIAbnormityResult.bCheck = true;
 		cEDIAbnormityResult.iAbnUp = iAbnormityPriceUpInr;
-		cEDIAbnormityResult.iAbnUp = iAbnormityPriceDownInr;
+		cEDIAbnormityResult.iAbnDown = iAbnormityPriceDownInr;
 		return cEDIAbnormityResult;
 	}
 	
@@ -86,7 +86,12 @@ public class EDIAbnormity {
 			{
 				BThread.sleep(1);
 
-				EDIAbnormity.get(fPriceWaveTSD, list, i);
+				EDIAbnormityResult cEDIAbnormityResult = EDIAbnormity.get(fPriceWaveTSD, list, i);
+				if(cEDIAbnormityResult.bCheck)
+				{
+					BLog.output("TEST", "iAbnormityPriceInr Up(%d) Down(%d) \n", 
+							cEDIAbnormityResult.iAbnUp, cEDIAbnormityResult.iAbnDown);
+				}
 			}
 			
 

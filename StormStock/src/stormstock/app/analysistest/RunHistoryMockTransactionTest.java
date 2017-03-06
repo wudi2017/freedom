@@ -2,6 +2,7 @@ package stormstock.app.analysistest;
 
 import java.util.List;
 
+import stormstock.app.analysistest.EStockComplexDXCheck.ComplexDXCheckResult;
 import stormstock.app.analysistest.EStockDayPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
 import stormstock.app.analysistest.EStockTimePriceDropStable.ResultXiaCuoQiWen;
@@ -37,28 +38,16 @@ public class RunHistoryMockTransactionTest {
 
 		@Override
 		public void strategy_select(TranContext ctx, SelectResult out_sr) {
+			
+			String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
 			List<StockDay> cStockDayList = ctx.target().stock().getCurStockDayData();
 			
-			EStockDayPriceDrop cEStockDayPriceDrop = new EStockDayPriceDrop();
-			
-			// 价格下挫
-			ResultCheckPriceDrop cResultCheckPriceDrop = cEStockDayPriceDrop.checkPriceDrop(cStockDayList, cStockDayList.size()-1);
-			if(cResultCheckPriceDrop.bCheck)
+			ComplexDXCheckResult cComplexDXCheckResult = EStockComplexDXCheck.check(stockId, cStockDayList, cStockDayList.size()-1);
+			if (cComplexDXCheckResult.bCheck)
 			{
-				
-				// 量能缩量
-				//VOLUMELEVEL volLev = EStockDayVolumeLevel.checkVolumeLevel(cStockDayList, cStockDayList.size()-1);
-				//if (volLev == VOLUMELEVEL.DEATH)
-				//{
-					//BLog.output("TEST", "StrategySelect %s\n", ctx.date());
-					out_sr.bSelect = true;
-					
-					float fMidleDeviateParam = EStockDayPriceMidleDeviateParam.checkMidleDeviateParam(cStockDayList, cStockDayList.size()-1);
-					out_sr.fPriority = -fMidleDeviateParam;
-				//}
-
+				out_sr.bSelect = true;
+				out_sr.fPriority = - cComplexDXCheckResult.x;
 			}
-			
 
 		}
 
@@ -86,6 +75,7 @@ public class RunHistoryMockTransactionTest {
 //				out_sr.fMaxPositionRatio = 0.15f;
 //			}
 			
+
 			// 建仓为跌幅一定时
 			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
@@ -93,7 +83,7 @@ public class RunHistoryMockTransactionTest {
 			if(fRatio < -0.02)
 			{
 				out_sr.bCreate = true;
-				out_sr.fMaxPositionRatio = 0.15f;
+				out_sr.fMaxPositionRatio = 0.25f;
 				
 			}
 			
@@ -103,7 +93,7 @@ public class RunHistoryMockTransactionTest {
 		}
 		@Override
 		public int strategy_create_max_count() {
-			return 8;
+			return 4;
 		}
 
 	}
@@ -116,7 +106,7 @@ public class RunHistoryMockTransactionTest {
 			{
 				out_sr.bClear = true;
 			}
-			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.1) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.05 || cHoldStock.profitRatio() < -0.05) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}

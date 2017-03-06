@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import stormstock.app.analysistest.EDIAbnormity.EDIAbnormityResult;
 import stormstock.app.analysistest.EDITryPress.EDITryPressResult;
 import stormstock.app.analysistest.EDIVirtualUpLine.EDIVirtualUpLineResult;
 import stormstock.app.analysistest.EDIWave.EDIWaveResult;
@@ -14,9 +15,47 @@ import stormstock.fw.tranbase.stockdata.StockDay;
 import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
-public class EStockComplexEatChipCheck {
+public class EStockComplexDXCheck {
 	
-	public static boolean check(String stockId, List<StockDay> list, int iCheck)
+	public static class ComplexDXCheckResult
+	{
+		public ComplexDXCheckResult()
+		{
+			bCheck = false;
+		}
+		public boolean bCheck;
+		public float x;
+	}
+	
+	public static ComplexDXCheckResult check(String stockId, List<StockDay> list, int iCheck)
+	{
+		ComplexDXCheckResult cComplexDXCheckResult = new ComplexDXCheckResult();
+		
+		int iBegin = iCheck-20;
+		int iEnd = iCheck;
+		if(iBegin<0)
+		{
+			return cComplexDXCheckResult;
+		}
+		
+		for(int i=iBegin;i<iEnd;i++)
+		{
+			boolean bXCheck = checkX(stockId, list, i);
+			if(bXCheck)
+			{
+				StockDay cCurStockDay = list.get(iCheck);
+				StockDay cXStockDay = list.get(i);
+				float xxx = cCurStockDay.close() - cXStockDay.close();
+				cComplexDXCheckResult.x = xxx;
+				cComplexDXCheckResult.bCheck = true;
+				break;
+			}
+		}
+		
+		return cComplexDXCheckResult;
+	}
+	
+	public static boolean checkX(String stockId, List<StockDay> list, int iCheck)
 	{
 		boolean bCheck = false;
 		
@@ -54,60 +93,60 @@ public class EStockComplexEatChipCheck {
 		}
 				
 		// @@@ 近60日 异常波动天计算
-		int iAbnormityPriceUpInr = 0;
-		int iAbnormityPriceDownInr = 0;
-		for(int i=iBegin; i<=iEnd; i++)
-		{
-			StockDay cTmpStockDay = list.get(i);
-			float fInrRatio = StockUtils.GetInreaseRatio(list, i);
-			if(fInrRatio > fPriceWaveTSD*0.6)
-			{
-				iAbnormityPriceUpInr++;
-				//BLog.output("TEST", "AbnormityPriceInr Up %s \n", cTmpStockDay.date());
-			}
-			if(fInrRatio < -fPriceWaveTSD*0.6)
-			{
-				iAbnormityPriceDownInr++;
-				//BLog.output("TEST", "AbnormityPriceInr Down %s \n", cTmpStockDay.date());
-			}
-		}
-		//BLog.output("TEST", "iAbnormityPriceInr Up(%d) Down(%d) \n", iAbnormityPriceUpInr, iAbnormityPriceDownInr);
-		if(iAbnormityPriceUpInr + iAbnormityPriceDownInr > 10)
+		EDIAbnormityResult cEDIAbnormityResult = EDIAbnormity.get(fPriceWaveTSD, list, iCheck);
+		if(cEDIAbnormityResult.bCheck
+				&& cEDIAbnormityResult.iAbnUp + cEDIAbnormityResult.iAbnDown > 8)
 		{
 		}
 		else
 		{
 			return false;
 		}
+//		BLog.output("TEST", "EDIAbnormity Up(%d) Down(%d) \n", 
+//				cEDIAbnormityResult.iAbnUp, cEDIAbnormityResult.iAbnDown);
 		
 		// @@@ 明显上影线个数检查
-		int iVirtualUpLineSharpA = 0;
-		int iVirtualUpLineSharpB = 0;
 		EDIVirtualUpLineResult cEDIVirtualUpLineResult = EDIVirtualUpLine.get(fPriceWaveTSD, list, iCheck);
-		if(cEDIVirtualUpLineResult.bCheck)
+		if(cEDIVirtualUpLineResult.bCheck
+				&& cEDIVirtualUpLineResult.iVirtualUpLineSharpA > 3
+				&& cEDIVirtualUpLineResult.iVirtualUpLineSharpB > 5)
 		{
-			iVirtualUpLineSharpA = cEDIVirtualUpLineResult.iVirtualUpLineSharpA;
-			iVirtualUpLineSharpB = cEDIVirtualUpLineResult.iVirtualUpLineSharpB;
 		}
-		BLog.output("TEST", "EDIVirtualUpLine SA %d SB %d\n", iVirtualUpLineSharpA, iVirtualUpLineSharpB);
+		else
+		{
+			return false;
+		}
+//		BLog.output("TEST", "EDIVirtualUpLine SA %d SB %d\n", 
+//				cEDIVirtualUpLineResult.iVirtualUpLineSharpA, cEDIVirtualUpLineResult.iVirtualUpLineSharpB);
 		
 		// @@@ 拉升试压力天数(扩展为不同权值的k线形态)
 		EDITryPressResult cEDITryPressResult = EDITryPress.get(list, iCheck);
-		if(cEDITryPressResult.bCheck)
+		if(cEDITryPressResult.bCheck
+				&& cEDITryPressResult.iTry60 > 3
+				&& cEDITryPressResult.iTry20 > 5)
 		{
-			BLog.output("TEST", "EDITryPress iE60 %d iE20 %d \n", cEDITryPressResult.iTry60, cEDITryPressResult.iTry20);
 		}
+		else
+		{
+			return false;
+		}
+//		BLog.output("TEST", "EDITryPress iE60 %d iE20 %d \n", cEDITryPressResult.iTry60, cEDITryPressResult.iTry20);
 		
 		// 波动区间区间密集成交区 高低点，均值（排除最低5天与最高5天后，取值计算）
 		// 密集成交区 应该在一定范围内才合理
 		EDIWaveResult cEDIWaveResult = EDIWave.get(list, iCheck);
-		if (cEDIWaveResult.bCheck)
+		if (cEDIWaveResult.bCheck
+				&& cEDIWaveResult.fWaveRadio() < 0.15f)
 		{
-			BLog.output("TEST", "EDIWave H(%.3f) L(%.3f) Wave(%.3f) iXM5M10(%d) iXM10M20(%d)\n", 
-					cEDIWaveResult.fWaveHigh, 
-					cEDIWaveResult.fWaveLow, cEDIWaveResult.fWaveRadio(), 
-					cEDIWaveResult.iXM5M10, cEDIWaveResult.iXM10M20);
 		}
+		else
+		{
+			return false;
+		}
+//		BLog.output("TEST", "EDIWave H(%.3f) L(%.3f) Wave(%.3f) iXM5M10(%d) iXM10M20(%d)\n", 
+//				cEDIWaveResult.fWaveHigh, 
+//				cEDIWaveResult.fWaveLow, cEDIWaveResult.fWaveRadio(), 
+//				cEDIWaveResult.iXM5M10, cEDIWaveResult.iXM10M20);
 
 		// 密集成交区均值用于判断回踩买入位置
 		
@@ -188,16 +227,15 @@ public class EStockComplexEatChipCheck {
 			if(cCurStockDay.date().equals("2016-09-06"))
 			{
 				BThread.sleep(1);
+				
 
-				boolean bCheck = EStockComplexEatChipCheck.check(stockID, list, i);
-				if (bCheck)
-				{
-					BLog.output("TEST", "### CheckPoint %s\n", cCurStockDay.date());
-					s_StockDayListCurve.markCurveIndex(i, "D");
-					i=i+20;
-				}
 			}
-			
+			ComplexDXCheckResult cComplexDXCheckResult = EStockComplexDXCheck.check(stockID, list, i);
+			if (cComplexDXCheckResult.bCheck)
+			{
+				BLog.output("TEST", "### CheckPoint %s x(%.3f)\n", cCurStockDay.date(), cComplexDXCheckResult.x);
+				s_StockDayListCurve.markCurveIndex(i, "D");
+			}
 
         } 
 		

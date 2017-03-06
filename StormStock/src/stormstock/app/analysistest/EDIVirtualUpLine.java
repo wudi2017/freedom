@@ -32,7 +32,7 @@ public class EDIVirtualUpLine {
 	{
 		EDIVirtualUpLineResult cEDIVirtualUpLineResult = new EDIVirtualUpLineResult();
 		
-		BLog.output("TEST", "fPriceWaveTSD %.4f\n", fPriceWaveTSD);
+		//BLog.output("TEST", "fPriceWaveTSD %.4f\n", fPriceWaveTSD);
 		
 		// ≤‚ ‘70Ωª“◊»’
 		int iBegin = iCheck-70;

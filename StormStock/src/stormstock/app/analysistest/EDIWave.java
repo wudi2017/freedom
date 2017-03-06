@@ -16,33 +16,45 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
  * @author wudi
  *
  */
-public class EStockComplexWaveCheck {
+public class EDIWave {
 	
-	public static class ComplexWaveResult
+	public static class EDIWaveResult
 	{
-		public ComplexWaveResult()
+		public EDIWaveResult()
 		{
 			bCheck = false;
 		}
-		public boolean bCheck;
+		boolean bCheck;
+		float fWaveHigh;  // 上压力
+		float fWaveLow;  // 下支撑
+		int iXM5M10;   // 5 10  交叉
+		int iXM10M20;  // 10 20 交叉
+		
+		public float fWaveRadio()
+		{
+			return (fWaveHigh-fWaveLow)/fWaveLow;
+		}
 	}
-	public static ComplexWaveResult get(List<StockDay> list, int iCheck)
+	public static EDIWaveResult get(List<StockDay> list, int iCheck)
 	{
-		ComplexWaveResult cComplexWaveResult = new ComplexWaveResult();
+		EDIWaveResult cEDIWaveResult = new EDIWaveResult();
 		
 		// 测试60交易日
 		int iBegin = iCheck-60;
 		int iEnd = iCheck;
+		StockDay cCurStockDay = list.get(iEnd);
 		if(iBegin<0)
 		{
-			return cComplexWaveResult;
+			return cEDIWaveResult;
 		}
+
+		// --------------------------------------
+		// 波动上下沿计算
 		
 		float fIntervalWaveHigh = 0.0f;
 		float fIntervalWaveLow = 0.0f;
-		int iXM5M10 = 0; 
-		int iXM10M20 = 0; 
-
+		
+		//添加所有最高最低点后排序
 		List<Float> checkList = new ArrayList<Float>();
 		for(int i=iBegin; i<=iEnd; i++)
 		{
@@ -53,7 +65,15 @@ public class EStockComplexWaveCheck {
 			checkList.add(fLow);
 		}
 		Collections.sort(checkList);
+		
+		// 移除最高最低3个点
+		for(int i=0;i<3;i++)
+		{
+			checkList.remove(0);
+			checkList.remove(checkList.size()-1);
+		}
 
+		// 计算前最高30的均值为上沿
 		float fHighAve = 0.0f;
 		for(int i=0;i<30;i++)
 		{
@@ -62,6 +82,7 @@ public class EStockComplexWaveCheck {
 		fHighAve = fHighAve/30;
 		fIntervalWaveHigh = fHighAve;
 		
+		// 计算前最低30的均值为下沿
 		float fLowAve = 0.0f;
 		for(int i=0;i<30;i++)
 		{
@@ -69,6 +90,12 @@ public class EStockComplexWaveCheck {
 		}
 		fLowAve = fLowAve/30;
 		fIntervalWaveLow = fLowAve;
+		
+		// --------------------------------------
+		// 交叉参数计算
+		
+		int iXM5M10 = 0; 
+		int iXM10M20 = 0; 
 
 		for(int i=iBegin+20; i<=iEnd; i++)
 		{
@@ -98,11 +125,19 @@ public class EStockComplexWaveCheck {
 		}
 		
 		float fIntervalWave = (fIntervalWaveHigh-fIntervalWaveLow)/fIntervalWaveLow;
-		BLog.output("TEST", "WaveInterval  H(%.3f) L(%.3f) Wave(%.3f) iXM5M10(%d) iXM10M20(%d)\n", 
-				fIntervalWaveHigh, fIntervalWaveLow, fIntervalWave, iXM5M10, iXM10M20);
-	
-		return cComplexWaveResult;
+//		BLog.output("TEST", "%s WaveInterval  H(%.3f) L(%.3f) Wave(%.3f) iXM5M10(%d) iXM10M20(%d)\n", 
+//				cCurStockDay.date(), fIntervalWaveHigh, fIntervalWaveLow, fIntervalWave, iXM5M10, iXM10M20);
+
+		cEDIWaveResult.fWaveHigh = fIntervalWaveHigh;
+		cEDIWaveResult.fWaveLow = fIntervalWaveLow;
+		cEDIWaveResult.iXM5M10 = iXM5M10;
+		cEDIWaveResult.iXM10M20 = iXM10M20;
+		cEDIWaveResult.bCheck = true;
+		
+		return cEDIWaveResult;
 	}
+	
+	
 	/*
 	 * ********************************************************************
 	 * Test
@@ -130,10 +165,16 @@ public class EStockComplexWaveCheck {
 			{
 				BThread.sleep(1);
 
-				ComplexWaveResult cComplexWaveResult = EStockComplexWaveCheck.get(list, i);
-				if (cComplexWaveResult.bCheck)
+				EDIWaveResult cEDIWaveResult = EDIWave.get(list, i);
+				if (cEDIWaveResult.bCheck)
 				{
+
 					BLog.output("TEST", "### CheckPoint %s\n", cCurStockDay.date());
+					BLog.output("TEST", "H(%.3f) L(%.3f) Wave(%.3f) iXM5M10(%d) iXM10M20(%d)\n", 
+							cEDIWaveResult.fWaveHigh, 
+							cEDIWaveResult.fWaveLow, cEDIWaveResult.fWaveRadio(), 
+							cEDIWaveResult.iXM5M10, cEDIWaveResult.iXM10M20);
+					
 					s_StockDayListCurve.markCurveIndex(i, "D");
 					i=i+20;
 				}
@@ -145,6 +186,6 @@ public class EStockComplexWaveCheck {
 		s_StockDayListCurve.generateImage();
 		BLog.output("TEST", "Main End\n");
 	}
-	public static StockDayListCurve s_StockDayListCurve = new StockDayListCurve("EStockComplexWaveCheck.jpg");
+	public static StockDayListCurve s_StockDayListCurve = new StockDayListCurve("EDIWave.jpg");
 
 }

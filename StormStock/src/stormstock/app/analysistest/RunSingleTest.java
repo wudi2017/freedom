@@ -6,7 +6,6 @@ import java.util.List;
 
 import stormstock.app.analysistest.EStockDayPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
-import stormstock.app.analysistest.EStockTimePriceDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BImageCurve;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BThread;
@@ -36,7 +35,6 @@ public class RunSingleTest {
 		s_StockDayListCurve.setCurve(list);
 		
 		EStockDayPriceDrop cEStockDayPriceDrop = new EStockDayPriceDrop();
-		EStockTimePriceDropStable cEStockTimePriceDropStable = new EStockTimePriceDropStable();
 		EStockDayVolumeLevel cEStockDayVolumeLevel = new EStockDayVolumeLevel();
 		
 		// »’ºÏ≤È

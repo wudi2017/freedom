@@ -12,18 +12,13 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultDayDetail;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 import stormstock.fw.tranengine_lite.ANLUtils;
 
-public class EStockTimePriceDropStable {
+public class ETDropStable {
 	
 	/**
 	 * 
 	 * @author wudi
 	 * 检查日内当前位置是否是下挫企稳点
 	 */
-	
-	public EStockTimePriceDropStable()
-	{
-	}
-	
 	public static class ResultXiaCuoQiWen
 	{
 		public ResultXiaCuoQiWen()
@@ -46,7 +41,7 @@ public class EStockTimePriceDropStable {
 			return 0;
 		}
 	}
-	public ResultXiaCuoQiWen checkXiaCuoQiWen_single(List<StockTime> list, int iCheck)
+	public static ResultXiaCuoQiWen checkXiaCuoQiWen_single(List<StockTime> list, int iCheck)
 	{
 		float param_checkDieFu = -0.02f; // 检查跌幅
 		float param_checkMaxTimeSpan = 20; // 最大检查时间段
@@ -126,7 +121,7 @@ public class EStockTimePriceDropStable {
 	}
 	
 	// iCheck是二次下挫企稳
-	public ResultXiaCuoQiWen checkXiaCuoQiWen_2Times(List<StockTime> list, int iCheck)
+	public static ResultXiaCuoQiWen checkXiaCuoQiWen_2Times(List<StockTime> list, int iCheck)
 	{
 		ResultXiaCuoQiWen cResultXiaCuoQiWen = new ResultXiaCuoQiWen();
 		
@@ -174,15 +169,13 @@ public class EStockTimePriceDropStable {
 		
 		s_StockTimeListCurve.setCurve(list);
 		
-		EStockTimePriceDropStable cEStockTimePriceDropStable = new EStockTimePriceDropStable();
-		
 		for(int i = 0; i < list.size(); i++)  
         {  
 			StockTime cCurStockTime = list.get(i);
 			
 			//if(cCurStockTime.time.equals("09:39:00"))
 			{
-				ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_2Times(list, i);
+				ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list, i);
 				if (cResultXiaCuoQiWen.bCheck)
 				{
 					BLog.output("TEST", "CheckPoint %s level:%.3f\n", cCurStockTime.time, cResultXiaCuoQiWen.getLevel());

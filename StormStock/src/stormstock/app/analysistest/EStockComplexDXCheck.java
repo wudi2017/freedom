@@ -45,7 +45,7 @@ public class EStockComplexDXCheck {
 			{
 				StockDay cCurStockDay = list.get(iCheck);
 				StockDay cXStockDay = list.get(i);
-				float xxx = cCurStockDay.close() - cXStockDay.close();
+				float xxx = (cCurStockDay.close() - cXStockDay.close())/cXStockDay.close();
 				cComplexDXCheckResult.x = xxx;
 				cComplexDXCheckResult.bCheck = true;
 				break;
@@ -211,7 +211,7 @@ public class EStockComplexDXCheck {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "300217"; // 300217 300227 300163 300165 00
+		String stockID = "600998"; // 300217 300227 300163 300165 00
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2011-01-01", "2017-03-01");
 		List<StockDay> list = cResultHistoryData.resultList;
@@ -224,17 +224,19 @@ public class EStockComplexDXCheck {
 			StockDay cCurStockDay = list.get(i);
 			//BLog.output("TEST", "cCurStockDay %s \n", cCurStockDay.date());
 			
-			if(cCurStockDay.date().equals("2016-09-06"))
+			if(cCurStockDay.date().equals("2013-05-10"))
 			{
 				BThread.sleep(1);
 				
 
 			}
-			ComplexDXCheckResult cComplexDXCheckResult = EStockComplexDXCheck.check(stockID, list, i);
-			if (cComplexDXCheckResult.bCheck)
+			boolean bCheck = EStockComplexDXCheck.checkX(stockID, list, i);
+			if (bCheck)
 			{
-				BLog.output("TEST", "### CheckPoint %s x(%.3f)\n", cCurStockDay.date(), cComplexDXCheckResult.x);
+				BLog.output("TEST", "### CheckPoint %s \n", cCurStockDay.date());
 				s_StockDayListCurve.markCurveIndex(i, "D");
+				
+				//i=i+20;
 			}
 
         } 

@@ -5,7 +5,6 @@ import java.util.List;
 import stormstock.app.analysistest.EStockComplexDXCheck.ComplexDXCheckResult;
 import stormstock.app.analysistest.EStockDayPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
-import stormstock.app.analysistest.EStockTimePriceDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
 import stormstock.fw.tranbase.account.AccountPublicDef.HoldStock;
 import stormstock.fw.tranbase.com.IEigenStock;
@@ -65,8 +64,6 @@ public class RunHistoryMockTransactionTest {
 		public void strategy_create(TranContext ctx, CreateResult out_sr) {
 			List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
 
-			EStockTimePriceDropStable cEStockTimePriceDropStable = new EStockTimePriceDropStable();
-			
 //			ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_single(list_stockTime, list_stockTime.size()-1);
 //			if (cResultXiaCuoQiWen.bCheck)
 //			{
@@ -123,7 +120,7 @@ public class RunHistoryMockTransactionTest {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2011-01-01", "2012-01-01");
+		cTranEngine.setHistoryTimeSpan("2011-01-01", "2011-05-01");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();

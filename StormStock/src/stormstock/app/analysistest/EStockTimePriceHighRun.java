@@ -2,7 +2,6 @@ package stormstock.app.analysistest;
 
 import java.util.List;
 
-import stormstock.app.analysistest.EStockTimePriceDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BThread;
 import stormstock.fw.tranbase.stockdata.StockDataIF;

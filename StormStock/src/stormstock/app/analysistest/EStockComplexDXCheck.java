@@ -211,7 +211,7 @@ public class EStockComplexDXCheck {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "600998"; // 300217 300227 300163 300165 00
+		String stockID = "000526"; // 300217 300227 300163 300165 00
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2011-01-01", "2017-03-01");
 		List<StockDay> list = cResultHistoryData.resultList;

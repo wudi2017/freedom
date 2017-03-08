@@ -77,7 +77,7 @@ public class RunHistoryMockTransactionTest {
 			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
 			float fRatio = (fNowPrice - fYesterdayClosePrice)/fYesterdayClosePrice;
-			if(fRatio < -0.035)
+			if(fRatio < -0.02)
 			{
 				out_sr.bCreate = true;
 				out_sr.fMaxPositionRatio = 0.2f;
@@ -120,7 +120,7 @@ public class RunHistoryMockTransactionTest {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2011-01-01", "2012-01-01");
+		cTranEngine.setHistoryTimeSpan("2016-08-01", "2017-02-01");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();

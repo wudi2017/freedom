@@ -7,6 +7,7 @@ import stormstock.fw.base.BLog;
 import stormstock.fw.base.BThread;
 import stormstock.fw.tranbase.stockdata.StockDataIF;
 import stormstock.fw.tranbase.stockdata.StockDay;
+import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 /**
@@ -19,21 +20,39 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 public class EStockComplexDYCheck {
 	
-	public static boolean get(List<StockDay> list, int iCheck)
+	public static class ResultDYCheck
 	{
-		boolean bCheck = false;
+		public ResultDYCheck()
+		{
+			bCheck = false;
+		}
+		public boolean bCheck;
+		public float po;
+	}
+	
+	public static ResultDYCheck get(String stockId, List<StockDay> list, int iCheck)
+	{
+		ResultDYCheck cResultDYCheck = new ResultDYCheck();
 		
-		int iBegin = iCheck-1;
+		int iBegin = iCheck-60;
 		int iEnd = iCheck;
 		if(iBegin<0)
 		{
-			return bCheck;
+			return cResultDYCheck;
 		}
 		
-		StockDay cStockDay = list.get(iEnd);
+		StockDay cCurStockDay = list.get(iEnd);
 		
-		bCheck = true;
-		return bCheck;
+		int iIndex60H = StockUtils.indexHigh(list, iBegin, iEnd);
+		StockDay cStockDay60H = list.get(iIndex60H);
+		int iIndex60L = StockUtils.indexLow(list, iBegin, iEnd);
+		StockDay cStockDay60L = list.get(iIndex60L);
+		
+		BLog.output("TEST", "60 H(%s) L(%s)\n", cStockDay60H.date(), cStockDay60L.date());
+		
+		cResultDYCheck.bCheck = true;
+		cResultDYCheck.po = 0;
+		return cResultDYCheck;
 	}
 	
 	
@@ -47,9 +66,9 @@ public class EStockComplexDYCheck {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "600213"; // 300217 300227 300163 300165 00
+		String stockID = "000151"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-03-01");
+				cStockDataIF.getHistoryData(stockID, "2010-09-01", "2014-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -64,19 +83,19 @@ public class EStockComplexDYCheck {
 			{
 				BThread.sleep(1);
 
+				ResultDYCheck cResultDYCheck = EStockComplexDYCheck.get(stockID, list, i);
+				if(cResultDYCheck.bCheck)
+				{
+					BLog.output("TEST", "CheckPoint %s\n", cCurStockDay.date());
+				}
 
 			}
 			
-			boolean bCheck = EStockComplexDYCheck.get(list, i);
-			if(bCheck)
-			{
-				BLog.output("TEST", "CheckPoint %s\n", cCurStockDay.date());
-			}
 
         } 
 		
 		s_StockDayListCurve.generateImage();
 		BLog.output("TEST", "Main End\n");
 	}
-	public static StockDayListCurve s_StockDayListCurve = new StockDayListCurve("EDIStrongUp.jpg");
+	public static StockDayListCurve s_StockDayListCurve = new StockDayListCurve("EStockComplexDYCheck.jpg");
 }

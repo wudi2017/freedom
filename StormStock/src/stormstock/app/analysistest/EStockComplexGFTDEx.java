@@ -69,41 +69,46 @@ public class EStockComplexGFTDEx {
 			if(cStockDay_T.close() < cStockDay_Tn1.close())  udi = -1;
 			if(cStockDay_T.close() == cStockDay_Tn1.close())  udi = 0;
 			
+			// udi变化检查
 			if(udi==udi_last)
 			{
 				udi_sum = udi_sum + udi;
 			}
 			else
 			{
-				if(udi_sum >= N2)
-				{
-					eGFTDStatus = GFTDStatus.SELL_CHECK_START; // 卖出启动形成
-					udi_sum = 0;
-					
-					s_StockDayListCurve.clearMark(i);
-					s_StockDayListCurve.markCurveIndex(i, "SC");
-					
-					signal_last_index = i;
-					signal_countor = 0;
-					continue;
-				}
-				else if(udi_sum <= -N2)
-				{
-					eGFTDStatus = GFTDStatus.BUY_CHECK_START; // 买入启动形成
-					udi_sum = 0;
-					
-					s_StockDayListCurve.clearMark(i);
-					s_StockDayListCurve.markCurveIndex(i, "BC");
-					
-					signal_last_index = i;
-					signal_countor = 0;
-					continue;
-				}
-				else
-				{
-					udi_sum = udi;
-				}
+				udi_sum = udi;
 			}
+			
+			// 启动判断
+			if((eGFTDStatus == GFTDStatus.INVALID 
+					|| eGFTDStatus == GFTDStatus.SELL_CHECK_START) 
+					&& udi_sum == N2)
+			{
+				eGFTDStatus = GFTDStatus.SELL_CHECK_START; // 卖出启动形成
+				udi_sum = 0;
+				
+				s_StockDayListCurve.clearMark(i);
+				s_StockDayListCurve.markCurveIndex(i, "SC");
+				
+				signal_last_index = i;
+				signal_countor = 0;
+				continue;
+			}
+			else if((eGFTDStatus == GFTDStatus.INVALID 
+					|| eGFTDStatus == GFTDStatus.BUY_CHECK_START) 
+					&& udi_sum == -N2)
+			{
+				eGFTDStatus = GFTDStatus.BUY_CHECK_START; // 买入启动形成
+				udi_sum = 0;
+				
+				s_StockDayListCurve.clearMark(i);
+				s_StockDayListCurve.markCurveIndex(i, "BC");
+				
+				signal_last_index = i;
+				signal_countor = 0;
+				continue;
+			}
+			
 			// 保存udi
 			udi_last = udi;
 			

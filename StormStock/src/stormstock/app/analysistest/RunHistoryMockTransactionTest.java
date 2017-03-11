@@ -3,8 +3,10 @@ package stormstock.app.analysistest;
 import java.util.List;
 
 import stormstock.app.analysistest.EStockComplexDXCheck.ComplexDXCheckResult;
+import stormstock.app.analysistest.EStockComplexGFTDEx.ResultComplexGFTDEx;
 import stormstock.app.analysistest.EStockDayPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
+import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
 import stormstock.fw.tranbase.account.AccountPublicDef.HoldStock;
 import stormstock.fw.tranbase.com.IEigenStock;
@@ -26,10 +28,15 @@ public class RunHistoryMockTransactionTest {
 	public static class TranStockSet extends ITranStockSetFilter {
 		@Override
 		public boolean tran_stockset_byLatestStockInfo(StockInfo cStockInfo) {
-			if(cStockInfo.ID.compareTo("000000") >= 0 && cStockInfo.ID.compareTo("002000") <= 0) {	
-				return true;
-			}
-			return false;
+//			if(cStockInfo.ID.compareTo("000000") >= 0 && cStockInfo.ID.compareTo("002000") <= 0) {	
+//				
+//			}
+//			if(cStockInfo.circulatedMarketValue < 100.0f)
+//			{
+//				return true;
+//			}
+			return true;
+			//return false;
 		}
 	}
 	// 选股
@@ -41,13 +48,25 @@ public class RunHistoryMockTransactionTest {
 			String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
 			List<StockDay> cStockDayList = ctx.target().stock().getCurStockDayData();
 			
-			ComplexDXCheckResult cComplexDXCheckResult = EStockComplexDXCheck.check(stockId, cStockDayList, cStockDayList.size()-1);
-			if (cComplexDXCheckResult.bCheck)
-			{
-				out_sr.bSelect = true;
-				out_sr.fPriority = - cComplexDXCheckResult.x;
-			}
-
+//			ResultCheckPriceDrop cResultCheckPriceDrop = EStockDayPriceDrop.checkPriceDrop(cStockDayList, cStockDayList.size()-1);
+//			if (cResultCheckPriceDrop.bCheck && cResultCheckPriceDrop.fDropRatio() < -0.1f)
+//			{
+//				out_sr.bSelect = true;
+//				out_sr.fPriority = - cResultCheckPriceDrop.fDropAcc();
+//			}
+			
+//			ResultComplexGFTDEx cResultComplexGFTDEx = EStockComplexGFTDEx.get_buy(stockId, cStockDayList, cStockDayList.size()-1);
+//			if(cResultComplexGFTDEx.bCheck)
+//			{
+//				out_sr.bSelect = true;
+//				out_sr.fPriority = - EStockDayPriceDrop.getMidDropParam(cStockDayList, cStockDayList.size()-1);
+//			}
+//			
+//			ResultDYCheck cResultDYCheck = EStockComplexDYCheck.get(stockId, cStockDayList, cStockDayList.size()-1);
+//			if(cResultDYCheck.bCheck)
+//			{
+//				out_sr.bSelect = true;
+//			}
 		}
 
 		@Override
@@ -63,26 +82,38 @@ public class RunHistoryMockTransactionTest {
 		@Override
 		public void strategy_create(TranContext ctx, CreateResult out_sr) {
 			List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
+			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 
-//			ResultXiaCuoQiWen cResultXiaCuoQiWen = cEStockTimePriceDropStable.checkXiaCuoQiWen_single(list_stockTime, list_stockTime.size()-1);
-//			if (cResultXiaCuoQiWen.bCheck)
-//			{
-//				//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
-//				out_sr.bCreate = true;
-//				out_sr.fMaxPositionRatio = 0.15f;
-//			}
+			// 二次下跌
+			ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
+			if (cResultXiaCuoQiWen.bCheck)
+			{
+				//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
+				out_sr.bCreate = true;
+				out_sr.fMaxPositionRatio = 0.2f;
+			}
 			
 
 			// 建仓为跌幅一定时
-			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
 			float fRatio = (fNowPrice - fYesterdayClosePrice)/fYesterdayClosePrice;
-			if(fRatio < -0.02)
+			if(fRatio < -0.01)
 			{
 				out_sr.bCreate = true;
 				out_sr.fMaxPositionRatio = 0.2f;
 				
 			}
+			
+//			// 尾盘不创新低
+//			if(ctx.time().compareTo("14:50:00") >= 0
+//					&& ctx.time().compareTo("14:55:00")<=0 )
+//			{
+//				if(list_stockTime.get(list_stockTime.size()-1).price >= fYesterdayClosePrice)
+//				{
+//					out_sr.bCreate = true;
+//					out_sr.fMaxPositionRatio = 0.2f;
+//				}
+//			}
 			
 //			out_sr.bCreate = true;
 //			out_sr.fMaxPositionRatio = 0.15f;
@@ -103,7 +134,7 @@ public class RunHistoryMockTransactionTest {
 			{
 				out_sr.bClear = true;
 			}
-			if(cHoldStock.profitRatio() > 0.05 || cHoldStock.profitRatio() < -0.05) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.03 || cHoldStock.profitRatio() < -0.06) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}
@@ -120,7 +151,7 @@ public class RunHistoryMockTransactionTest {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2016-08-01", "2017-02-01");
+		cTranEngine.setHistoryTimeSpan("2012-01-01", "2016-10-15");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();

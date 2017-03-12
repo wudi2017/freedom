@@ -15,7 +15,7 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
  * @author wudi
  */
 
-public class EStockDayPriceDrop {
+public class EDIPriceDrop {
 
 	public static class ResultCheckPriceDrop
 	{
@@ -236,26 +236,26 @@ public class EStockDayPriceDrop {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-04-25"))
+			if(cCurStockDay.date().equals("2016-05-11"))
 			{
 				BThread.sleep(1);
 				
-
+				ResultCheckPriceDrop cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
+				if (cResultCheckPriceDrop.bCheck)
+				{
+					BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
+							cCurStockDay.date(), 
+							list.get(cResultCheckPriceDrop.iHigh).date(),
+							cResultCheckPriceDrop.fHighPrice,
+							list.get(cResultCheckPriceDrop.iLow).date(),
+							cResultCheckPriceDrop.fLowPrice,
+							cResultCheckPriceDrop.fDropRatio());
+					//s_StockDayListCurve.markCurveIndex(i, "D");
+					//i=i+20;
+				}
 			}
 			
-			ResultCheckPriceDrop cResultCheckPriceDrop = EStockDayPriceDrop.checkPriceDrop(list, i);
-			if (cResultCheckPriceDrop.bCheck)
-			{
-				BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
-						cCurStockDay.date(), 
-						list.get(cResultCheckPriceDrop.iHigh).date(),
-						cResultCheckPriceDrop.fHighPrice,
-						list.get(cResultCheckPriceDrop.iLow).date(),
-						cResultCheckPriceDrop.fLowPrice,
-						cResultCheckPriceDrop.fDropRatio());
-				//s_StockDayListCurve.markCurveIndex(i, "D");
-				//i=i+20;
-			}
+
 
         } 
 		

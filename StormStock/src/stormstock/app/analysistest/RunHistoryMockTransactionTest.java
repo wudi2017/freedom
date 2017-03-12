@@ -2,9 +2,7 @@ package stormstock.app.analysistest;
 
 import java.util.List;
 
-import stormstock.app.analysistest.EStockComplexDXCheck.ComplexDXCheckResult;
 import stormstock.app.analysistest.EStockComplexGFTDEx.ResultComplexGFTDEx;
-import stormstock.app.analysistest.EStockDayPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
@@ -28,15 +26,14 @@ public class RunHistoryMockTransactionTest {
 	public static class TranStockSet extends ITranStockSetFilter {
 		@Override
 		public boolean tran_stockset_byLatestStockInfo(StockInfo cStockInfo) {
-//			if(cStockInfo.ID.compareTo("000000") >= 0 && cStockInfo.ID.compareTo("002000") <= 0) {	
-//				
-//			}
-//			if(cStockInfo.circulatedMarketValue < 100.0f)
-//			{
+//			if(cStockInfo.ID.compareTo("002123") >= 0 && cStockInfo.ID.compareTo("002123") <= 0) {	
 //				return true;
 //			}
-			return true;
-			//return false;
+			if(cStockInfo.circulatedMarketValue < 300.0f)
+			{
+				return true;
+			}
+			return false;
 		}
 	}
 	// Ñ¡¹É
@@ -145,9 +142,9 @@ public class RunHistoryMockTransactionTest {
 		TranEngine cTranEngine = new TranEngine();
 		
 		cTranEngine.setStockSet(new TranStockSet());
-		cTranEngine.setSelectStockStrategy(new StrategySelect());
-		cTranEngine.setCreatePositonStrategy(new StrategyCreate());
-		cTranEngine.setClearPositonStrategy(new StrategyClear());
+		cTranEngine.setSelectStockStrategy(new EStockComplexDZCZX.StrategySelect());
+		cTranEngine.setCreatePositonStrategy(new EStockComplexDZCZX.StrategyCreate());
+		cTranEngine.setClearPositonStrategy(new EStockComplexDZCZX.StrategyClear());
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);

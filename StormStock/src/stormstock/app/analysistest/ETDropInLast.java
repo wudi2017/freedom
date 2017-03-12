@@ -90,7 +90,7 @@ public class ETDropInLast {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "300165";
+		String stockID = "002123";
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-03-01");
 		List<StockDay> list = cResultHistoryData.resultList;

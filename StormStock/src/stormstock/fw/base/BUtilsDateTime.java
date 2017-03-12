@@ -8,6 +8,13 @@ import com.google.protobuf.TextFormat.ParseException;
 
 public class BUtilsDateTime {
 	/*
+	 *  当前时间戳
+	 */
+	static public long GetCurrentTimeMillis()
+	{
+		return System.currentTimeMillis();
+	}
+	/*
 	 *  当前日期
 	 */
 	static public String GetCurDateStr()

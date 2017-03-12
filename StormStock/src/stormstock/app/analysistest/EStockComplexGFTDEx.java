@@ -8,6 +8,11 @@ import stormstock.fw.tranbase.stockdata.StockDataIF;
 import stormstock.fw.tranbase.stockdata.StockDay;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
+/**
+ * GFTD 趋势跟踪操作模型
+ * @author wudi
+ *
+ */
 public class EStockComplexGFTDEx {
 	
 	public static class ResultComplexGFTDEx

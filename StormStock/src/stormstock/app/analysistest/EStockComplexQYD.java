@@ -15,7 +15,12 @@ import stormstock.fw.tranbase.stockdata.StockDay;
 import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
-public class EStockComplexDXCheck {
+/**
+ * QYD前期移动操作模型
+ * @author wudi
+ *
+ */
+public class EStockComplexQYD {
 	
 	public static class ComplexDXCheckResult
 	{
@@ -230,7 +235,7 @@ public class EStockComplexDXCheck {
 				
 
 			}
-			boolean bCheck = EStockComplexDXCheck.checkX(stockID, list, i);
+			boolean bCheck = EStockComplexQYD.checkX(stockID, list, i);
 			if (bCheck)
 			{
 				BLog.output("TEST", "### CheckPoint %s \n", cCurStockDay.date());

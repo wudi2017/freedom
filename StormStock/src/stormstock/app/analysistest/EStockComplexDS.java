@@ -5,7 +5,6 @@ import java.util.List;
 import stormstock.app.analysistest.EDIPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EStockComplexDZCZX.ResultDYCheck;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
-import stormstock.app.analysistest.RunHistoryMockTransactionTest.TranStockSet;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BThread;
 import stormstock.fw.base.BUtilsMath;
@@ -44,13 +43,13 @@ public class EStockComplexDS {
 	public static class TranStockSet extends ITranStockSetFilter {
 		@Override
 		public boolean tran_stockset_byLatestStockInfo(StockInfo cStockInfo) {
-//			if(cStockInfo.ID.compareTo("002425") >= 0 && cStockInfo.ID.compareTo("002425") <= 0) {	
-//				return true;
-//			}
-			if(cStockInfo.circulatedMarketValue < 300.0f)
-			{
+			if(cStockInfo.ID.compareTo("002425") >= 0 && cStockInfo.ID.compareTo("002425") <= 0) {	
 				return true;
 			}
+//			if(cStockInfo.circulatedMarketValue < 300.0f)
+//			{
+//				return true;
+//			}
 			return false;
 		}
 	}
@@ -67,7 +66,7 @@ public class EStockComplexDS {
 			if (cResultDSSelectParam.bCheck)
 			{
 				out_sr.bSelect = true;
-				out_sr.fPriority = BUtilsMath.randomFloat();
+				out_sr.fPriority = cResultDSSelectParam.po;
 			}
 		}
 
@@ -193,6 +192,7 @@ public class EStockComplexDS {
 		public float fSellHigh;
 		public float fSellLow;
 		public float fBuyCheck;
+		public float po;
 	}
 	public static ResultDSSelectParam isSelect(String stockId, List<StockDay> list, int iCheck)
 	{
@@ -210,6 +210,7 @@ public class EStockComplexDS {
 		boolean bUM3Flg = false;
 		float fHigh = 0.0f;
 		float fLow = 0.0f;
+		float fDropRate = 0.0f;
 		float fHigh_2 = 0.0f;
 		for(int i=iEnd;i>=iBegin;i--)
 		{
@@ -243,6 +244,7 @@ public class EStockComplexDS {
 						fLow = list.get(cResultCheckPriceDrop.iLow).low();
 						int iIndexH2 = StockUtils.indexHigh(list, cResultCheckPriceDrop.iLow, iCheck);
 						fHigh_2 = list.get(iIndexH2).high();
+						fDropRate = cResultCheckPriceDrop.fDropRatio();
 						break;
 					}
 				}
@@ -255,6 +257,7 @@ public class EStockComplexDS {
 		cResultDSSelectParam.fBuyCheck = (fLow+fHigh_2)/2;
 		cResultDSSelectParam.fSellHigh = fLow + (fHigh-fLow)/2;
 		cResultDSSelectParam.fSellLow = fLow*(1-0.02f);
+		cResultDSSelectParam.po = -fDropRate;
 		return cResultDSSelectParam;
 	}
 	/*
@@ -262,7 +265,7 @@ public class EStockComplexDS {
 	 * Test
 	 * ********************************************************************
 	 */
-	public static void main(String[] args) {
+	public static void mainx(String[] args) {
 		BLog.output("TEST", "--->>> MainBegin\n");
 		TranEngine cTranEngine = new TranEngine();
 		
@@ -281,7 +284,7 @@ public class EStockComplexDS {
 		BLog.output("TEST", "--->>> MainEnd\n");
 	}
 	
-	public static void mainx(String[] args)
+	public static void main(String[] args)
 	{
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
@@ -298,20 +301,18 @@ public class EStockComplexDS {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-03-10"))
+			if(cCurStockDay.date().equals("2016-08-30"))
 			{
 				BThread.sleep(1);
 				
-	
 				ResultDSSelectParam cResultDSSelectParam = EStockComplexDS.isSelect(stockID, list, i);
 				if (cResultDSSelectParam.bCheck)
 				{
 					BLog.output("TEST", "### CheckPoint %s\n", 
 							cCurStockDay.date());
 					s_StockDayListCurve.markCurveIndex(i, "S");
-					
-					i=i+10;
-				}	
+				}
+	
 			}
 
 

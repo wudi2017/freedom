@@ -11,7 +11,7 @@ import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 /**
- * 
+ * 价格急跌
  * @author wudi
  */
 
@@ -85,7 +85,7 @@ public class EDIPriceDrop {
 		for(int i = iEnd; i>iBegin+4; i--)
 		{
 			StockDay cStockDay = list.get(i);
-			float ave3PreCheck = StockUtils.GetAveNear(list, 1, i-3);
+			float ave3PreCheck = StockUtils.GetAveNear(list, 1, i-2);
 			if(cStockDay.close() < ave3PreCheck)
 			{
 				checkTimes_drop++;
@@ -106,11 +106,11 @@ public class EDIPriceDrop {
 		StockDay cB1StockDay = list.get(iEnd-1);
 		StockDay cB2StockDay = list.get(iEnd-2);
 		StockDay cHStockDay = list.get(indexCheckHigh);
-		if(checkTimes_drop > 3 
+		if(checkTimes_drop >= 3 
 				&& cEndStockDay.close() < cB1StockDay.close()
-				&& cEndStockDay.close() < cB1StockDay.close()
-				&& cEndStockDay.low() < cB2StockDay.low()
-				&& cEndStockDay.low() < cB2StockDay.low())
+				&& cEndStockDay.low() < cB1StockDay.low()
+				&& cEndStockDay.close() < cB2StockDay.low()
+				)
 		{
 		}
 		else
@@ -122,7 +122,7 @@ public class EDIPriceDrop {
 		
 		// 最大跌幅
 		float MaxDropRate = (cEndStockDay.close()-cHStockDay.close())/cHStockDay.close();
-		if(MaxDropRate < -0.6*fAveWave)
+		if(MaxDropRate < -1.5*fAveWave)
 		{
 		}
 		else
@@ -130,17 +130,29 @@ public class EDIPriceDrop {
 			return cResultCheck;
 		}
 		
-		// 最后一天非跌停
-		float fDieTingPrice = cB1StockDay.close() * 0.90f;
-		fDieTingPrice = BUtilsMath.saveNDecimal(fDieTingPrice, 2);
-		float fcloseCompare = BUtilsMath.saveNDecimal(cEndStockDay.close(), 2);
-		if(Float.compare(fDieTingPrice, fcloseCompare) != 0)
+//		// 最后一天非跌停
+//		float fDieTingPrice = cB1StockDay.close() * 0.90f;
+//		fDieTingPrice = BUtilsMath.saveNDecimal(fDieTingPrice, 2);
+//		float fcloseCompare = BUtilsMath.saveNDecimal(cEndStockDay.close(), 2);
+//		if(Float.compare(fDieTingPrice, fcloseCompare) != 0)
+//		{
+//		}
+//		else
+//		{
+//			return cResultCheck;
+//		}
+		
+		// 跌速计算
+		float fDropRate = (cEndStockDay.close() - cHStockDay.close())/cHStockDay.close();
+		float fDropAcc = fDropRate/(iEnd-indexCheckHigh+1);
+		if(fDropAcc<-0.25f*fAveWave)
 		{
 		}
 		else
 		{
 			return cResultCheck;
 		}
+		//BLog.output("TEST", " (%s) fDropAcc %.4f fAveWave %.4f \n", curDate, fDropAcc, fAveWave);
 		
 		s_StockDayListCurve.clearMark(indexCheckHigh);
 		s_StockDayListCurve.markCurveIndex(indexCheckHigh, "H");
@@ -224,7 +236,7 @@ public class EDIPriceDrop {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002425"; // 300163 300165
+		String stockID = "300163"; // 300163 300165 002425 002123
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
@@ -236,27 +248,27 @@ public class EDIPriceDrop {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-05-11"))
+			if(cCurStockDay.date().equals("2016-04-27"))
 			{
 				BThread.sleep(1);
 				
-				ResultCheckPriceDrop cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
-				if (cResultCheckPriceDrop.bCheck)
-				{
-					BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
-							cCurStockDay.date(), 
-							list.get(cResultCheckPriceDrop.iHigh).date(),
-							cResultCheckPriceDrop.fHighPrice,
-							list.get(cResultCheckPriceDrop.iLow).date(),
-							cResultCheckPriceDrop.fLowPrice,
-							cResultCheckPriceDrop.fDropRatio());
-					//s_StockDayListCurve.markCurveIndex(i, "D");
-					//i=i+20;
-				}
+
 			}
 			
 
-
+			ResultCheckPriceDrop cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
+			if (cResultCheckPriceDrop.bCheck)
+			{
+				BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
+						cCurStockDay.date(), 
+						list.get(cResultCheckPriceDrop.iHigh).date(),
+						cResultCheckPriceDrop.fHighPrice,
+						list.get(cResultCheckPriceDrop.iLow).date(),
+						cResultCheckPriceDrop.fLowPrice,
+						cResultCheckPriceDrop.fDropRatio());
+				//s_StockDayListCurve.markCurveIndex(i, "D");
+				//i=i+20;
+			}
         } 
 		
 		s_StockDayListCurve.generateImage();

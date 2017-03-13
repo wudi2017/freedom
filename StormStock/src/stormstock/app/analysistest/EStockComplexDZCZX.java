@@ -3,7 +3,9 @@ package stormstock.app.analysistest;
 import java.util.List;
 import java.util.Random;
 
+import stormstock.app.analysistest.EDIPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EDITryPress.EDITryPressResult;
+import stormstock.app.analysistest.EStockComplexDS.TranStockSet;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BThread;
@@ -23,6 +25,9 @@ import stormstock.fw.tranbase.stockdata.StockInfo;
 import stormstock.fw.tranbase.stockdata.StockTime;
 import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
+import stormstock.fw.tranengine.TranEngine;
+import stormstock.fw.tranengine.TranEngine.TRANACCOUNTTYPE;
+import stormstock.fw.tranengine.TranEngine.TRANTIMEMODE;
 
 /**
  * 早晨之星操作模型
@@ -32,6 +37,188 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
  */
 
 public class EStockComplexDZCZX {
+	
+	/*
+	 * ***************************************************************************
+	 * 完成策略
+	 * 
+	 */
+	// 测试集
+	public static class TranStockSet extends ITranStockSetFilter {
+		@Override
+		public boolean tran_stockset_byLatestStockInfo(StockInfo cStockInfo) {
+//			if(cStockInfo.ID.compareTo("002123") >= 0 && cStockInfo.ID.compareTo("002123") <= 0) {	
+//				return true;
+//			}
+			if(cStockInfo.circulatedMarketValue < 300.0f)
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+	// 选股
+	public static class StrategySelect extends IStrategySelect {
+
+		@Override
+		public void strategy_select(TranContext ctx, SelectResult out_sr) {
+			
+			String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
+			List<StockDay> cStockDayList = ctx.target().stock().getCurStockDayData();
+			
+			ResultDZCZXSelectParam cResultDZCZXSelectParam = EStockComplexDZCZX.isSelect(stockId, cStockDayList, cStockDayList.size()-1);
+			if(cResultDZCZXSelectParam.bCheck)
+			{
+				out_sr.bSelect = true;
+				out_sr.fPriority = -cResultDZCZXSelectParam.po;
+			}
+		}
+
+		@Override
+		public int strategy_select_max_count() {
+			// TODO Auto-generated method stub
+			return 10;
+		}
+
+	}
+	// 建仓
+	public static class StrategyCreate extends IStrategyCreate {
+		
+		public boolean bCheckFlg;
+		public float fStarHigh;
+		public float fStarLow;
+		
+		public void CalcParam(TranContext ctx)
+		{
+			this.bCheckFlg = false;
+			
+			String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
+			List<StockDay> list = ctx.target().stock().getCurStockDayData();
+			int iCheck = list.size()-1;
+			
+			int iBegin = iCheck-5;
+			int iEnd = iCheck;
+			
+			for(int i=iEnd;i>=iBegin;i--)
+			{
+				ResultDYCheck cResultDYCheck = checkZCZX(stockId,list,i);
+				if(cResultDYCheck.bCheck)
+				{
+					this.bCheckFlg = true;
+					this.fStarHigh = cResultDYCheck.fStarHigh;
+					this.fStarLow = cResultDYCheck.fStarLow;
+					break;
+				}
+			}
+		}
+
+		@Override
+		public void strategy_create(TranContext ctx, CreateResult out_sr) {
+			List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
+			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
+			float fNowPrice = ctx.target().stock().getLatestPrice();
+			
+//			CalcParam(ctx);
+//			
+//			if(bCheckFlg)
+//			{
+//				// 一次下跌
+//				ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
+//				if (cResultXiaCuoQiWen.bCheck && fNowPrice < fStarHigh)
+//				{
+//					//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
+//					out_sr.bCreate = true;
+//					out_sr.fMaxPositionRatio = 0.2f;
+//				}
+//				
+//
+//				// 建仓为跌幅一定时
+//				float checkBuyPrice = fStarHigh - (fStarHigh - fStarLow)/3*2;
+//				if(fNowPrice <= checkBuyPrice)
+//				{
+//					out_sr.bCreate = true;
+//					out_sr.fMaxPositionRatio = 0.2f;
+//				}
+//			}	
+			
+			out_sr.bCreate = true;
+		}
+		@Override
+		public int strategy_create_max_count() {
+			return 5;
+		}
+
+	}
+	// 清仓
+	public static class StrategyClear extends IStrategyClear {
+		
+		public boolean bCheckFlg;
+		public float fStarHigh;
+		public float fStarLow;
+		
+		public void CalcParam(TranContext ctx)
+		{
+			this.bCheckFlg = false;
+			
+			String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
+			List<StockDay> list = ctx.target().stock().getCurStockDayData();
+			int iCheck = list.size()-1;
+			
+			int iBegin = iCheck-5;
+			int iEnd = iCheck;
+			
+			for(int i=iEnd;i>=iBegin;i--)
+			{
+				ResultDYCheck cResultDYCheck = checkZCZX(stockId,list,i);
+				if(cResultDYCheck.bCheck)
+				{
+					this.bCheckFlg = true;
+					this.fStarHigh = cResultDYCheck.fStarHigh;
+					this.fStarLow = cResultDYCheck.fStarLow;
+					break;
+				}
+			}
+		}
+		
+		@Override
+		public void strategy_clear(TranContext ctx, ClearResult out_sr) {
+			List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
+			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
+			float fNowPrice = ctx.target().stock().getLatestPrice();
+			HoldStock cHoldStock = ctx.target().holdStock();
+			
+			CalcParam(ctx);
+			
+			if(cHoldStock.investigationDays >= 20) // 调查天数控制
+			{
+				out_sr.bClear = true;
+			}
+
+//			float checkSellH = fStarHigh + (fStarHigh-fStarLow)/2;
+//			if(cHoldStock.curPrice >= checkSellH)
+//			{
+//				out_sr.bClear = true;
+//			}
+//			
+//			float checkSellL = fStarLow - (fStarHigh-fStarLow)/3;
+//			if(cHoldStock.curPrice < checkSellL)
+//			{
+//				out_sr.bClear = true;
+//			}
+			
+			if(cHoldStock.profitRatio() > 0.05 || cHoldStock.profitRatio() < -0.05) // 止盈止损x个点卖
+			{
+				out_sr.bClear = true;
+			}
+		}
+	}
+		
+		
+	/*
+	 * ***************************************************************************
+	 * 策略细节
+	 * 
+	 */
 	
 	public static class ResultDYCheck
 	{
@@ -73,7 +260,7 @@ public class EStockComplexDZCZX {
 			if(cCurStockBegin.open() > cCurStockBegin.close()
 					&& shangying < shiti/2 
 					&& xiaying < shiti/2
-					&& shitiRatio > fAveWave*0.8)
+					&& shitiRatio > fAveWave*1.2f)
 			{
 				
 			}
@@ -91,7 +278,7 @@ public class EStockComplexDZCZX {
 			float shiti = cStockDayMid.entityHigh() - cStockDayMid.entityLow();
 			float shitiRatio = shiti/cStockDayMid.low();
 			if((shangying > shiti/3 || xiaying > shiti/3)
-					&& shitiRatio < fAveWave*0.5)
+					&& shitiRatio < fAveWave*1.2f)
 			{
 				
 			}
@@ -149,190 +336,105 @@ public class EStockComplexDZCZX {
 		return cResultDYCheck;
 	}
 	
-	public static boolean isSelect(String stockId, List<StockDay> list, int iCheck)
+	public static class ResultDZCZXSelectParam
 	{
-		boolean bSelect = false;
-		
-		int iBegin = iCheck-5;
-		int iEnd = iCheck;
-		
-		for(int i=iEnd;i>=iBegin;i--)
+		public ResultDZCZXSelectParam()
 		{
-			ResultDYCheck cResultDYCheck = checkZCZX(stockId,list,i);
-			if(cResultDYCheck.bCheck)
+			bCheck = false;
+		}
+		public boolean bCheck;
+		public float po;
+	}
+	public static ResultDZCZXSelectParam isSelect(String stockId, List<StockDay> list, int iCheck)
+	{
+		ResultDZCZXSelectParam cResultDZCZXSelectParam = new ResultDZCZXSelectParam();
+		
+		// 至少天数检查
+		{
+			int iBegin = iCheck-10;
+			int iEnd = iCheck;
+			if(iBegin<0)
 			{
-				bSelect = true;
+				return cResultDZCZXSelectParam;
 			}
 		}
 		
-		return bSelect;
+//		// 10天之内有大跌幅
+//		ResultCheckPriceDrop cResultCheckPriceDrop = new ResultCheckPriceDrop();
+//		{
+//			int iBegin = iCheck-10;
+//			int iEnd = iCheck;
+//
+//			for(int i=iEnd;i>=iBegin;i--)
+//			{
+//				StockDay cStockDay = list.get(i);
+//				cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
+//				if (cResultCheckPriceDrop.bCheck)
+//				{
+////						BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
+////								cStockDay.date(), 
+////								list.get(cResultCheckPriceDrop.iHigh).date(),
+////								cResultCheckPriceDrop.fHighPrice,
+////								list.get(cResultCheckPriceDrop.iLow).date(),
+////								cResultCheckPriceDrop.fLowPrice,
+////								cResultCheckPriceDrop.fDropRatio());
+//					//s_StockDayListCurve.markCurveIndex(i, "D");
+//					//i=i+20;
+//					break;
+//				}
+//			}
+//		}
+		
+		// 5天之内有早晨之星
+		boolean bZCZXFlg = false;
+		{
+			int iBegin = iCheck-5;
+			int iEnd = iCheck;
+			for(int i=iEnd;i>=iBegin;i--)
+			{
+				StockDay cStockDay = list.get(i);
+				ResultDYCheck cResultDYCheck = checkZCZX(stockId,list,i);
+				if(cResultDYCheck.bCheck)
+				{
+					bZCZXFlg = true;
+				}
+			}
+		}
+		
+		if(bZCZXFlg)
+		{
+			cResultDZCZXSelectParam.bCheck = true;
+			cResultDZCZXSelectParam.po = BUtilsMath.randomFloat();
+		}
+		
+		return cResultDZCZXSelectParam;
 	}
 	
-	/*
-	 * ***************************************************************************
-	 * 完成策略
-	 * 
-	 */
-		// 选股
-		public static class StrategySelect extends IStrategySelect {
-
-			@Override
-			public void strategy_select(TranContext ctx, SelectResult out_sr) {
-				
-				String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
-				List<StockDay> cStockDayList = ctx.target().stock().getCurStockDayData();
-				
-				boolean bCheck = EStockComplexDZCZX.isSelect(stockId, cStockDayList, cStockDayList.size()-1);
-				if(bCheck)
-				{
-					out_sr.bSelect = true;
-					out_sr.fPriority = BUtilsMath.randomFloat();
-				}
-			}
-
-			@Override
-			public int strategy_select_max_count() {
-				// TODO Auto-generated method stub
-				return 10;
-			}
-
-		}
-		// 建仓
-		public static class StrategyCreate extends IStrategyCreate {
-			
-			public boolean bCheckFlg;
-			public float fStarHigh;
-			public float fStarLow;
-			
-			public void CalcParam(TranContext ctx)
-			{
-				this.bCheckFlg = false;
-				
-				String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
-				List<StockDay> list = ctx.target().stock().getCurStockDayData();
-				int iCheck = list.size()-1;
-				
-				int iBegin = iCheck-5;
-				int iEnd = iCheck;
-				
-				for(int i=iEnd;i>=iBegin;i--)
-				{
-					ResultDYCheck cResultDYCheck = checkZCZX(stockId,list,i);
-					if(cResultDYCheck.bCheck)
-					{
-						this.bCheckFlg = true;
-						this.fStarHigh = cResultDYCheck.fStarHigh;
-						this.fStarLow = cResultDYCheck.fStarLow;
-						break;
-					}
-				}
-			}
-
-			@Override
-			public void strategy_create(TranContext ctx, CreateResult out_sr) {
-				List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
-				float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
-				float fNowPrice = ctx.target().stock().getLatestPrice();
-				
-				CalcParam(ctx);
-				
-				if(bCheckFlg)
-				{
-					// 一次下跌
-					ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
-					if (cResultXiaCuoQiWen.bCheck && fNowPrice < fStarHigh)
-					{
-						//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
-						out_sr.bCreate = true;
-						out_sr.fMaxPositionRatio = 0.2f;
-					}
-					
-
-					// 建仓为跌幅一定时
-					float checkBuyPrice = fStarHigh - (fStarHigh - fStarLow)/3*2;
-					if(fNowPrice <= checkBuyPrice)
-					{
-						out_sr.bCreate = true;
-						out_sr.fMaxPositionRatio = 0.2f;
-					}
-				}	
-			}
-			@Override
-			public int strategy_create_max_count() {
-				return 5;
-			}
-
-		}
-		// 清仓
-		public static class StrategyClear extends IStrategyClear {
-			
-			public boolean bCheckFlg;
-			public float fStarHigh;
-			public float fStarLow;
-			
-			public void CalcParam(TranContext ctx)
-			{
-				this.bCheckFlg = false;
-				
-				String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
-				List<StockDay> list = ctx.target().stock().getCurStockDayData();
-				int iCheck = list.size()-1;
-				
-				int iBegin = iCheck-5;
-				int iEnd = iCheck;
-				
-				for(int i=iEnd;i>=iBegin;i--)
-				{
-					ResultDYCheck cResultDYCheck = checkZCZX(stockId,list,i);
-					if(cResultDYCheck.bCheck)
-					{
-						this.bCheckFlg = true;
-						this.fStarHigh = cResultDYCheck.fStarHigh;
-						this.fStarLow = cResultDYCheck.fStarLow;
-						break;
-					}
-				}
-			}
-			
-			@Override
-			public void strategy_clear(TranContext ctx, ClearResult out_sr) {
-				List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
-				float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
-				float fNowPrice = ctx.target().stock().getLatestPrice();
-				HoldStock cHoldStock = ctx.target().holdStock();
-				
-				CalcParam(ctx);
-				
-				if(cHoldStock.investigationDays >= 20) // 调查天数控制
-				{
-					out_sr.bClear = true;
-				}
-
-				float checkSellH = fStarHigh + (fStarHigh-fStarLow)/2;
-				if(cHoldStock.curPrice >= checkSellH)
-				{
-					out_sr.bClear = true;
-				}
-				
-				float checkSellL = fStarLow - (fStarHigh-fStarLow)/3;
-				if(cHoldStock.curPrice < checkSellL)
-				{
-					out_sr.bClear = true;
-				}
-				
-				if(cHoldStock.profitRatio() > 0.10 || cHoldStock.profitRatio() < -0.08) // 止盈止损x个点卖
-				{
-					out_sr.bClear = true;
-				}
-			}
-		}
-		
 	/*
 	 * ********************************************************************
 	 * Test
 	 * ********************************************************************
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) {
+		BLog.output("TEST", "--->>> MainBegin\n");
+		TranEngine cTranEngine = new TranEngine();
+		
+		cTranEngine.setStockSet(new TranStockSet());
+		cTranEngine.setSelectStockStrategy(new StrategySelect());
+		cTranEngine.setCreatePositonStrategy(new StrategyCreate());
+		cTranEngine.setClearPositonStrategy(new StrategyClear());
+		
+		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
+		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
+		cTranEngine.setHistoryTimeSpan("2016-01-01", "2017-01-01");
+		
+		cTranEngine.run();
+		cTranEngine.mainLoop();
+		
+		BLog.output("TEST", "--->>> MainEnd\n");
+	}
+	
+	public static void mainx(String[] args)
 	{
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
@@ -354,16 +456,22 @@ public class EStockComplexDZCZX {
 			{
 				BThread.sleep(1);
 
-
+//				ResultDYCheck cResultDYCheck = checkZCZX(stockID, list, i);
+//				if(cResultDYCheck.bCheck)
+//				{
+//					BLog.output("TEST", "CheckPoint %s\n", cCurStockDay.date());
+//					s_StockDayListCurve.markCurveIndex(i, "X");
+//				}
+				ResultDZCZXSelectParam cResultDZCZXSelectParam = EStockComplexDZCZX.isSelect(stockID, list, i);
+				if(cResultDZCZXSelectParam.bCheck)
+				{
+					BLog.output("TEST", "CheckPoint %s po(%.3f)\n", cCurStockDay.date(), cResultDZCZXSelectParam.po);
+					s_StockDayListCurve.markCurveIndex(i, "X");
+				}
 
 			}
 			
-			boolean bCheck = EStockComplexDZCZX.isSelect(stockID, list, i);
-			if(bCheck)
-			{
-				BLog.output("TEST", "CheckPoint %s\n", cCurStockDay.date());
-				s_StockDayListCurve.markCurveIndex(i, "X");
-			}
+
         } 
 		
 		s_StockDayListCurve.generateImage();

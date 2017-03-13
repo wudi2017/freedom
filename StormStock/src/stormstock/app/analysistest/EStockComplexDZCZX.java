@@ -3,7 +3,6 @@ package stormstock.app.analysistest;
 import java.util.List;
 import java.util.Random;
 
-import stormstock.app.analysistest.EDIPriceDrop.ResultCheckPriceDrop;
 import stormstock.app.analysistest.EDITryPress.EDITryPressResult;
 import stormstock.app.analysistest.EStockComplexDS.TranStockSet;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;

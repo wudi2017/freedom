@@ -11,33 +11,11 @@ import stormstock.fw.tranbase.stockdata.StockUtils;
 import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 /**
- * 价格急跌
+ * 价格短期急跌信号
  * @author wudi
  */
 
 public class EDIPriceDrop {
-
-	public static class ResultCheckPriceDrop
-	{
-		public ResultCheckPriceDrop()
-		{
-			bCheck = false;
-		}
-		public boolean bCheck;
-		public int iHigh;
-		public float fHighPrice;
-		public int iLow;
-		public float fLowPrice;
-		public float fDropRatio()
-		{
-			return (fLowPrice - fHighPrice)/fHighPrice;
-		}
-		public float fDropAcc()
-		{
-			return fDropRatio()/(iLow-iHigh+1);
-		}
-	}
-	
 	public static float getMidDropParam(List<StockDay> list, int iCheck)
 	{
 		int iBegin = iCheck-60;
@@ -61,47 +39,67 @@ public class EDIPriceDrop {
 		return Pa;
 	}
 
-	public static ResultCheckPriceDrop checkPriceDrop(List<StockDay> list, int iCheck)
+	public static class ResultPriceDrop
+	{
+		public ResultPriceDrop()
+		{
+			bCheck = false;
+		}
+		public boolean bCheck;
+		public int iHigh;
+		public float fHighPrice;
+		public int iLow;
+		public float fLowPrice;
+		public float fDropRatio()
+		{
+			return (fLowPrice - fHighPrice)/fHighPrice;
+		}
+		public float fDropAcc()
+		{
+			return fDropRatio()/(iLow-iHigh+1);
+		}
+	}
+	public static ResultPriceDrop getPriceDrop(List<StockDay> list, int iCheck)
 	{
 		String curDate = list.get(iCheck).date();
 		float fAveWave = EStockDayPriceWaveThreshold.get(list, iCheck);
 		//BLog.output("TEST", " (%s) %.4f\n", curDate, fAveWave);
 		
-		ResultCheckPriceDrop cResultCheck = new ResultCheckPriceDrop();
+		ResultPriceDrop cResultPriceDrop = new ResultPriceDrop();
 		
-		// 检查日判断
+		// 检查日判断(至少要有一定的交易天数)
 		int iBegin = iCheck-30;
 		int iEnd = iCheck;
 		if(iBegin<0)
 		{
-			return cResultCheck;
+			return cResultPriceDrop;
 		}
 		StockDay cEndStockDay = list.get(iEnd);
 		
-		// 反向查找高位
+		// 急跌最高最低判断（当日下挫到短期最低）
 		int checkTimes_drop = 0;
 		int checkTimes_inc = 0;
 		int indexCheckHigh = 0;
 		for(int i = iEnd; i>iBegin+4; i--)
 		{
-			StockDay cStockDay = list.get(i);
-			float ave3PreCheck = StockUtils.GetAveNear(list, 1, i-2);
-			if(cStockDay.close() < ave3PreCheck)
+			StockDay cStockDayI = list.get(i);
+			StockDay cStockDayB1 = list.get(i-1);
+			StockDay cStockDayB2 = list.get(i-2);
+			StockDay cStockDayB3 = list.get(i-3);
+			
+			if(cStockDayI.midle() < cStockDayB3.midle())
 			{
 				checkTimes_drop++;
 				checkTimes_inc=0;
 			}
-			else
-			{
-				checkTimes_inc++;
-			}
 			
-			if(checkTimes_inc >=2)
+			if(cStockDayB3.midle() <= cStockDayI.high()
+					&& cStockDayB2.midle() <= cStockDayI.high()
+					&& cStockDayB1.midle() <= cStockDayI.high())
 			{
 				indexCheckHigh = i;
 				break;
-			}
-			
+			}	
 		}
 		StockDay cB1StockDay = list.get(iEnd-1);
 		StockDay cB2StockDay = list.get(iEnd-2);
@@ -115,19 +113,19 @@ public class EDIPriceDrop {
 		}
 		else
 		{
-			return cResultCheck;
+			return cResultPriceDrop;
 		}
 		//BLog.output("TEST", "(%s) %s\n", curDate, list.get(indexCheckHigh).date());
 
 		
-		// 最大跌幅
-		float MaxDropRate = (cEndStockDay.close()-cHStockDay.close())/cHStockDay.close();
+		// 最大跌幅检查（最大跌幅需要符合股性）
+		float MaxDropRate = (cEndStockDay.low()-cHStockDay.high())/cHStockDay.high();
 		if(MaxDropRate < -1.5*fAveWave)
 		{
 		}
 		else
 		{
-			return cResultCheck;
+			return cResultPriceDrop;
 		}
 		
 //		// 最后一天非跌停
@@ -142,15 +140,15 @@ public class EDIPriceDrop {
 //			return cResultCheck;
 //		}
 		
-		// 跌速计算
-		float fDropRate = (cEndStockDay.close() - cHStockDay.close())/cHStockDay.close();
+		// 跌速检查(跌速需要大于一定幅度)
+		float fDropRate = (cEndStockDay.midle() - cHStockDay.midle())/cHStockDay.midle();
 		float fDropAcc = fDropRate/(iEnd-indexCheckHigh+1);
-		if(fDropAcc<-0.25f*fAveWave)
+		if(fDropAcc<-0.01f)
 		{
 		}
 		else
 		{
-			return cResultCheck;
+			return cResultPriceDrop;
 		}
 		//BLog.output("TEST", " (%s) fDropAcc %.4f fAveWave %.4f \n", curDate, fDropAcc, fAveWave);
 		
@@ -160,11 +158,11 @@ public class EDIPriceDrop {
 		s_StockDayListCurve.clearMark(iEnd);
 		s_StockDayListCurve.markCurveIndex(iEnd, "L");
 		
-		cResultCheck.bCheck = true;
-		cResultCheck.iHigh = indexCheckHigh;
-		cResultCheck.fHighPrice = cHStockDay.close();
-		cResultCheck.iLow = iEnd;
-		cResultCheck.fLowPrice = cEndStockDay.close();
+		cResultPriceDrop.bCheck = true;
+		cResultPriceDrop.iHigh = indexCheckHigh;
+		cResultPriceDrop.fHighPrice = cHStockDay.high();
+		cResultPriceDrop.iLow = StockUtils.indexLow(list, iEnd-3, iEnd);
+		cResultPriceDrop.fLowPrice = list.get(cResultPriceDrop.iLow).low();
 		
 		
 //		// 最低点在临近日判断
@@ -223,7 +221,7 @@ public class EDIPriceDrop {
 //			return cResultCheck;
 //		}
 
-		return cResultCheck;
+		return cResultPriceDrop;
 	}
 	
 	/*
@@ -236,7 +234,7 @@ public class EDIPriceDrop {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "300163"; // 300163 300165 002425 002123
+		String stockID = "002425"; // 002425 000246
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
@@ -248,24 +246,24 @@ public class EDIPriceDrop {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-04-27"))
+			if(cCurStockDay.date().equals("2016-08-01"))
 			{
 				BThread.sleep(1);
-				
 
 			}
 			
 
-			ResultCheckPriceDrop cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
-			if (cResultCheckPriceDrop.bCheck)
+
+			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
+			if (cResultPriceDrop.bCheck)
 			{
 				BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
 						cCurStockDay.date(), 
-						list.get(cResultCheckPriceDrop.iHigh).date(),
-						cResultCheckPriceDrop.fHighPrice,
-						list.get(cResultCheckPriceDrop.iLow).date(),
-						cResultCheckPriceDrop.fLowPrice,
-						cResultCheckPriceDrop.fDropRatio());
+						list.get(cResultPriceDrop.iHigh).date(),
+						cResultPriceDrop.fHighPrice,
+						list.get(cResultPriceDrop.iLow).date(),
+						cResultPriceDrop.fLowPrice,
+						cResultPriceDrop.fDropRatio());
 				//s_StockDayListCurve.markCurveIndex(i, "D");
 				//i=i+20;
 			}

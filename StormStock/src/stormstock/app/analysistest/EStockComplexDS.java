@@ -2,7 +2,7 @@ package stormstock.app.analysistest;
 
 import java.util.List;
 
-import stormstock.app.analysistest.EDIPriceDrop.ResultCheckPriceDrop;
+import stormstock.app.analysistest.EDIPriceDrop.ResultPriceDrop;
 import stormstock.app.analysistest.EStockComplexDZCZX.ResultDYCheck;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
@@ -28,7 +28,7 @@ import stormstock.fw.tranengine.TranEngine.TRANACCOUNTTYPE;
 import stormstock.fw.tranengine.TranEngine.TRANTIMEMODE;
 
 /**
- * DS下跌企稳反弹操作模型
+ * DS短期下跌反弹模型
  * @author wudi
  *
  */
@@ -199,65 +199,96 @@ public class EStockComplexDS {
 		ResultDSSelectParam cResultDSSelectParam = new ResultDSSelectParam();
 		
 		// 检查日判断
-		int iBegin = iCheck-10;
+		int iBegin = iCheck-5;
 		int iEnd = iCheck;
 		if(iBegin<0)
 		{
 			return cResultDSSelectParam;
 		}
 		
-		// 连续3日收复5日线检查
-		boolean bUM3Flg = false;
-		float fHigh = 0.0f;
-		float fLow = 0.0f;
-		float fDropRate = 0.0f;
-		float fHigh_2 = 0.0f;
+		// 5日内存在下短期下跌安全点
+		int indexH = 0;
+		int indexL = 0;
 		for(int i=iEnd;i>=iBegin;i--)
 		{
-			ResultCheckPriceDrop cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
-			if (cResultCheckPriceDrop.bCheck)
+			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
+			if (cResultPriceDrop.bCheck)
 			{
+				indexH=cResultPriceDrop.iHigh;
+				StockDay sdH = list.get(indexH);
+				indexL=cResultPriceDrop.iLow;
+				StockDay sdL = list.get(indexL);
 				
-				s_StockDayListCurve.clearMark(cResultCheckPriceDrop.iLow);
-				s_StockDayListCurve.markCurveIndex(cResultCheckPriceDrop.iLow, "L");
+				int iInterH = StockUtils.indexHigh(list, indexL, iCheck);
+				StockDay sdInterH = list.get(iInterH);
+				int iInterL = StockUtils.indexLow(list, indexL, iCheck);
+				StockDay sdInterL = list.get(iInterL);
 				
-				
-				int iSelectBegin = cResultCheckPriceDrop.iLow;
-				int iSelectEnd = iCheck;
-				int iCheckUM5Cnt = 0;
-				for(int iSIndex =iSelectBegin; iSIndex<=iSelectEnd;iSIndex++)
+				// 区间不能破位和过高
+				if(sdInterH.high() < (sdH.high() + sdL.low())/2
+						&& sdInterL.low() > sdL.low()-0.01f
+						)
 				{
-					StockDay cSStockDay = list.get(iSIndex);
-					float fSMA5 = StockUtils.GetMA(list, 5, iSIndex);
-					if(cSStockDay.close() > fSMA5)
-					{
-						iCheckUM5Cnt ++;
-					}
-					else
-					{
-						iCheckUM5Cnt = 0;
-					}
-					if(iCheckUM5Cnt>=3)
-					{
-						bUM3Flg = true;
-						fHigh = list.get(cResultCheckPriceDrop.iHigh).high();
-						fLow = list.get(cResultCheckPriceDrop.iLow).low();
-						int iIndexH2 = StockUtils.indexHigh(list, cResultCheckPriceDrop.iLow, iCheck);
-						fHigh_2 = list.get(iIndexH2).high();
-						fDropRate = cResultCheckPriceDrop.fDropRatio();
-						break;
-					}
+					s_StockDayListCurve.clearMark(iCheck);
+					s_StockDayListCurve.markCurveIndex(iCheck, "S");
+					cResultDSSelectParam.bCheck = true;
+					break;
 				}
-				
-				break;
 			}
 		}
 		
-		cResultDSSelectParam.bCheck = bUM3Flg;
-		cResultDSSelectParam.fBuyCheck = (fLow+fHigh_2)/2;
-		cResultDSSelectParam.fSellHigh = fLow + (fHigh-fLow)/2;
-		cResultDSSelectParam.fSellLow = fLow*(1-0.02f);
-		cResultDSSelectParam.po = -fDropRate;
+		// 连续3日收复5日线检查
+//		boolean bUM3Flg = false;
+//		float fHigh = 0.0f;
+//		float fLow = 0.0f;
+//		float fDropRate = 0.0f;
+//		float fHigh_2 = 0.0f;
+//		for(int i=iEnd;i>=iBegin;i--)
+//		{
+//			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
+//			if (cResultPriceDrop.bCheck)
+//			{
+//				
+//				s_StockDayListCurve.clearMark(cResultPriceDrop.iLow);
+//				s_StockDayListCurve.markCurveIndex(cResultPriceDrop.iLow, "L");
+//				
+//				
+//				int iSelectBegin = cResultPriceDrop.iLow;
+//				int iSelectEnd = iCheck;
+//				int iCheckUM5Cnt = 0;
+//				for(int iSIndex =iSelectBegin; iSIndex<=iSelectEnd;iSIndex++)
+//				{
+//					StockDay cSStockDay = list.get(iSIndex);
+//					float fSMA5 = StockUtils.GetMA(list, 5, iSIndex);
+//					if(cSStockDay.close() > fSMA5)
+//					{
+//						iCheckUM5Cnt ++;
+//					}
+//					else
+//					{
+//						iCheckUM5Cnt = 0;
+//					}
+//					if(iCheckUM5Cnt>=3)
+//					{
+//						bUM3Flg = true;
+//						fHigh = list.get(cResultPriceDrop.iHigh).high();
+//						fLow = list.get(cResultPriceDrop.iLow).low();
+//						int iIndexH2 = StockUtils.indexHigh(list, cResultPriceDrop.iLow, iCheck);
+//						fHigh_2 = list.get(iIndexH2).high();
+//						fDropRate = cResultPriceDrop.fDropRatio();
+//						break;
+//					}
+//				}
+//				
+//				break;
+//			}
+//		}
+		
+//		cResultDSSelectParam.bCheck = bUM3Flg;
+//		cResultDSSelectParam.fBuyCheck = (fLow+fHigh_2)/2;
+//		cResultDSSelectParam.fSellHigh = fLow + (fHigh-fLow)/2;
+//		cResultDSSelectParam.fSellLow = fLow*(1-0.02f);
+//		cResultDSSelectParam.po = -fDropRate;
 		return cResultDSSelectParam;
 	}
 	/*
@@ -301,7 +332,7 @@ public class EStockComplexDS {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-08-30"))
+			if(cCurStockDay.date().equals("2016-10-31"))
 			{
 				BThread.sleep(1);
 				
@@ -312,8 +343,8 @@ public class EStockComplexDS {
 							cCurStockDay.date());
 					s_StockDayListCurve.markCurveIndex(i, "S");
 				}
-	
 			}
+
 
 
         } 

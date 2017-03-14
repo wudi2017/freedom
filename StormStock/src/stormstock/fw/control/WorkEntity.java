@@ -224,8 +224,12 @@ public class WorkEntity {
 		if(m_bHistoryTest)
 		{
 			// 数据错误排除,经过测试 次日期内无法从网络获取数据
-			if(date.equals("2013-03-08")
-					|| date.equals("2015-06-09"))
+			if(
+				date.equals("2013-03-08")
+				|| date.equals("2015-06-09")
+				|| date.equals("2016-10-17")
+				|| date.equals("2016-11-25")
+				)
 			{
 				return false;
 			}

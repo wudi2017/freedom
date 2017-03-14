@@ -16,6 +16,7 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
  */
 
 public class EDIPriceDrop {
+	
 	public static float getMidDropParam(List<StockDay> list, int iCheck)
 	{
 		int iBegin = iCheck-60;

@@ -104,7 +104,7 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		if(cStockSelectList.size() > 0)
 		{
 			String logStr = "";
-			logStr += String.format("    -SelectList:[ ");
+			logStr += String.format("    -SelectList(%d):[ ", cStockSelectList.size());
 			for(int i=0; i<cStockSelectList.size(); i++ )
 			{
 				String stockId = cStockSelectList.get(i);

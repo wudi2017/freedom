@@ -89,7 +89,8 @@ public class EStockComplexDS {
 			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
 			
-			ResultDSSelectParam cResultDSSelectParam = EStockComplexDS.isSelect(stockId, list_stocyDay, list_stocyDay.size()-1);
+			// 昨天被选
+			ResultDSSelectParam cResultDSSelectParam = EStockComplexDS.isSelect(stockId, list_stocyDay, list_stocyDay.size()-2);
 			if (cResultDSSelectParam.bCheck)
 			{
 				StockDay cDayH = list_stocyDay.get(cResultDSSelectParam.indexH);
@@ -99,7 +100,7 @@ public class EStockComplexDS {
 				if(time.compareTo("14:50:00") >= 0)
 				{
 					float fZhang = (fNowPrice-fYesterdayClosePrice)/fYesterdayClosePrice;
-					if(fZhang < 0.09f)
+					if(fZhang < 0.09f && fZhang>0.0f)
 					{
 						int iTLow = StockUtils.indexStockTimeLow(list_stockTime, 0, list_stockTime.size()-1);
 						StockTime cStockTime = list_stockTime.get(iTLow);
@@ -107,19 +108,19 @@ public class EStockComplexDS {
 								&& fNowPrice > cInterL.entityLow()
 								&& fNowPrice < (cInterH.high() + cInterL.low())/2)
 						{
-							out_sr.bCreate = true;
-							out_sr.fMaxPositionRatio = 0.2f;
+							//out_sr.bCreate = true;
+							//out_sr.fMaxPositionRatio = 0.2f;
 						}
 					}
 				}
-				// 一次下跌
-//				ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
-//				if (cResultXiaCuoQiWen.bCheck && fNowPrice < fStarHigh)
-//				{
-//					//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
-//					out_sr.bCreate = true;
-//					out_sr.fMaxPositionRatio = 0.2f;
-//				}
+				// 日内急跌抄底
+				ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
+				if (cResultXiaCuoQiWen.bCheck)
+				{
+					//BLog.output("TEST", "     --->>> StrategyCreate %s %s \n", ctx.date(), ctx.time());
+					out_sr.bCreate = true;
+					out_sr.fMaxPositionRatio = 0.2f;
+				}
 				
 //				// 建仓为跌幅一定时
 //				if(fNowPrice <= cResultDSSelectParam.fBuyCheck)
@@ -167,35 +168,35 @@ public class EStockComplexDS {
 			float fNowPrice = ctx.target().stock().getLatestPrice();
 			
 			// 持有天数止损止盈
-			if(cHoldStock.investigationDays >= 10) // 调查天数控制
+			if(cHoldStock.investigationDays >= 5) // 调查天数控制
 			{
 				out_sr.bClear = true;
 			}
 
 			// 选股参数止损止盈
-			ResultDSSelectParam cResultDSSelectParam = findSelectParam(stockId, list_stocyDay, list_stocyDay.size()-1);
-			if (cResultDSSelectParam.bCheck)
-			{
-				StockDay cDayH = list_stocyDay.get(cResultDSSelectParam.indexH);
-				StockDay cDayL = list_stocyDay.get(cResultDSSelectParam.indexL);
-				StockDay cInterL = list_stocyDay.get(cResultDSSelectParam.iInterL);
-				StockDay cInterH = list_stocyDay.get(cResultDSSelectParam.iInterH);
-				
-				float checkSellH = cInterH.high()*1.03f;
-				if(cHoldStock.curPrice >= checkSellH)
-				{
-					out_sr.bClear = true;
-				}
-				
-				float checkSellL = cInterL.low()*(1-0.02f);
-				if(cHoldStock.curPrice < checkSellL)
-				{
-					out_sr.bClear = true;
-				}
-			}
+//			ResultDSSelectParam cResultDSSelectParam = findSelectParam(stockId, list_stocyDay, list_stocyDay.size()-1);
+//			if (cResultDSSelectParam.bCheck)
+//			{
+//				StockDay cDayH = list_stocyDay.get(cResultDSSelectParam.indexH);
+//				StockDay cDayL = list_stocyDay.get(cResultDSSelectParam.indexL);
+//				StockDay cInterL = list_stocyDay.get(cResultDSSelectParam.iInterL);
+//				StockDay cInterH = list_stocyDay.get(cResultDSSelectParam.iInterH);
+//				
+//				float checkSellH = cInterH.high()*(1+0.02f);
+//				if(cHoldStock.curPrice >= checkSellH)
+//				{
+//					out_sr.bClear = true;
+//				}
+//				
+//				float checkSellL = cInterL.low();
+//				if(cHoldStock.curPrice < checkSellL)
+//				{
+//					out_sr.bClear = true;
+//				}
+//			}
 
 			// 硬性指标止损止盈
-			if(cHoldStock.profitRatio() > 0.08 || cHoldStock.profitRatio() < -0.08) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.05 || cHoldStock.profitRatio() < -0.05) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}
@@ -226,12 +227,23 @@ public class EStockComplexDS {
 		ResultDSSelectParam cResultDSSelectParam = new ResultDSSelectParam();
 		
 		// 检查日判断
-		int iBegin = iCheck-5;
+		int iBegin = iCheck-10;
 		int iEnd = iCheck;
 		if(iBegin<0)
 		{
 			return cResultDSSelectParam;
 		}
+		
+//		// 最后日再60日上
+//		float fMA60 = StockUtils.GetMA(list, 60, iEnd);
+//		StockDay cStockDayEnd = list.get(iEnd);
+//		if(cStockDayEnd.close() > fMA60)
+//		{
+//		}
+//		else
+//		{
+//			return cResultDSSelectParam;
+//		}
 		
 		// 5日内存在下短期下跌安全点
 		boolean bPriceSafe = false;
@@ -240,7 +252,7 @@ public class EStockComplexDS {
 		float fDrop = 0.0f;
 		int iInterH = 0;
 		int iInterL = 0;
-		for(int i=iEnd;i>=iBegin;i--)
+		for(int i=iEnd;i>=iBegin&&i>iEnd-5;i--)
 		{
 			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
 			if (cResultPriceDrop.bCheck)
@@ -274,51 +286,51 @@ public class EStockComplexDS {
 		}
 		
 		// 连续3日收复5日线检查
-//		boolean bUM3Flg = false;
-//		float fHigh = 0.0f;
-//		float fLow = 0.0f;
-//		float fDropRate = 0.0f;
-//		float fHigh_2 = 0.0f;
-//		for(int i=iEnd;i>=iBegin;i--)
-//		{
-//			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
-//			if (cResultPriceDrop.bCheck)
-//			{
-//				
-//				s_StockDayListCurve.clearMark(cResultPriceDrop.iLow);
-//				s_StockDayListCurve.markCurveIndex(cResultPriceDrop.iLow, "L");
-//				
-//				
-//				int iSelectBegin = cResultPriceDrop.iLow;
-//				int iSelectEnd = iCheck;
-//				int iCheckUM5Cnt = 0;
-//				for(int iSIndex =iSelectBegin; iSIndex<=iSelectEnd;iSIndex++)
-//				{
-//					StockDay cSStockDay = list.get(iSIndex);
-//					float fSMA5 = StockUtils.GetMA(list, 5, iSIndex);
-//					if(cSStockDay.close() > fSMA5)
-//					{
-//						iCheckUM5Cnt ++;
-//					}
-//					else
-//					{
-//						iCheckUM5Cnt = 0;
-//					}
-//					if(iCheckUM5Cnt>=3)
-//					{
-//						bUM3Flg = true;
-//						fHigh = list.get(cResultPriceDrop.iHigh).high();
-//						fLow = list.get(cResultPriceDrop.iLow).low();
-//						int iIndexH2 = StockUtils.indexHigh(list, cResultPriceDrop.iLow, iCheck);
-//						fHigh_2 = list.get(iIndexH2).high();
-//						fDropRate = cResultPriceDrop.fDropRatio();
-//						break;
-//					}
-//				}
-//				
-//				break;
-//			}
-//		}
+		boolean bUM3Flg = false;
+		float fHigh = 0.0f;
+		float fLow = 0.0f;
+		float fDropRate = 0.0f;
+		float fHigh_2 = 0.0f;
+		for(int i=iEnd;i>=iBegin;i--)
+		{
+			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
+			if (cResultPriceDrop.bCheck)
+			{
+				
+				s_StockDayListCurve.clearMark(cResultPriceDrop.iLow);
+				s_StockDayListCurve.markCurveIndex(cResultPriceDrop.iLow, "L");
+				
+				
+				int iSelectBegin = cResultPriceDrop.iLow;
+				int iSelectEnd = iCheck;
+				int iCheckUM5Cnt = 0;
+				for(int iSIndex =iSelectBegin; iSIndex<=iSelectEnd;iSIndex++)
+				{
+					StockDay cSStockDay = list.get(iSIndex);
+					float fSMA5 = StockUtils.GetMA(list, 5, iSIndex);
+					if(cSStockDay.close() > fSMA5)
+					{
+						iCheckUM5Cnt ++;
+					}
+					else
+					{
+						iCheckUM5Cnt = 0;
+					}
+					if(iCheckUM5Cnt>=3)
+					{
+						bUM3Flg = true;
+						fHigh = list.get(cResultPriceDrop.iHigh).high();
+						fLow = list.get(cResultPriceDrop.iLow).low();
+						int iIndexH2 = StockUtils.indexHigh(list, cResultPriceDrop.iLow, iCheck);
+						fHigh_2 = list.get(iIndexH2).high();
+						fDropRate = cResultPriceDrop.fDropRatio();
+						break;
+					}
+				}
+				
+				break;
+			}
+		}
 		
 //		cResultDSSelectParam.bCheck = bUM3Flg;
 //		cResultDSSelectParam.fBuyCheck = (fLow+fHigh_2)/2;
@@ -366,7 +378,7 @@ public class EStockComplexDS {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002425"; // 300163 300165
+		String stockID = "300165"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
@@ -378,23 +390,23 @@ public class EStockComplexDS {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
-			if(cCurStockDay.date().equals("2016-05-12"))
+			if(cCurStockDay.date().equals("2016-09-12"))
 			{
 				BThread.sleep(1);
 				
-				ResultDSSelectParam cResultDSSelectParam = EStockComplexDS.isSelect(stockID, list, i);
-				if (cResultDSSelectParam.bCheck)
-				{
-					BLog.output("TEST", "### CheckPoint %s (%s %s) (%s %s) po(%.3f)\n", 
-							cCurStockDay.date(),
-							list.get(cResultDSSelectParam.indexH).date(),list.get(cResultDSSelectParam.indexL).date(),
-							list.get(cResultDSSelectParam.iInterH).date(),list.get(cResultDSSelectParam.iInterL).date(),
-							cResultDSSelectParam.po);
-					s_StockDayListCurve.markCurveIndex(i, "S");
-				}
+
 			}
 
-
+			ResultDSSelectParam cResultDSSelectParam = EStockComplexDS.isSelect(stockID, list, i);
+			if (cResultDSSelectParam.bCheck)
+			{
+				BLog.output("TEST", "### CheckPoint %s (%s %s) (%s %s) po(%.3f)\n", 
+						cCurStockDay.date(),
+						list.get(cResultDSSelectParam.indexH).date(),list.get(cResultDSSelectParam.indexL).date(),
+						list.get(cResultDSSelectParam.iInterH).date(),list.get(cResultDSSelectParam.iInterL).date(),
+						cResultDSSelectParam.po);
+				s_StockDayListCurve.markCurveIndex(i, "S");
+			}
 
         } 
 		

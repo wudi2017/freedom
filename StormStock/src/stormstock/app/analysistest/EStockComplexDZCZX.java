@@ -259,7 +259,7 @@ public class EStockComplexDZCZX {
 			if(cCurStockBegin.open() > cCurStockBegin.close()
 					&& shangying < shiti/2 
 					&& xiaying < shiti/2
-					&& shitiRatio > fAveWave*1.2f)
+					&& shitiRatio > fAveWave*0.5)
 			{
 				
 			}
@@ -277,7 +277,7 @@ public class EStockComplexDZCZX {
 			float shiti = cStockDayMid.entityHigh() - cStockDayMid.entityLow();
 			float shitiRatio = shiti/cStockDayMid.low();
 			if((shangying > shiti/3 || xiaying > shiti/3)
-					&& shitiRatio < fAveWave*1.2f)
+					&& shitiRatio < fAveWave)
 			{
 				
 			}
@@ -296,7 +296,7 @@ public class EStockComplexDZCZX {
 			if(cCurStockDay.open() < cCurStockDay.close()
 					&& shangying < shiti/2 
 					&& xiaying < shiti/2
-					&& shitiRatio > fAveWave*0.8)
+					&& shitiRatio > fAveWave*0.5)
 			{
 				
 			}
@@ -308,6 +308,7 @@ public class EStockComplexDZCZX {
 		
 		// 价位控制
 		{
+			// 中间上影线不能超过中间值
 			if(cStockDayMid.high() < cCurStockDay.midle()
 					&& cStockDayMid.high() < cCurStockBegin.midle())
 			{
@@ -318,7 +319,8 @@ public class EStockComplexDZCZX {
 				return cResultDYCheck;
 			}
 			
-			float fcheck = cCurStockBegin.entityLow() + (cCurStockBegin.entityHigh() - cCurStockBegin.entityLow())/2;
+			// 最后一天收复大部分第一天实体
+			float fcheck = cCurStockBegin.entityLow() + (cCurStockBegin.entityHigh() - cCurStockBegin.entityLow())/3*2;
 			if(cCurStockDay.entityHigh() > fcheck)
 			{
 				
@@ -414,7 +416,7 @@ public class EStockComplexDZCZX {
 	 * Test
 	 * ********************************************************************
 	 */
-	public static void main(String[] args) {
+	public static void mainx(String[] args) {
 		BLog.output("TEST", "--->>> MainBegin\n");
 		TranEngine cTranEngine = new TranEngine();
 		
@@ -433,14 +435,14 @@ public class EStockComplexDZCZX {
 		BLog.output("TEST", "--->>> MainEnd\n");
 	}
 	
-	public static void mainx(String[] args)
+	public static void main(String[] args)
 	{
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002123"; // 300163 300165
+		String stockID = "002566"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2012-01-01", "2017-01-01");
+				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-03-14");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -451,26 +453,26 @@ public class EStockComplexDZCZX {
 			StockDay cCurStockDay = list.get(i);
 			//BLog.output("TEST", "cCurStockDay %s \n", cCurStockDay.date());
 
-			if(cCurStockDay.date().equals("2016-06-15"))
+			if(cCurStockDay.date().equals("2017-03-06"))
 			{
 				BThread.sleep(1);
 
-//				ResultDYCheck cResultDYCheck = checkZCZX(stockID, list, i);
-//				if(cResultDYCheck.bCheck)
-//				{
-//					BLog.output("TEST", "CheckPoint %s\n", cCurStockDay.date());
-//					s_StockDayListCurve.markCurveIndex(i, "X");
-//				}
-				ResultDZCZXSelectParam cResultDZCZXSelectParam = EStockComplexDZCZX.isSelect(stockID, list, i);
-				if(cResultDZCZXSelectParam.bCheck)
-				{
-					BLog.output("TEST", "CheckPoint %s po(%.3f)\n", cCurStockDay.date(), cResultDZCZXSelectParam.po);
-					s_StockDayListCurve.markCurveIndex(i, "X");
-				}
+
+
 
 			}
-			
-
+			ResultDYCheck cResultDYCheck = checkZCZX(stockID, list, i);
+			if(cResultDYCheck.bCheck)
+			{
+				BLog.output("TEST", "CheckPoint %s\n", cCurStockDay.date());
+				s_StockDayListCurve.markCurveIndex(i, "X");
+			}
+//			ResultDZCZXSelectParam cResultDZCZXSelectParam = EStockComplexDZCZX.isSelect(stockID, list, i);
+//			if(cResultDZCZXSelectParam.bCheck)
+//			{
+//				BLog.output("TEST", "CheckPoint %s po(%.3f)\n", cCurStockDay.date(), cResultDZCZXSelectParam.po);
+//				s_StockDayListCurve.markCurveIndex(i, "X");
+//			}
         } 
 		
 		s_StockDayListCurve.generateImage();

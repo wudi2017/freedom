@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import stormstock.app.analysistest.EStockComplexDZCZX.ResultDYCheck;
 import stormstock.app.analysistest.EStockDayVolumeLevel.VOLUMELEVEL;
 import stormstock.fw.base.BImageCurve;
 import stormstock.fw.base.BLog;
@@ -21,26 +22,23 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
 
 public class RunSingleTest {
 	
-	public static void main(String[] args) {
-		BLog.output("TEST", "Main Begin\n");
-		StockDataIF cStockDataIF = new StockDataIF();
-		
-		String stockID = "000151"; // 300163 300165 000401 600439
+	public static void testOneStock(String stockId)
+	{
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-09-01", "2017-03-01");
+				s_cStockDataIF.getHistoryData(stockId, "2016-01-01", "2017-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
-		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
-		
-		s_StockDayListCurve.setCurve(list);
-		
-		EStockDayVolumeLevel cEStockDayVolumeLevel = new EStockDayVolumeLevel();
+		//BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockId, list.size());
 		
 		// 日检查
 		for(int iDayCheck = 0; iDayCheck < list.size(); iDayCheck++)  
         {  
 			StockDay cCurStockDay = list.get(iDayCheck);
 			
-			
+			ResultDYCheck cResultDYCheck = EStockComplexDZCZX.checkZCZX(stockId, list, iDayCheck);
+			if(cResultDYCheck.bCheck)
+			{
+				BLog.output("TEST", "Check stockID(%s) date(%s)\n", stockId, cCurStockDay.date());
+			}
 			
 //			// 日细节检查
 //			for(int iDayDetailCheck = iDayCheck+1; 
@@ -68,11 +66,26 @@ public class RunSingleTest {
 //			}
 			
         } 
+	}
+	
+	public static void main(String[] args) {
+		BLog.output("TEST", "Main Begin\n");
 		
-		s_StockDayListCurve.generateImage();
+		ResultAllStockID allStock = s_cStockDataIF.getAllStockID();
+		if(0 == allStock.error)
+		{
+			for(int i=0;i<allStock.resultList.size();i++)
+			{
+				String stockID = allStock.resultList.get(i);
+				//if(stockID.equals("000151"))
+					testOneStock(stockID);
+			}
+		}
+		
 		BLog.output("TEST", "Main End\n");
 	}
 	
+	public static StockDataIF s_cStockDataIF = new StockDataIF();
 	public static StockDayListCurve s_StockDayListCurve = new StockDayListCurve("RunSingleTest.jpg");
 	public static StockTimeListCurve s_StockTimeListCurve = new StockTimeListCurve("RunSingleTestDetail.jpg");
 }

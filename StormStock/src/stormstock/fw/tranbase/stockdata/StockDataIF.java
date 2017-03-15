@@ -468,7 +468,7 @@ public class StockDataIF {
 		}
 		else
 		{
-			boolean bDataFitting = false;
+			boolean bDataFitting = true;
 			
 			if(bDataFitting)
 			{

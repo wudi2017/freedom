@@ -3,6 +3,7 @@ package stormstock.app.analysistest;
 import java.util.List;
 import java.util.Random;
 
+import stormstock.app.analysistest.EDIPricePos.ResultLongDropParam;
 import stormstock.app.analysistest.EDITryPress.EDITryPressResult;
 import stormstock.app.analysistest.EStockComplexDS.TranStockSet;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
@@ -49,7 +50,7 @@ public class EStockComplexDZCZX {
 //			if(cStockInfo.ID.compareTo("002123") >= 0 && cStockInfo.ID.compareTo("002123") <= 0) {	
 //				return true;
 //			}
-			if(cStockInfo.circulatedMarketValue < 300.0f)
+			if(cStockInfo.circulatedMarketValue < 100.0f)
 			{
 				return true;
 			}
@@ -69,14 +70,16 @@ public class EStockComplexDZCZX {
 			if(cResultDZCZXSelectParam.bCheck)
 			{
 				out_sr.bSelect = true;
-				out_sr.fPriority = -cResultDZCZXSelectParam.po;
+				
+				ResultLongDropParam cResultLongDropParam = EDIPricePos.getLongDropParam(cStockDayList, cStockDayList.size()-1);
+				out_sr.fPriority = -cResultLongDropParam.refHigh;
 			}
 		}
 
 		@Override
 		public int strategy_select_max_count() {
 			// TODO Auto-generated method stub
-			return 10;
+			return 20;
 		}
 
 	}
@@ -140,11 +143,12 @@ public class EStockComplexDZCZX {
 //				}
 //			}	
 			
+			out_sr.fMaxPositionRatio = 0.1f;
 			out_sr.bCreate = true;
 		}
 		@Override
 		public int strategy_create_max_count() {
-			return 5;
+			return 10;
 		}
 
 	}
@@ -188,7 +192,7 @@ public class EStockComplexDZCZX {
 			
 			CalcParam(ctx);
 			
-			if(cHoldStock.investigationDays >= 20) // 调查天数控制
+			if(cHoldStock.investigationDays >= 30) // 调查天数控制
 			{
 				out_sr.bClear = true;
 			}
@@ -205,7 +209,7 @@ public class EStockComplexDZCZX {
 //				out_sr.bClear = true;
 //			}
 			
-			if(cHoldStock.profitRatio() > 0.05 || cHoldStock.profitRatio() < -0.05) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.1) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}
@@ -257,8 +261,8 @@ public class EStockComplexDZCZX {
 			float shiti = cCurStockBegin.entityHigh() - cCurStockBegin.entityLow();
 			float shitiRatio = shiti/cCurStockBegin.low();
 			if(cCurStockBegin.open() > cCurStockBegin.close()
-					&& shangying < shiti/2 
-					&& xiaying < shiti/2
+					&& shangying < shiti/3*2 
+					&& xiaying < shiti/3*2 
 					&& shitiRatio > fAveWave*0.5)
 			{
 				
@@ -294,8 +298,8 @@ public class EStockComplexDZCZX {
 			float shiti = cCurStockDay.entityHigh() - cCurStockDay.entityLow();
 			float shitiRatio = shiti/cCurStockDay.low();
 			if(cCurStockDay.open() < cCurStockDay.close()
-					&& shangying < shiti/2 
-					&& xiaying < shiti/2
+					&& shangying < shiti/3*2  
+					&& xiaying < shiti/3*2 
 					&& shitiRatio > fAveWave*0.5)
 			{
 				
@@ -309,8 +313,8 @@ public class EStockComplexDZCZX {
 		// 价位控制
 		{
 			// 中间上影线不能超过中间值
-			if(cStockDayMid.high() < cCurStockDay.midle()
-					&& cStockDayMid.high() < cCurStockBegin.midle())
+			if(cStockDayMid.entityHigh() < cCurStockDay.midle()
+					&& cStockDayMid.entityHigh() < cCurStockBegin.midle())
 			{
 				
 			}
@@ -416,7 +420,7 @@ public class EStockComplexDZCZX {
 	 * Test
 	 * ********************************************************************
 	 */
-	public static void mainx(String[] args) {
+	public static void main(String[] args) {
 		BLog.output("TEST", "--->>> MainBegin\n");
 		TranEngine cTranEngine = new TranEngine();
 		
@@ -427,7 +431,7 @@ public class EStockComplexDZCZX {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2016-01-01", "2017-01-01");
+		cTranEngine.setHistoryTimeSpan("2016-06-01", "2017-02-01");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();
@@ -435,12 +439,12 @@ public class EStockComplexDZCZX {
 		BLog.output("TEST", "--->>> MainEnd\n");
 	}
 	
-	public static void main(String[] args)
+	public static void mainx(String[] args)
 	{
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002566"; // 300163 300165
+		String stockID = "601566"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
 				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-03-14");
 		List<StockDay> list = cResultHistoryData.resultList;

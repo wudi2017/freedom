@@ -3,6 +3,7 @@ package stormstock.app.analysistest;
 import java.util.List;
 
 import stormstock.app.analysistest.EDIPriceDrop.ResultPriceDrop;
+import stormstock.app.analysistest.EDIPricePos.ResultLongDropParam;
 import stormstock.app.analysistest.EStockComplexDZCZX.ResultDYCheck;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
@@ -46,7 +47,7 @@ public class EStockComplexDS {
 //			if(cStockInfo.ID.compareTo("002425") >= 0 && cStockInfo.ID.compareTo("002425") <= 0) {	
 //				return true;
 //			}
-			if(cStockInfo.circulatedMarketValue < 300.0f)
+			if(cStockInfo.circulatedMarketValue < 100.0f)
 			{
 				return true;
 			}
@@ -66,7 +67,9 @@ public class EStockComplexDS {
 			if (cResultDSSelectParam.bCheck)
 			{
 				out_sr.bSelect = true;
-				out_sr.fPriority = BUtilsMath.randomFloat();
+				
+				ResultLongDropParam cResultLongDropParam = EDIPricePos.getLongDropParam(cStockDayList, cStockDayList.size()-1);
+				out_sr.fPriority = -cResultLongDropParam.refHigh;
 			}
 		}
 
@@ -100,7 +103,7 @@ public class EStockComplexDS {
 				if(time.compareTo("14:50:00") >= 0)
 				{
 					float fZhang = (fNowPrice-fYesterdayClosePrice)/fYesterdayClosePrice;
-					if(fZhang < 0.08f && fZhang> -0.08f)
+					if(fZhang < 0.03f && fZhang> -0.08f)
 					{
 						int iTLow = StockUtils.indexStockTimeLow(list_stockTime, 0, list_stockTime.size()-1);
 						StockTime cStockTime = list_stockTime.get(iTLow);
@@ -378,9 +381,9 @@ public class EStockComplexDS {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "002443"; // 300163 300165
+		String stockID = "300187"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-01-01");
+				cStockDataIF.getHistoryData(stockID, "2011-01-01", "2012-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -404,6 +407,8 @@ public class EStockComplexDS {
 						list.get(cResultDSSelectParam.indexH).date(),list.get(cResultDSSelectParam.indexL).date(),
 						list.get(cResultDSSelectParam.iInterH).date(),list.get(cResultDSSelectParam.iInterL).date(),
 						cResultDSSelectParam.po);
+				
+				s_StockDayListCurve.clearMark(i);
 				s_StockDayListCurve.markCurveIndex(i, "S");
 			}
 

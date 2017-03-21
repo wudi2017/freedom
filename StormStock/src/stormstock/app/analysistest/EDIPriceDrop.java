@@ -16,6 +16,29 @@ import stormstock.fw.tranbase.stockdata.StockDataIF.ResultHistoryData;
  */
 
 public class EDIPriceDrop {
+	
+	public static float getMidDropParam(List<StockDay> list, int iCheck)
+	{
+		int iBegin = iCheck-60;
+		int iEnd = iCheck;
+		if(iBegin<0)
+		{
+			return 0.0f;
+		}
+		
+		StockDay cCurStockDay = list.get(iEnd);
+		
+		int iIndex60H = StockUtils.indexHigh(list, iBegin, iEnd);
+		StockDay cStockDay60H = list.get(iIndex60H);
+		int iIndex60L = StockUtils.indexLow(list, iBegin, iEnd);
+		StockDay cStockDay60L = list.get(iIndex60L);
+		float fMA20 = StockUtils.GetMA(list, 20, iEnd);
+		
+		float Pa = (cCurStockDay.close() - cStockDay60H.close())
+				+ (cCurStockDay.close() - cStockDay60L.close())
+				+ (cCurStockDay.close() - fMA20);
+		return Pa;
+	}
 
 	public static class ResultPriceDrop
 	{
@@ -212,9 +235,9 @@ public class EDIPriceDrop {
 		BLog.output("TEST", "Main Begin\n");
 		StockDataIF cStockDataIF = new StockDataIF();
 		
-		String stockID = "601566"; // 002425 000246
+		String stockID = "601919"; // 002425 000246
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-03-01");
+				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-01-01");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		
@@ -224,21 +247,27 @@ public class EDIPriceDrop {
         {  
 			StockDay cCurStockDay = list.get(i);
 	
+			if(cCurStockDay.date().equals("2016-08-01"))
+			{
+				BThread.sleep(1);
 
-				ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
-				if (cResultPriceDrop.bCheck)
-				{
-					BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
-							cCurStockDay.date(), 
-							list.get(cResultPriceDrop.iHigh).date(),
-							cResultPriceDrop.fHighPrice,
-							list.get(cResultPriceDrop.iLow).date(),
-							cResultPriceDrop.fLowPrice,
-							cResultPriceDrop.fDropRatio());
-					//s_StockDayListCurve.markCurveIndex(i, "D");
-					//i=i+20;
-				}
+			}
+			
 
+
+			ResultPriceDrop cResultPriceDrop = EDIPriceDrop.getPriceDrop(list, i);
+			if (cResultPriceDrop.bCheck)
+			{
+				BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
+						cCurStockDay.date(), 
+						list.get(cResultPriceDrop.iHigh).date(),
+						cResultPriceDrop.fHighPrice,
+						list.get(cResultPriceDrop.iLow).date(),
+						cResultPriceDrop.fLowPrice,
+						cResultPriceDrop.fDropRatio());
+				//s_StockDayListCurve.markCurveIndex(i, "D");
+				//i=i+20;
+			}
         } 
 		
 		s_StockDayListCurve.generateImage();

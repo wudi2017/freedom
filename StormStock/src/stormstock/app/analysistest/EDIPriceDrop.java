@@ -225,6 +225,7 @@ public class EDIPriceDrop {
 		return cResultPriceDrop;
 	}
 	
+	
 	/*
 	 * ********************************************************************
 	 * Test

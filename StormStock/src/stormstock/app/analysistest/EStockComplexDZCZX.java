@@ -3,7 +3,9 @@ package stormstock.app.analysistest;
 import java.util.List;
 import java.util.Random;
 
+import stormstock.app.analysistest.EDIPriceDrop.ResultPriceDrop;
 import stormstock.app.analysistest.EDIPricePos.ResultLongDropParam;
+import stormstock.app.analysistest.EDIPriceUp.ResultPriceUp;
 import stormstock.app.analysistest.EDITryPress.EDITryPressResult;
 import stormstock.app.analysistest.EStockComplexDS.TranStockSet;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
@@ -50,7 +52,7 @@ public class EStockComplexDZCZX {
 //			if(cStockInfo.ID.compareTo("002123") >= 0 && cStockInfo.ID.compareTo("002123") <= 0) {	
 //				return true;
 //			}
-			if(cStockInfo.circulatedMarketValue < 100.0f)
+			if(cStockInfo.circulatedMarketValue < 1000.0f)
 			{
 				return true;
 			}
@@ -79,7 +81,7 @@ public class EStockComplexDZCZX {
 		@Override
 		public int strategy_select_max_count() {
 			// TODO Auto-generated method stub
-			return 20;
+			return 30;
 		}
 
 	}
@@ -209,7 +211,7 @@ public class EStockComplexDZCZX {
 //				out_sr.bClear = true;
 //			}
 			
-			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.1) // 止盈止损x个点卖
+			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.8) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
 			}
@@ -364,8 +366,8 @@ public class EStockComplexDZCZX {
 			}
 		}
 		
-//		// 10天之内有大跌幅
-//		ResultCheckPriceDrop cResultCheckPriceDrop = new ResultCheckPriceDrop();
+//		// 10天之内有大。。。
+//		ResultPriceUp cResultPriceUp = new ResultPriceUp();
 //		{
 //			int iBegin = iCheck-10;
 //			int iEnd = iCheck;
@@ -373,18 +375,9 @@ public class EStockComplexDZCZX {
 //			for(int i=iEnd;i>=iBegin;i--)
 //			{
 //				StockDay cStockDay = list.get(i);
-//				cResultCheckPriceDrop = EDIPriceDrop.checkPriceDrop(list, i);
-//				if (cResultCheckPriceDrop.bCheck)
+//				cResultPriceUp = EDIPriceUp.getPriceUp(list, i);
+//				if (cResultPriceUp.bCheck)
 //				{
-////						BLog.output("TEST", "### CheckPoint %s H(%s %.2f) L(%s %.2f) Ratio(%.3f)\n", 
-////								cStockDay.date(), 
-////								list.get(cResultCheckPriceDrop.iHigh).date(),
-////								cResultCheckPriceDrop.fHighPrice,
-////								list.get(cResultCheckPriceDrop.iLow).date(),
-////								cResultCheckPriceDrop.fLowPrice,
-////								cResultCheckPriceDrop.fDropRatio());
-//					//s_StockDayListCurve.markCurveIndex(i, "D");
-//					//i=i+20;
 //					break;
 //				}
 //			}
@@ -431,7 +424,7 @@ public class EStockComplexDZCZX {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2016-06-01", "2017-02-01");
+		cTranEngine.setHistoryTimeSpan("2009-01-01", "2017-01-01");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();
@@ -446,7 +439,7 @@ public class EStockComplexDZCZX {
 		
 		String stockID = "601566"; // 300163 300165
 		ResultHistoryData cResultHistoryData = 
-				cStockDataIF.getHistoryData(stockID, "2016-01-01", "2017-03-14");
+				cStockDataIF.getHistoryData(stockID, "2009-01-01", "2017-03-14");
 		List<StockDay> list = cResultHistoryData.resultList;
 		BLog.output("TEST", "Check stockID(%s) list size(%d)\n", stockID, list.size());
 		

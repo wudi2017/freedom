@@ -3,6 +3,7 @@ package stormstock.app.analysistest;
 import java.util.List;
 
 import stormstock.app.analysistest.EDIPriceDrop.ResultPriceDrop;
+import stormstock.app.analysistest.EDIPricePos.ResultLongDropParam;
 import stormstock.app.analysistest.EStockComplexDZCZX.ResultDYCheck;
 import stormstock.app.analysistest.ETDropStable.ResultXiaCuoQiWen;
 import stormstock.fw.base.BLog;
@@ -66,14 +67,17 @@ public class EStockComplexDS {
 			if (cResultDSSelectParam.bCheck)
 			{
 				out_sr.bSelect = true;
-				out_sr.fPriority = BUtilsMath.randomFloat();
+				
+				
+				ResultLongDropParam cResultLongDropParam = EDIPricePos.getLongDropParam(cStockDayList, cStockDayList.size()-1);
+				out_sr.fPriority = cResultLongDropParam.refHigh;
 			}
 		}
 
 		@Override
 		public int strategy_select_max_count() {
 			// TODO Auto-generated method stub
-			return 10;
+			return 20;
 		}
 
 	}

@@ -12,14 +12,17 @@ public class Application {
 		
 		TranEngine cTranEngine = new TranEngine();
 		
-		cTranEngine.setStockSet(new TranStockSet());
-		cTranEngine.setSelectStockStrategy(new StrategySelect());
-		cTranEngine.setCreatePositonStrategy(new StrategyCreate());
-		cTranEngine.setClearPositonStrategy(new StrategyClear());
+		cTranEngine.setStockSet(new Strategy_D1.EStockComplexDZCZX.TranStockSet());
+		cTranEngine.setSelectStockStrategy(new Strategy_D1.EStockComplexDZCZX.StrategySelect());
+		cTranEngine.setCreatePositonStrategy(new Strategy_D1.EStockComplexDZCZX.StrategyCreate());
+		cTranEngine.setClearPositonStrategy(new Strategy_D1.EStockComplexDZCZX.StrategyClear());
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		
-		cTranEngine.setTranMode(TRANTIMEMODE.REALTIME);
+		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
+		
+		cTranEngine.setHistoryTimeSpan("2011-01-01", "2014-01-01");
+		//cTranEngine.setTranMode(TRANTIMEMODE.REALTIME);
 
 		cTranEngine.run();
 		

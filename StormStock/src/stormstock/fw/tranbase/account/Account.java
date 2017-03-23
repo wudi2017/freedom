@@ -30,6 +30,7 @@ public class Account {
 			cIAccountOpe = new RealAccountOpe(accountID, password);
 		}
 		m_cIAccountOpe = cIAccountOpe;
+		m_lockedMoney = 100000.0f; // 默认锁定10w
 		m_holdStockInvestigationDaysMap = new HashMap<String, Integer>();
 		m_stockSelectList = new ArrayList<String>();
 		m_accountStore = new AccountStore(accountID, password);
@@ -108,10 +109,29 @@ public class Account {
 		return m_cIAccountOpe.pushSellOrder(date, time, id, amount, price);
 	}
 	
+	// 获得账户锁定资金（现金）
+	public int getLockedMoney(RefFloat out_lockedMoney)
+	{
+		out_lockedMoney.value = m_lockedMoney;
+		return 0;
+	}
+	
 	// 获得账户可用资金（现金）
 	public int getAvailableMoney(RefFloat out_availableMoney)
 	{
-		return m_cIAccountOpe.getAvailableMoney(out_availableMoney);
+		RefFloat availableMoney= new RefFloat();
+		int iRetGetAvailableMoney = m_cIAccountOpe.getAvailableMoney(availableMoney);
+		
+		RefFloat lockedMoney= new RefFloat();
+		int iRetGetLockedMoney = this.getLockedMoney(lockedMoney);
+		
+		out_availableMoney.value = availableMoney.value - lockedMoney.value;
+		if(out_availableMoney.value < 0)
+		{
+			out_availableMoney.value = 0.0f;
+		}
+		
+		return iRetGetAvailableMoney + iRetGetLockedMoney;
 	}
 	
 	// 获得委托列表(未成交的，包含买入和卖出的)
@@ -312,6 +332,7 @@ public class Account {
 		StoreEntity cStoreEntity = m_accountStore.load();
 		if(null != cStoreEntity)
 		{
+			// load holdStockInvestigationDaysMap
 			m_holdStockInvestigationDaysMap.clear();
 			if(null != cStoreEntity.initHoldStockInvestigationDaysMap)
 		    	m_holdStockInvestigationDaysMap.putAll(cStoreEntity.initHoldStockInvestigationDaysMap);
@@ -323,6 +344,11 @@ public class Account {
 		StoreEntity cStoreEntity = m_accountStore.load();
 		if(null != cStoreEntity)
 		{
+			// load lockedMoney
+			if(null != cStoreEntity.lockedMoney)
+				m_lockedMoney = cStoreEntity.lockedMoney;
+			
+			// load stockSelectList
 		    m_stockSelectList.clear();
 		    if(null != cStoreEntity.stockSelectList)
 		    	m_stockSelectList.addAll(cStoreEntity.stockSelectList);
@@ -332,6 +358,9 @@ public class Account {
 	private void store()
 	{
 		StoreEntity cStoreEntity = new StoreEntity();
+		// locked money
+		cStoreEntity.lockedMoney = m_lockedMoney;
+		// stockSelectList
 		cStoreEntity.stockSelectList = m_stockSelectList;
 		m_accountStore.store(cStoreEntity);
 	}
@@ -339,6 +368,9 @@ public class Account {
 	public void printAccount(String date, String time)
 	{
 		BLog.output("ACCOUNT", "    ---ACCOUNT---INFO---\n");
+		
+		RefFloat lockedMoney = new RefFloat();
+		this.getLockedMoney(lockedMoney);
 		float fTotalAssets = this.getTotalAssets(date, time);
 		RefFloat availableMoney = new RefFloat();
 		this.getAvailableMoney(availableMoney);
@@ -348,6 +380,7 @@ public class Account {
 		this.getDealOrderList(cDealOrderList);
 		
 		// 打印资产
+		BLog.output("ACCOUNT", "    -LockedMoney: %.3f\n", lockedMoney.value);
 		BLog.output("ACCOUNT", "    -TotalAssets: %.3f\n", fTotalAssets);
 		BLog.output("ACCOUNT", "    -AvailableMoney: %.3f\n", availableMoney.value);
 		
@@ -397,6 +430,7 @@ public class Account {
 	 * 账户操作接口，可以设置为模拟或真实
 	 */
 	private IAccountOpe m_cIAccountOpe;
+	private float m_lockedMoney;
 	private Map<String, Integer> m_holdStockInvestigationDaysMap;
 	private List<String> m_stockSelectList; // 选股列表
 	private AccountStore m_accountStore;

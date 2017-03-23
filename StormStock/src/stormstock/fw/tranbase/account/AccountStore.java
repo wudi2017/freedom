@@ -42,6 +42,7 @@ public class AccountStore {
 	
 	public static class StoreEntity
 	{
+		public Float lockedMoney;
 		public List<String> stockSelectList;
 		public Map<String, Integer> initHoldStockInvestigationDaysMap;
 	}
@@ -122,6 +123,15 @@ public class AccountStore {
         
         if(null != cStoreEntity)
         {
+        	// locked Money
+        	if(null != cStoreEntity.lockedMoney)
+        	{
+        		String sLockedMoney = Float.toString(cStoreEntity.lockedMoney);
+        		Element Node_LockedMoney = doc.createElement("LockedMoney");
+        		Node_LockedMoney.setAttribute("value", sLockedMoney);
+        		root.appendChild(Node_LockedMoney);
+        	}
+        	
         	// StockSelectList
         	if(null != cStoreEntity.stockSelectList)
         	{
@@ -257,6 +267,21 @@ public class AccountStore {
 				return null; // 账号秘密不对 load失败
 			}
 		    
+		    // 加载锁定资金
+		    Float lockedMoney = null;
+		    {
+		    	NodeList nodelist_LockedMoney = rootElement.getElementsByTagName("LockedMoney");
+		        if(nodelist_LockedMoney.getLength() == 1)
+	        	{
+		        	Node node_LockedMoney = nodelist_LockedMoney.item(0);
+		        	if(node_LockedMoney.getNodeType() == Node.ELEMENT_NODE)
+		        	{
+			        	String sLockedMoney = ((Element)node_LockedMoney).getAttribute("value");
+			        	lockedMoney = Float.parseFloat(sLockedMoney);
+		        	}
+	        	}
+		    }
+		    
 		    // 选股列表加载
 		    List<String> stockSelectList = null;
 		    {
@@ -303,6 +328,7 @@ public class AccountStore {
 		    }
 		 
 		    StoreEntity cStoreEntity = new StoreEntity();
+		    cStoreEntity.lockedMoney = lockedMoney;
 		    cStoreEntity.stockSelectList = stockSelectList;
 		    cStoreEntity.initHoldStockInvestigationDaysMap = initHoldStockInvestigationDaysMap;
 		    return cStoreEntity;

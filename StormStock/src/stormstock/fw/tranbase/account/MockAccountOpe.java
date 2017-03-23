@@ -32,7 +32,7 @@ public class MockAccountOpe extends IAccountOpe {
 
 		// 交易流数据
 		{
-			m_money = 100000.00f;
+			m_money = 200000.00f; // 模拟账户默认20w
 			m_commissionOrderList = new ArrayList<CommissionOrder>();
 			m_holdStockList = new ArrayList<HoldStock>();
 			m_dealOrderList = new ArrayList<DealOrder>();

@@ -21,7 +21,7 @@ public class GenerateReportRequest  extends BQThreadRequest {
 		m_cInfoCollector = cInfoCollector;
 		String outputDir = BPath.getOutputDir();
 		String imgfilename = outputDir + "\\report.jpg";
-		m_imgReport = new BImageCurve(1600,900,imgfilename);
+		m_imgReport = new BImageCurve(2560,1920,imgfilename);
 	}
 	
 	@Override

@@ -80,11 +80,17 @@ public class AccountControlIF {
 		return bRet;
 	}
 	
+	public int getLockedMoney(RefFloat out_lockedMoney)
+	{
+		return m_account.getLockedMoney(out_lockedMoney);
+	}
+	
 	// 获取账户总资产（根据日期时间来确定股价）
 	public float getTotalAssets(String date, String time)
 	{
 		return m_account.getTotalAssets(date, time);
 	}
+	
 	
 	public int getAvailableMoney(RefFloat out_availableMoney)
 	{

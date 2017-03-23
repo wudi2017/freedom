@@ -44,7 +44,8 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		List<StockDay> cSHCompositeList = cResultHistoryData.resultList;
 		cDailyReport.fSHComposite = cSHCompositeList.get(0).close();
 		
-		
+		RefFloat lockedMoney = new RefFloat();
+		cAccountControlIF.getLockedMoney(lockedMoney);
 		float fTotalAssets = cAccountControlIF.getTotalAssets(m_date, m_time);
 		RefFloat availableMoney = new RefFloat();
 		cAccountControlIF.getAvailableMoney(availableMoney);
@@ -58,6 +59,7 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		// 打印添加当前总资产，可用钱
 		cDailyReport.fTotalAssets = fTotalAssets;
 		cDailyReport.fAvailableMoney = availableMoney.value;
+		BLog.output("REPORT", "    -LockedMoney: %.3f\n", lockedMoney.value);
 		BLog.output("REPORT", "    -TotalAssets: %.3f\n", fTotalAssets);
 		BLog.output("REPORT", "    -AvailableMoney: %.3f\n", availableMoney.value);
 		

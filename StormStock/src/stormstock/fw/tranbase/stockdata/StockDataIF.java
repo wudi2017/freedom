@@ -29,6 +29,24 @@ public class StockDataIF {
 	
 	public StockDataIF()
 	{
+		m_bDataFitting = false;
+	}
+	
+	/*
+	 * property - value
+	 * 
+	 * "DATA_HISTORY_DAYTIME_DATAFITTING" //历史日内数据拟合开启
+	 *     true
+	 *     false
+	 */
+	public int config(String property, Object value)
+	{
+		if(property.equals("DATA_HISTORY_DAYTIME_DATAFITTING"))
+		{
+			boolean bDataFitting = (boolean)value;
+			m_bDataFitting = bDataFitting;
+		}
+		return 0;
 	}
 	
 	/*
@@ -468,7 +486,7 @@ public class StockDataIF {
 		}
 		else
 		{
-			boolean bDataFitting = true;
+			boolean bDataFitting = m_bDataFitting;
 			
 			if(bDataFitting)
 			{
@@ -699,4 +717,8 @@ public class StockDataIF {
 	// 日内分时缓存  
 	// key:600001_2016-01-01
 	private Map<String,List<StockTime>> s_cache_stockTimeData = null;
+	
+	//==========================================================================================
+	// config
+	private boolean m_bDataFitting;
 }

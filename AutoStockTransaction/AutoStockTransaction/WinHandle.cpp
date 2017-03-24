@@ -208,13 +208,13 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 				tvItem.hItem = TreeView_GetRoot(hTreeView);
 				// 买入选择
 				TreeView_SelectItem(hTreeView, tvItem.hItem);
-				Sleep(100);
+				Sleep(200);
 				return 0;
 			}
 		}
 		return -1;
 	}
-	else if (0 == index)
+	else if (0 == index) // 买入选择
 	{
 		TVITEM tvItem;
 		ZeroMemory(&tvItem, sizeof(TVITEM));
@@ -223,9 +223,10 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 		tvItem.hItem = TreeView_GetRoot(hTreeView);
 		// 买入选择
 		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(200);
 		return 0;
 	}
-	else if (1 == index)
+	else if (1 == index) // 卖出选择
 	{
 		TVITEM tvItem;
 		ZeroMemory(&tvItem, sizeof(TVITEM));
@@ -235,11 +236,150 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 		// 卖出选择
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
 		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(200);
 		return 0;
 	}
+	else if (2 == index) // 资金股票选择
+	{
+		TVITEM tvItem;
+		ZeroMemory(&tvItem, sizeof(TVITEM));
+		tvItem.cchTextMax = 512;
+		tvItem.pszText = "X";
+		tvItem.hItem = TreeView_GetRoot(hTreeView);
+		// 买入选择
+		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(100);
+		// 卖出选择
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(100);
+		// 撤单
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 新股申购
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 双向
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 市价
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 查询
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		for (int i = 0; i<10 ;i++)
+		{
+			if (TreeView_Expand(hTreeView, tvItem.hItem, TVE_EXPAND))
+			{
+				// 资金股票获取
+				tvItem.hItem = TreeView_GetChild(hTreeView, tvItem.hItem);
+				if (!tvItem.hItem)
+					continue;
+				// 展开成功
+				// 资金股票选择
+				TreeView_SelectItem(hTreeView, tvItem.hItem);
+				Sleep(200);
+				return 0;
+			}
+		}
+	}
+	else if (3 == index) // 当日委托
+	{
+		TVITEM tvItem;
+		ZeroMemory(&tvItem, sizeof(TVITEM));
+		tvItem.cchTextMax = 512;
+		tvItem.pszText = "X";
+		tvItem.hItem = TreeView_GetRoot(hTreeView);
+		// 买入选择
+		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(100);
+		// 卖出选择
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(100);
+		// 撤单
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 新股申购
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 双向
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 市价
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 查询
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		for (int i = 0; i<10 ;i++)
+		{
+			if (TreeView_Expand(hTreeView, tvItem.hItem, TVE_EXPAND))
+			{
+				// 资金股票获取
+				tvItem.hItem = TreeView_GetChild(hTreeView, tvItem.hItem);
+				if (!tvItem.hItem)
+					continue;
+				// 展开成功
 
+				// 资金股票选择
+				TreeView_SelectItem(hTreeView, tvItem.hItem);
+				Sleep(100);
+
+				// 当日委托
+				tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+				TreeView_SelectItem(hTreeView, tvItem.hItem);
+				Sleep(200);
+
+				return 0;
+			}
+		}
+	}
+	else if (4 == index) // 当日成交
+	{
+		TVITEM tvItem;
+		ZeroMemory(&tvItem, sizeof(TVITEM));
+		tvItem.cchTextMax = 512;
+		tvItem.pszText = "X";
+		tvItem.hItem = TreeView_GetRoot(hTreeView);
+		// 买入选择
+		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(100);
+		// 卖出选择
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		TreeView_SelectItem(hTreeView, tvItem.hItem);
+		Sleep(100);
+		// 撤单
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 新股申购
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 双向
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 市价
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		// 查询
+		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+		for (int i = 0; i<10 ;i++)
+		{
+			if (TreeView_Expand(hTreeView, tvItem.hItem, TVE_EXPAND))
+			{
+				// 资金股票获取
+				tvItem.hItem = TreeView_GetChild(hTreeView, tvItem.hItem);
+				if (!tvItem.hItem)
+					continue;
+				// 展开成功
+
+				// 资金股票选择
+				TreeView_SelectItem(hTreeView, tvItem.hItem);
+				Sleep(100);
+
+				// 当日委托
+				tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+				TreeView_SelectItem(hTreeView, tvItem.hItem);
+				Sleep(100);
+
+				// 当日成交
+				tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
+				TreeView_SelectItem(hTreeView, tvItem.hItem);
+				Sleep(200);
+
+				return 0;
+			}
+		}
+	}
 	return -1;
-}
+}				
 
 HWND findZijinGupiaoWin(HWND hWnd)
 {

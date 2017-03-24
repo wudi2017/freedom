@@ -7,6 +7,18 @@
 #include "commctrl.h"
 #include "WinHandle.h"
 
+class FlushingTimer: public DTimer
+{
+public:
+	FlushingTimer():DTimer(1000*60*30, true) {}
+	virtual void Run()
+	{
+		TESTLOG("FlushingTimer Run\n");
+		Flush_F5();
+	}
+};
+
+static FlushingTimer * s_pflushingTimer = NULL;
 static bool s_initFLag = false;
 static HWND s_hMainWin = NULL;
 static HWND s_hLeftTreeView = NULL;
@@ -18,6 +30,7 @@ static HWND s_hDealOrderWin = NULL;
 
 static HWND s_hBuyWin = NULL;
 static HWND s_hSellWin = NULL;
+
 
 int THSAPI_TongHuaShunInit()
 {
@@ -75,17 +88,17 @@ int THSAPI_TongHuaShunInit()
 	if (NULL == hCommissionOrderWin)
 	{
 		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] findCommissionOrderWin error\n");
-		return -32;
+		return -40;
 	}
 	s_hCommissionOrderWin = hCommissionOrderWin;
 	TESTLOG("THSAPI_TongHuaShunInit# search CommissionOrderWin ok\n");
 
-	////// 初始化当日成交窗口句柄
+	// 初始化当日成交窗口句柄
 	HWND hDealOrderWin = findDealOrderWin(hWnd);
 	if (NULL == hDealOrderWin)
 	{
 		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] findDealOrderWin error\n");
-		return -33;
+		return -50;
 	}
 	s_hDealOrderWin = hDealOrderWin;
 	TESTLOG("THSAPI_TongHuaShunInit# search DealOrderWin ok\n");
@@ -95,7 +108,7 @@ int THSAPI_TongHuaShunInit()
 	if (NULL == hBuyWin)
 	{
 		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] Buy win error\n");
-		return -40;
+		return -60;
 	}
 	s_hBuyWin = hBuyWin;
 	TESTLOG("THSAPI_TongHuaShunInit# search BuyWin ok\n");
@@ -105,7 +118,7 @@ int THSAPI_TongHuaShunInit()
 	if (NULL == hSellWin)
 	{
 		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] Sell win error\n");
-		return -50;
+		return -70;
 	}
 	s_hSellWin = hSellWin;
 	TESTLOG("THSAPI_TongHuaShunInit# search SellWin ok\n");
@@ -114,13 +127,16 @@ int THSAPI_TongHuaShunInit()
 	if (0!=CancelAllMainWin())
 	{
 		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] CancelAllMainWin error\n");
-		return -60;
+		return -80;
 	}
 
 	Flush_F5();
 	Hide_MainWin();
 
 	s_initFLag = true;
+	// 启动刷新timer
+	s_pflushingTimer = new FlushingTimer();
+	s_pflushingTimer->Start();
 	return 0;
 }
 
@@ -279,6 +295,7 @@ int THSAPI_GetHoldStockList(std::list<HoldStock> & resultList)
 
 	resultList.clear();
 
+	Flush_F5();
 	if (s_hHoldStockWin)
 	{
 		std::string buf;
@@ -412,6 +429,7 @@ int THSAPI_GetCommissionOrderList(std::list<CommissionOrder> & resultList)
 
 	resultList.clear();
 
+	Flush_F5();
 	if (s_hCommissionOrderWin)
 	{
 		std::string buf;
@@ -560,6 +578,7 @@ int THSAPI_GetDealOrderList(std::list<DealOrder> & resultList)
 
 	resultList.clear();
 
+	Flush_F5();
 	if (s_hDealOrderWin)
 	{
 		std::string buf;

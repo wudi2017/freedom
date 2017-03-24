@@ -9,7 +9,17 @@ void setMainWin(HWND hWnd);
 int Hide_MainWin();
 
 HWND findLeftTreeView(HWND hWnd);
-int selectMasterTreeViewItem(HWND hTreeView, int index);
+
+/* 
+ * -1:all
+ * 0：买入
+ * 1：卖出
+ * 2：资金股票
+ * 3：当日委托
+ * 4：当日成交
+ */
+int selectMasterTreeViewItem(HWND hTreeView, int index); 
+
 HWND findZijinGupiaoWin(HWND hWnd);
 HWND findBuyWin(HWND hWnd);
 HWND findSellWin(HWND hWnd);
@@ -17,7 +27,6 @@ HWND findSellWin(HWND hWnd);
 HWND findCommissionOrderWin(HWND hWnd);
 HWND findHoldStockWin(HWND hWnd);
 HWND findDealOrderWin(HWND hWnd);
-
 
 //////////////////////////////////////////////////////////////////////////
 //  main win in desktop

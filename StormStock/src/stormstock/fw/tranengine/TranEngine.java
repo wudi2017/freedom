@@ -79,12 +79,44 @@ public class TranEngine {
 		m_endDate = null; 
 		m_eAccType = null; 
 		m_cEigenMap = new HashMap<String, IEigenStock>();
+		
+		// console
+		m_console = new TranConsole();
 	}
 	
 	public void onTranEngineExitNotify(com.google.protobuf.GeneratedMessage msg) {
 		m_exitFlag = true;
 		synchronized (m_waitObj) {
 			m_waitObj.notify();
+		}
+	}
+	public static class TranConsole extends BConsole
+	{
+		public void command(String cmd)
+		{
+			String tranDate = GlobalTranDateTime.getTranDate();
+			String tranTime =  GlobalTranDateTime.getTranTime();
+			if(cmd.equals("pa")) 
+			{
+				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
+				cAccountControlIF.printAccount(tranDate, tranTime);
+			}
+			else if(cmd.equals("gr"))
+			{
+				ReportAnalysis.GenerateReportRequest.Builder msg_builder = ReportAnalysis.GenerateReportRequest.newBuilder();
+				msg_builder.setDate(tranDate);
+				msg_builder.setTime(tranTime);
+				
+				ReportAnalysis.GenerateReportRequest msg = msg_builder.build();
+				BEventSys.EventSender cSender = new BEventSys.EventSender();
+				cSender.Send("BEV_TRAN_GENERATEREPORTREQUEST", msg);
+			}
+			else
+			{
+				BLog.output( "TEST", "command invalid!\n");
+				BLog.output( "TEST", "pa :  print account\n");
+				BLog.output( "TEST", "gr :  generate report\n");
+			}
 		}
 	}
 	public void mainLoop()
@@ -94,10 +126,8 @@ public class TranEngine {
 		while(!m_exitFlag)
 		{
 			try {
-				String cmd = BConsole.readDataFromConsole();
-				parseCmd(cmd);
 				synchronized (m_waitObj) {
-					m_waitObj.wait(100);
+					m_waitObj.wait(1000);
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -112,34 +142,10 @@ public class TranEngine {
 		BEventSys.stop();
 		// log stop
 		BLog.stop();
+		// exit process
+		System.exit(0);
 	}
-	private void parseCmd(String cmd)
-	{
-		String tranDate = GlobalTranDateTime.getTranDate();
-		String tranTime =  GlobalTranDateTime.getTranTime();
-		if(cmd.equals("pa")) 
-		{
-			AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
-			cAccountControlIF.printAccount(tranDate, tranTime);
-		}
-		else if(cmd.equals("gr"))
-		{
-			ReportAnalysis.GenerateReportRequest.Builder msg_builder = ReportAnalysis.GenerateReportRequest.newBuilder();
-			msg_builder.setDate(tranDate);
-			msg_builder.setTime(tranTime);
-			
-			ReportAnalysis.GenerateReportRequest msg = msg_builder.build();
-			BEventSys.EventSender cSender = new BEventSys.EventSender();
-			cSender.Send("BEV_TRAN_GENERATEREPORTREQUEST", msg);
-		}
-		else
-		{
-			BLog.output( "TEST", "command invalid!\n");
-			BLog.output( "TEST", "pa :  print account\n");
-			BLog.output( "TEST", "gr :  generate report\n");
-		}
-	}
-	
+
 	// send exit cmd 
 	public void exitCommand()
 	{
@@ -276,6 +282,9 @@ public class TranEngine {
 		}
 		Transaction.ControllerStartNotify msg = msg_builder.build();
 		cSender.Send("BEV_TRAN_CONTROLLERSTARTNOTIFY", msg);
+		
+		// start console
+		m_console.startThread();
 	}
 	
 	// ”√ªß…Ë÷√
@@ -296,4 +305,6 @@ public class TranEngine {
 	private boolean m_exitFlag;
 	// event receiver
 	private EventReceiver m_eventRecever;
+	// console
+	private TranConsole m_console;
 }

@@ -74,6 +74,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search ZijinGupiaoWin ok\n");
 
 	// 初始化持股窗口句柄
+	Sleep(2000);
 	HWND hHoldStockWin = findHoldStockWin(hWnd);
 	if (NULL == hHoldStockWin)
 	{
@@ -84,6 +85,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search HoldStockWin ok\n");
 
 	// 初始化当日委托窗口句柄
+	Sleep(2000);
 	HWND hCommissionOrderWin = findCommissionOrderWin(hWnd);
 	if (NULL == hCommissionOrderWin)
 	{
@@ -94,6 +96,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search CommissionOrderWin ok\n");
 
 	// 初始化当日成交窗口句柄
+	Sleep(2000);
 	HWND hDealOrderWin = findDealOrderWin(hWnd);
 	if (NULL == hDealOrderWin)
 	{

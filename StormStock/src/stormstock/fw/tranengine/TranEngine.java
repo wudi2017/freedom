@@ -117,15 +117,10 @@ public class TranEngine {
 	{
 		String tranDate = GlobalTranDateTime.getTranDate();
 		String tranTime =  GlobalTranDateTime.getTranTime();
-		if(cmd.equals("pr")) // print account
+		if(cmd.equals("pa")) 
 		{
-			ReportAnalysis.TranInfoCollectRequest.Builder msg_builder = ReportAnalysis.TranInfoCollectRequest.newBuilder();
-			msg_builder.setDate(tranDate);
-			msg_builder.setTime(tranTime);
-			
-			ReportAnalysis.TranInfoCollectRequest msg = msg_builder.build();
-			BEventSys.EventSender cSender = new BEventSys.EventSender();
-			cSender.Send("BEV_TRAN_TRANINFOCOLLECTREQUEST", msg);
+			AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
+			cAccountControlIF.printAccount(tranDate, tranTime);
 		}
 		else if(cmd.equals("gr"))
 		{
@@ -140,7 +135,7 @@ public class TranEngine {
 		else
 		{
 			BLog.output( "TEST", "command invalid!\n");
-			BLog.output( "TEST", "pr :  print report\n");
+			BLog.output( "TEST", "pa :  print account\n");
 			BLog.output( "TEST", "gr :  generate report\n");
 		}
 	}

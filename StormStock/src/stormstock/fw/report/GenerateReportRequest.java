@@ -20,7 +20,9 @@ public class GenerateReportRequest  extends BQThreadRequest {
 		m_time = time;
 		m_cInfoCollector = cInfoCollector;
 		String outputDir = BPath.getOutputDir();
-		String imgfilename = outputDir + "\\report.jpg";
+		String imgfilename = outputDir + "\\report_" 
+				+ m_date.replace("-", "") 
+				+ "_" +  m_time.replace(":", "")  + ".jpg";
 		m_imgReport = new BImageCurve(2560,1920,imgfilename);
 	}
 	

@@ -367,7 +367,7 @@ public class Account {
 	
 	public void printAccount(String date, String time)
 	{
-		BLog.output("ACCOUNT", "    ---ACCOUNT---INFO---\n");
+		BLog.output("ACCOUNT", "    ---ACCOUNT---INFO--- %s %s\n", date, time);
 		
 		RefFloat lockedMoney = new RefFloat();
 		this.getLockedMoney(lockedMoney);

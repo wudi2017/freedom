@@ -12,6 +12,7 @@ import stormstock.fw.base.BWaitObj;
 import stormstock.fw.event.Transaction;
 import stormstock.fw.event.Transaction.ControllerStartNotify;
 import stormstock.fw.tranbase.account.AccountControlIF;
+import stormstock.fw.tranbase.com.GlobalTranDateTime;
 import stormstock.fw.tranbase.com.GlobalUserObj;
 import stormstock.fw.tranbase.com.ITranStockSetFilter;
 import stormstock.fw.tranbase.stockdata.Stock;
@@ -314,12 +315,14 @@ public class WorkEntity {
 	{
 		if(m_bHistoryTest)
 		{
+			GlobalTranDateTime.setTranDateTime(date, time);
 			return true;
 		}
 		else
 		{
 			BLog.output("CTRL", "realtime waitting DateTime (%s %s)... \n", date, time);
 			boolean bWait = BUtilsDateTime.waitDateTime(date, time);
+			GlobalTranDateTime.setTranDateTime(date, time);
 			BLog.output("CTRL", "realtime waitting DateTime (%s %s) complete! result(%b)\n", date, time, bWait);
 			return bWait;
 		}

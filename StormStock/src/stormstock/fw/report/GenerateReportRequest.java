@@ -45,7 +45,7 @@ public class GenerateReportRequest  extends BQThreadRequest {
 		m_imgReport.addLogicCurveSameRatio(cCurvePointList_SHComposite, 1);
 		m_imgReport.addLogicCurveSameRatio(cCurvePointList_TotalAssets, 2);
 		m_imgReport.GenerateImage();
-		
+		BLog.output("REPORT", "Generate Report Succ!\n");
 		
 		ReportAnalysis.GenerateReportCompleteNotify.Builder msg_builder = ReportAnalysis.GenerateReportCompleteNotify.newBuilder();
 		msg_builder.setDate(m_date);

@@ -3,12 +3,14 @@ package stormstock.fw.tranengine;
 import java.util.HashMap;
 import java.util.Map;
 
+import stormstock.fw.base.BConsole;
 import stormstock.fw.base.BEventSys;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BModuleManager;
 import stormstock.fw.base.BPath;
 import stormstock.fw.base.BEventSys.EventReceiver;
 import stormstock.fw.event.EventDef;
+import stormstock.fw.event.ReportAnalysis;
 import stormstock.fw.event.Transaction;
 import stormstock.fw.event.Transaction.ControllerStartNotify;
 import stormstock.fw.control.FlowController;
@@ -18,6 +20,7 @@ import stormstock.fw.stockcreateanalyzer.StockCreateAnalyzer;
 import stormstock.fw.stockselectanalyzer.StockSelectAnalyzer;
 import stormstock.fw.tranbase.account.AccountControlIF;
 import stormstock.fw.tranbase.account.AccountPublicDef.ACCOUNTTYPE;
+import stormstock.fw.tranbase.com.GlobalTranDateTime;
 import stormstock.fw.tranbase.com.GlobalUserObj;
 import stormstock.fw.tranbase.com.IEigenStock;
 import stormstock.fw.tranbase.com.IStrategyClear;
@@ -91,8 +94,10 @@ public class TranEngine {
 		while(!m_exitFlag)
 		{
 			try {
+				String cmd = BConsole.readDataFromConsole();
+				parseCmd(cmd);
 				synchronized (m_waitObj) {
-					m_waitObj.wait(1000);
+					m_waitObj.wait(100);
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -107,6 +112,37 @@ public class TranEngine {
 		BEventSys.stop();
 		// log stop
 		BLog.stop();
+	}
+	private void parseCmd(String cmd)
+	{
+		String tranDate = GlobalTranDateTime.getTranDate();
+		String tranTime =  GlobalTranDateTime.getTranTime();
+		if(cmd.equals("pr")) // print account
+		{
+			ReportAnalysis.TranInfoCollectRequest.Builder msg_builder = ReportAnalysis.TranInfoCollectRequest.newBuilder();
+			msg_builder.setDate(tranDate);
+			msg_builder.setTime(tranTime);
+			
+			ReportAnalysis.TranInfoCollectRequest msg = msg_builder.build();
+			BEventSys.EventSender cSender = new BEventSys.EventSender();
+			cSender.Send("BEV_TRAN_TRANINFOCOLLECTREQUEST", msg);
+		}
+		else if(cmd.equals("gr"))
+		{
+			ReportAnalysis.GenerateReportRequest.Builder msg_builder = ReportAnalysis.GenerateReportRequest.newBuilder();
+			msg_builder.setDate(tranDate);
+			msg_builder.setTime(tranTime);
+			
+			ReportAnalysis.GenerateReportRequest msg = msg_builder.build();
+			BEventSys.EventSender cSender = new BEventSys.EventSender();
+			cSender.Send("BEV_TRAN_GENERATEREPORTREQUEST", msg);
+		}
+		else
+		{
+			BLog.output( "TEST", "command invalid!\n");
+			BLog.output( "TEST", "pr :  print report\n");
+			BLog.output( "TEST", "gr :  generate report\n");
+		}
 	}
 	
 	// send exit cmd 

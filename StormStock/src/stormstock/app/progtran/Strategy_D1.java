@@ -502,7 +502,7 @@ public class Strategy_D1 {
 //					out_sr.bClear = true;
 //				}
 				
-				if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.8) // Ö¹Ó¯Ö¹Ëðx¸öµãÂô
+				if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.15) // Ö¹Ó¯Ö¹Ëðx¸öµãÂô
 				{
 					out_sr.bClear = true;
 				}

@@ -39,7 +39,7 @@ public class AccountControlIF {
 		}
 		if(ACCOUNTTYPE.REAL == eAccIFType)
 		{
-			m_account = new Account(eAccIFType, "xxx", "xxx");
+			m_account = new Account(eAccIFType, "real001", "real001_password");
 		}
 	}
 	

@@ -17,12 +17,12 @@ public class Application {
 		cTranEngine.setCreatePositonStrategy(new Strategy_D1.EStockComplexDZCZX.StrategyCreate());
 		cTranEngine.setClearPositonStrategy(new Strategy_D1.EStockComplexDZCZX.StrategyClear());
 		
-		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
+		cTranEngine.setAccountType(TRANACCOUNTTYPE.REAL); 
 		
-		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
+		//cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
+		//cTranEngine.setHistoryTimeSpan("2009-01-01", "2017-03-01");
 		
-		cTranEngine.setHistoryTimeSpan("2009-01-01", "2017-03-01");
-		//cTranEngine.setTranMode(TRANTIMEMODE.REALTIME);
+		cTranEngine.setTranMode(TRANTIMEMODE.REALTIME);
 
 		cTranEngine.run();
 		

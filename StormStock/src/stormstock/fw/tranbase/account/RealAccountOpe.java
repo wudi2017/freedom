@@ -30,9 +30,9 @@ public class RealAccountOpe extends IAccountOpe {
 	@Override
 	public int newDayInit(String date, String time) {
 		int iInitRet = CATHSAccount.initialize();
-		BLog.output("ACCOUNT", " @RealAccountOpe newDayInit err(%d) \n", 
-				date, time,
-				iInitRet);
+		BLog.output("ACCOUNT", " @RealAccountOpe newDayInit err(%d) [%s %s]\n", 
+				iInitRet,
+				date, time);
 		return iInitRet;
 	}
 
@@ -46,8 +46,9 @@ public class RealAccountOpe extends IAccountOpe {
 	public int pushBuyOrder(String date, String time, String id, int amount, float price) {
 		int iBuyRet = CATHSAccount.buyStock(id, amount, price);
 		BLog.output("ACCOUNT", " @RealAccountOpe pushBuyOrder err(%d) [%s %s] [%s %d %.3f %.3f] \n", 
+				iBuyRet, 
 				date, time,
-				iBuyRet, id, amount, price, amount*price);
+				id, amount, price, amount*price);
 		return iBuyRet;
 	}
 
@@ -55,8 +56,9 @@ public class RealAccountOpe extends IAccountOpe {
 	public int pushSellOrder(String date, String time, String id, int amount, float price) {
 		int iSellRet = CATHSAccount.sellStock(id, amount, price);
 		BLog.output("ACCOUNT", " @RealAccountOpe pushSellOrder err(%d) [%s %s] [%s %d %.3f %.3f] \n", 
+				iSellRet, 
 				date, time,
-				iSellRet, id, amount, price, amount*price);
+				id, amount, price, amount*price);
 		return 0;
 	}
 

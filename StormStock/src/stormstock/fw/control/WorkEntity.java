@@ -89,11 +89,11 @@ public class WorkEntity {
 			if(bIsTranDate)
 			{
 				// 09:27 账户新交易日初始化
-				boolean bAccInit = false;
+				AccountControlIF accIF = GlobalUserObj.getCurAccountControlIF();
+				boolean bAccInit = accIF.newDayInit(dateStr, timestr);
 				timestr = "09:27:00";
 				if(waitForDateTime(dateStr, timestr))
 				{
-					AccountControlIF accIF = GlobalUserObj.getCurAccountControlIF();
 					for(int i=0;i<5;i++) // 试图5次初始化账户
 					{
 						bAccInit = accIF.newDayInit(dateStr, timestr);
@@ -145,7 +145,6 @@ public class WorkEntity {
 					if(waitForDateTime(dateStr, timestr))
 					{
 						BLog.output("CTRL", "[%s %s] account newDayTranEnd\n", dateStr, timestr);
-						AccountControlIF accIF = GlobalUserObj.getCurAccountControlIF();
 						accIF.newDayTranEnd(dateStr, timestr);
 					}
 					

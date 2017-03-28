@@ -246,13 +246,8 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 		tvItem.cchTextMax = 512;
 		tvItem.pszText = "X";
 		tvItem.hItem = TreeView_GetRoot(hTreeView);
-		// 买入选择
-		TreeView_SelectItem(hTreeView, tvItem.hItem);
-		Sleep(100);
-		// 卖出选择
+		// 卖出
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
-		TreeView_SelectItem(hTreeView, tvItem.hItem);
-		Sleep(100);
 		// 撤单
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
 		// 新股申购
@@ -286,13 +281,8 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 		tvItem.cchTextMax = 512;
 		tvItem.pszText = "X";
 		tvItem.hItem = TreeView_GetRoot(hTreeView);
-		// 买入选择
-		TreeView_SelectItem(hTreeView, tvItem.hItem);
-		Sleep(100);
-		// 卖出选择
+		// 卖出
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
-		TreeView_SelectItem(hTreeView, tvItem.hItem);
-		Sleep(100);
 		// 撤单
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
 		// 新股申购
@@ -312,10 +302,6 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 				if (!tvItem.hItem)
 					continue;
 				// 展开成功
-
-				// 资金股票选择
-				TreeView_SelectItem(hTreeView, tvItem.hItem);
-				Sleep(100);
 
 				// 当日委托
 				tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
@@ -333,13 +319,8 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 		tvItem.cchTextMax = 512;
 		tvItem.pszText = "X";
 		tvItem.hItem = TreeView_GetRoot(hTreeView);
-		// 买入选择
-		TreeView_SelectItem(hTreeView, tvItem.hItem);
-		Sleep(100);
-		// 卖出选择
+		// 卖出
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
-		TreeView_SelectItem(hTreeView, tvItem.hItem);
-		Sleep(100);
 		// 撤单
 		tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
 		// 新股申购
@@ -360,14 +341,8 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 					continue;
 				// 展开成功
 
-				// 资金股票选择
-				TreeView_SelectItem(hTreeView, tvItem.hItem);
-				Sleep(100);
-
 				// 当日委托
 				tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
-				TreeView_SelectItem(hTreeView, tvItem.hItem);
-				Sleep(100);
 
 				// 当日成交
 				tvItem.hItem = TreeView_GetNextSibling(hTreeView, tvItem.hItem);
@@ -1399,11 +1374,11 @@ int CloseTijiaoChengGong(){
 
 int Flush_F5()
 {
-	HWND hWnd = FindTongHuaShunMainWin();
-	::PostMessage(hWnd, WM_KEYDOWN, VK_F5, 0);
-	Sleep(10);
-	::PostMessage(hWnd, WM_KEYUP, VK_F5, 0);
-	Sleep(200);
+	HWND hWndWin = FindTongHuaShunMainWin();
+	::PostMessage(hWndWin, WM_KEYDOWN, VK_F5, 0);
+	Sleep(50);
+	::PostMessage(hWndWin, WM_KEYUP, VK_F5, 0);
+	Sleep(1000);
 	return 0;
 }
 

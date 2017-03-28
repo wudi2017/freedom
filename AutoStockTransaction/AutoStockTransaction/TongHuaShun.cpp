@@ -140,6 +140,7 @@ int THSAPI_TongHuaShunInit()
 	// Æô¶¯Ë¢ÐÂtimer
 	s_pflushingTimer = new FlushingTimer();
 	s_pflushingTimer->Start();
+
 	return 0;
 }
 
@@ -150,6 +151,7 @@ int THSAPI_GetAvailableMoney(float & availableMoney)
 	{
 		return -10;
 	}
+	selectMasterTreeViewItem(s_hLeftTreeView, 2);
 	Flush_F5();
 	if (!s_hZijinGupiaoWin)
 	{
@@ -198,7 +200,7 @@ int THSAPI_GetTotalAssets(float & totalAssets)
 	{
 		return -10;
 	}
-
+	selectMasterTreeViewItem(s_hLeftTreeView, 2);
 	Flush_F5();
 	if (!s_hZijinGupiaoWin)
 	{
@@ -247,7 +249,7 @@ int THSAPI_GetAllStockMarketValue(float & allStockMarketValue)
 	{
 		return -10;
 	}
-
+	selectMasterTreeViewItem(s_hLeftTreeView, 2);
 	Flush_F5();
 	if (!s_hZijinGupiaoWin)
 	{
@@ -297,7 +299,7 @@ int THSAPI_GetHoldStockList(std::list<HoldStock> & resultList)
 	}
 
 	resultList.clear();
-
+	selectMasterTreeViewItem(s_hLeftTreeView, 0);
 	Flush_F5();
 	if (s_hHoldStockWin)
 	{
@@ -431,7 +433,7 @@ int THSAPI_GetCommissionOrderList(std::list<CommissionOrder> & resultList)
 	}
 
 	resultList.clear();
-
+	selectMasterTreeViewItem(s_hLeftTreeView, 3);
 	Flush_F5();
 	if (s_hCommissionOrderWin)
 	{
@@ -580,7 +582,7 @@ int THSAPI_GetDealOrderList(std::list<DealOrder> & resultList)
 	}
 
 	resultList.clear();
-
+	selectMasterTreeViewItem(s_hLeftTreeView, 4);
 	Flush_F5();
 	if (s_hDealOrderWin)
 	{

@@ -107,24 +107,25 @@ int _tmain(int argc, _TCHAR* argv[])
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetHoldStockList
 		{
 			std::list<HoldStock> cResultList;
-			for (int i=0; i<1; i++)
+			for (int i=0; i<1000; i++)
 			{
 				err = THSAPI_GetHoldStockList(cResultList);
 				printf("[TEST] THSAPI_GetHoldStockList Error[%d]\n", err);
+				printf("[TEST] THSAPI_GetHoldStockList list size %d\n", cResultList.size());
+				std::list<HoldStock>::iterator it;
+				for (it = cResultList.begin(); it != cResultList.end(); it++)
+				{
+					HoldStock cHoldStock = *it;
+					printf("    {%s %d %d %.3f %.3f %.3f}\n",
+						cHoldStock.stockID.c_str(),
+						cHoldStock.totalAmount,
+						cHoldStock.availableAmount,
+						cHoldStock.refProfitLoss,
+						cHoldStock.refPrimeCostPrice,
+						cHoldStock.curPrice);
+				}
 			}
-			printf("[TEST] THSAPI_GetHoldStockList list size %d\n", cResultList.size());
-			std::list<HoldStock>::iterator it;
-			for (it = cResultList.begin(); it != cResultList.end(); it++)
-			{
-				HoldStock cHoldStock = *it;
-				printf("    {%s %d %d %.3f %.3f %.3f}\n",
-					cHoldStock.stockID.c_str(),
-					cHoldStock.totalAmount,
-					cHoldStock.availableAmount,
-					cHoldStock.refProfitLoss,
-					cHoldStock.refPrimeCostPrice,
-					cHoldStock.curPrice);
-			}
+
 		}
 
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetCommissionOrderList
@@ -134,8 +135,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			{
 				err = THSAPI_GetCommissionOrderList(cResultList);
 				printf("[TEST] THSAPI_GetCommissionOrderList Error[%d]\n", err);
+				printf("[TEST] THSAPI_GetCommissionOrderList list size %d\n", cResultList.size());
 			}
-			printf("[TEST] THSAPI_GetCommissionOrderList list size %d\n", cResultList.size());
+			
 			std::list<CommissionOrder>::iterator it;
 			for (it = cResultList.begin(); it != cResultList.end(); it++)
 			{
@@ -154,23 +156,24 @@ int _tmain(int argc, _TCHAR* argv[])
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetDealOrderList
 		{
 			std::list<DealOrder> cResultList;
-			for (int i=0; i<1; i++)
+			for (int i=0; i<11; i++)
 			{
 				err = THSAPI_GetDealOrderList(cResultList);
 				printf("[TEST] THSAPI_GetDealOrderList Error[%d]\n", err);
+				printf("[TEST] THSAPI_GetDealOrderList list size %d\n", cResultList.size());
+				std::list<DealOrder>::iterator it;
+				for (it = cResultList.begin(); it != cResultList.end(); it++)
+				{
+					DealOrder cDealOrder = *it;
+					printf("    {%s %s %d %d %.3f}\n",
+						cDealOrder.time.c_str(),
+						cDealOrder.stockID.c_str(),
+						cDealOrder.tranAct,
+						cDealOrder.dealAmount,
+						cDealOrder.dealPrice);
+				}
 			}
-			printf("[TEST] THSAPI_GetDealOrderList list size %d\n", cResultList.size());
-			std::list<DealOrder>::iterator it;
-			for (it = cResultList.begin(); it != cResultList.end(); it++)
-			{
-				DealOrder cDealOrder = *it;
-				printf("    {%s %s %d %d %.3f}\n",
-					cDealOrder.time.c_str(),
-					cDealOrder.stockID.c_str(),
-					cDealOrder.tranAct,
-					cDealOrder.dealAmount,
-					cDealOrder.dealPrice);
-			}
+
 		}
 
 	}

@@ -248,7 +248,6 @@ public class TranEngine {
 			cAccountControlIF.setAccountType(ACCOUNTTYPE.REAL);
 		}
 		GlobalUserObj.setCurrentAccountControlIF(cAccountControlIF);
-		GlobalUserObj.getCurAccountControlIF().printAccount(null, null);
 		
 		// 股票数据接口全局设置
 		StockDataIF cStockDataIF = new StockDataIF();

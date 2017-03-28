@@ -34,11 +34,9 @@ public class Account {
 		m_holdStockInvestigationDaysMap = new HashMap<String, Integer>();
 		m_stockSelectList = new ArrayList<String>();
 		m_accountStore = new AccountStore(accountID, password);
-		
-		preLoad(); // 加载一次股票调查天数表
-		
-		load(); // 加载选股表
-		store(); // 存储选股表
+
+		load(); // 加载数据
+		store(); // 存储数据
 	}
 	
 	// ***********************************************************************
@@ -61,7 +59,7 @@ public class Account {
 		if(0 == iNewDayTranEnd)
 		{
 			// 更新调查天数map
-			Map<String, Integer> newHoldStockInvestigationDaysMap = new HashMap<String, Integer>();
+			Map<String, Integer> newholdStockInvestigationDaysMap = new HashMap<String, Integer>();
 			
 			List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 			int iGetHoldStockList = getHoldStockList(date, time, cHoldStockList);
@@ -70,9 +68,9 @@ public class Account {
 				for(int i=0; i<cHoldStockList.size();i++)
 				{
 					HoldStock cHoldStock = cHoldStockList.get(i);
-					newHoldStockInvestigationDaysMap.put(cHoldStock.stockID, 0);
+					newholdStockInvestigationDaysMap.put(cHoldStock.stockID, 0);
 				}
-				for(Map.Entry<String, Integer> entry:newHoldStockInvestigationDaysMap.entrySet()){   
+				for(Map.Entry<String, Integer> entry:newholdStockInvestigationDaysMap.entrySet()){   
 					String key = entry.getKey();
 					int iInvestigationDays = 0;
 					if(m_holdStockInvestigationDaysMap.containsKey(key))
@@ -81,12 +79,14 @@ public class Account {
 					}
 					entry.setValue(iInvestigationDays);
 				} 
-				for(Map.Entry<String, Integer> entry:newHoldStockInvestigationDaysMap.entrySet()){   
+				for(Map.Entry<String, Integer> entry:newholdStockInvestigationDaysMap.entrySet()){   
 					int iInvestigationDays = entry.getValue();
 					entry.setValue(iInvestigationDays+1);
 				} 
 				m_holdStockInvestigationDaysMap.clear();
-				m_holdStockInvestigationDaysMap.putAll(newHoldStockInvestigationDaysMap);
+				m_holdStockInvestigationDaysMap.putAll(newholdStockInvestigationDaysMap);
+				
+				store();
 			}
 			else
 			{
@@ -326,19 +326,7 @@ public class Account {
 		return all_asset;
 	}
 	
-	// 只加载股票考察天数表
-	private void preLoad()
-	{
-		StoreEntity cStoreEntity = m_accountStore.load();
-		if(null != cStoreEntity)
-		{
-			// load holdStockInvestigationDaysMap
-			m_holdStockInvestigationDaysMap.clear();
-			if(null != cStoreEntity.initHoldStockInvestigationDaysMap)
-		    	m_holdStockInvestigationDaysMap.putAll(cStoreEntity.initHoldStockInvestigationDaysMap);
-		}
-	}
-	// 加载选股表
+	// 加载锁定资金，选股表，股票调查天数表
 	private void load()
 	{
 		StoreEntity cStoreEntity = m_accountStore.load();
@@ -352,6 +340,11 @@ public class Account {
 		    m_stockSelectList.clear();
 		    if(null != cStoreEntity.stockSelectList)
 		    	m_stockSelectList.addAll(cStoreEntity.stockSelectList);
+		    
+		    // load holdStockInvestigationDaysMap
+		    m_holdStockInvestigationDaysMap.clear();
+			if(null != cStoreEntity.holdStockInvestigationDaysMap)
+		    	m_holdStockInvestigationDaysMap.putAll(cStoreEntity.holdStockInvestigationDaysMap);
 		}
 	}
 	// 保存选股表
@@ -362,6 +355,8 @@ public class Account {
 		cStoreEntity.lockedMoney = m_lockedMoney;
 		// stockSelectList
 		cStoreEntity.stockSelectList = m_stockSelectList;
+		// holdStockInvestigationDaysMap
+		cStoreEntity.holdStockInvestigationDaysMap = m_holdStockInvestigationDaysMap;
 		m_accountStore.store(cStoreEntity);
 	}
 	

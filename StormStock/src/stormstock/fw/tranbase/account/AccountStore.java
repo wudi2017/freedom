@@ -44,7 +44,7 @@ public class AccountStore {
 	{
 		public Float lockedMoney;
 		public List<String> stockSelectList;
-		public Map<String, Integer> initHoldStockInvestigationDaysMap;
+		public Map<String, Integer> holdStockInvestigationDaysMap;
 	}
 	
 	public AccountStore(String accountID, String password)
@@ -146,18 +146,18 @@ public class AccountStore {
             	}
         	}
 
-        	// initInvestigationDaysMap
-        	if(null != cStoreEntity.initHoldStockInvestigationDaysMap)
+        	// holdStockInvestigationDaysMap
+        	if(null != cStoreEntity.holdStockInvestigationDaysMap)
         	{
-            	Element Node_InitHoldStockInvestigationDaysMap=doc.createElement("InitHoldStockInvestigationDaysMap");
-            	root.appendChild(Node_InitHoldStockInvestigationDaysMap);
-            	for (Map.Entry<String, Integer> entry : cStoreEntity.initHoldStockInvestigationDaysMap.entrySet()) {  
+            	Element Node_holdStockInvestigationDaysMap=doc.createElement("holdStockInvestigationDaysMap");
+            	root.appendChild(Node_holdStockInvestigationDaysMap);
+            	for (Map.Entry<String, Integer> entry : cStoreEntity.holdStockInvestigationDaysMap.entrySet()) {  
             		String stockID = entry.getKey();
             		Integer investigationDays = entry.getValue();
             		Element Node_StockInvestigation = doc.createElement("StockInvestigation");
             		Node_StockInvestigation.setAttribute("stockID", stockID);
             		Node_StockInvestigation.setAttribute("investigationDays", investigationDays.toString());
-            		Node_InitHoldStockInvestigationDaysMap.appendChild(Node_StockInvestigation);
+            		Node_holdStockInvestigationDaysMap.appendChild(Node_StockInvestigation);
             	} 
         	}
         }
@@ -304,13 +304,13 @@ public class AccountStore {
 	        	}
 		    }
 		    
-        	// initInvestigationDaysMap
-		    Map<String, Integer> initHoldStockInvestigationDaysMap = null;
+        	// holdStockInvestigationDaysMap
+		    Map<String, Integer> holdStockInvestigationDaysMap = null;
 		    {
-		    	NodeList nodelist_HoldStockInvestigationDaysMap = rootElement.getElementsByTagName("InitHoldStockInvestigationDaysMap");
+		    	NodeList nodelist_HoldStockInvestigationDaysMap = rootElement.getElementsByTagName("holdStockInvestigationDaysMap");
 		    	if(nodelist_HoldStockInvestigationDaysMap.getLength() == 1)
 	        	{
-		    		initHoldStockInvestigationDaysMap = new HashMap<String, Integer>();
+		    		holdStockInvestigationDaysMap = new HashMap<String, Integer>();
 		    		
 		        	Node HoldStockInvestigationDaysMap = nodelist_HoldStockInvestigationDaysMap.item(0);
 		        	NodeList nodelist_StockInvestigation = HoldStockInvestigationDaysMap.getChildNodes();
@@ -321,7 +321,7 @@ public class AccountStore {
 			        		String stockID = ((Element)node_StockInvestigation).getAttribute("stockID");
 			        		String investigationDays = ((Element)node_StockInvestigation).getAttribute("investigationDays");
 				        	//BLog.output("ACCOUNT", "stockID:%s \n", stockID);
-			        		initHoldStockInvestigationDaysMap.put(stockID, Integer.parseInt(investigationDays));
+			        		holdStockInvestigationDaysMap.put(stockID, Integer.parseInt(investigationDays));
 			        	}
 			        }
 	        	}
@@ -330,7 +330,7 @@ public class AccountStore {
 		    StoreEntity cStoreEntity = new StoreEntity();
 		    cStoreEntity.lockedMoney = lockedMoney;
 		    cStoreEntity.stockSelectList = stockSelectList;
-		    cStoreEntity.initHoldStockInvestigationDaysMap = initHoldStockInvestigationDaysMap;
+		    cStoreEntity.holdStockInvestigationDaysMap = holdStockInvestigationDaysMap;
 		    return cStoreEntity;
 		}
 		catch(Exception e)

@@ -4,7 +4,7 @@
   <SelectList>
     <Stock stockID="000062"/>
   </SelectList>
-  <InitHoldStockInvestigationDaysMap>
-    <StockInvestigation stockID="000062" investigationDays="1"/>
-  </InitHoldStockInvestigationDaysMap>
+  <holdStockInvestigationDaysMap>
+    <StockInvestigation investigationDays="1" stockID="000062"/>
+  </holdStockInvestigationDaysMap>
 </account>

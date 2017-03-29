@@ -58,7 +58,19 @@ JNIEXPORT jobject JNICALL Java_stormstock_ori_capi_CATHSAccount_getAvailableMone
 
 	int err = 0;
 	float availableMoney = 0.0f;
-	err = THSAPI_GetAvailableMoney(availableMoney);
+	// frequency limit
+	{
+		static float s_lastData = 0.0f;
+		static DWORD s_dwLastCall = 0;
+		DWORD dwCurTC = ::GetTickCount();
+		DWORD dwPeriod = dwCurTC - s_dwLastCall;
+		if (dwPeriod > 1000*10)
+		{
+			err = THSAPI_GetAvailableMoney(s_lastData);
+			s_dwLastCall = dwCurTC;
+		}
+		availableMoney = s_lastData;
+	}
 	TESTLOG("   THSAPI_GetAvailableMoney err(%d) AvailableMoney(%f)\n",err,availableMoney);
 
 	jclass jcls_ResultAvailableMoney = env->FindClass("stormstock/ori/capi/CATHSAccount$ResultAvailableMoney");
@@ -109,8 +121,19 @@ JNIEXPORT jobject JNICALL Java_stormstock_ori_capi_CATHSAccount_getTotalAssets
 
 	int err = 0;
 	float totalAssets = 0.0f;
-	err = THSAPI_GetTotalAssets(totalAssets);
-
+	// frequency limit
+	{
+		static float s_lastData = 0.0f;
+		static DWORD s_dwLastCall = 0;
+		DWORD dwCurTC = ::GetTickCount();
+		DWORD dwPeriod = dwCurTC - s_dwLastCall;
+		if (dwPeriod > 1000*10)
+		{
+			err = THSAPI_GetTotalAssets(s_lastData);
+			s_dwLastCall = dwCurTC;
+		}
+		totalAssets = s_lastData;
+	}
 	TESTLOG("   THSAPI_GetTotalAssets err(%d) TotalAssets(%f)\n",err,totalAssets);
 
 	jclass jcls_ResultTotalAssets = env->FindClass("stormstock/ori/capi/CATHSAccount$ResultTotalAssets");
@@ -161,8 +184,19 @@ JNIEXPORT jobject JNICALL Java_stormstock_ori_capi_CATHSAccount_getAllStockMarke
 
 	int err = 0;
 	float allStockMarketValue = 0.0f;
-	err = THSAPI_GetAllStockMarketValue(allStockMarketValue);
-
+	// frequency limit
+	{
+		static float s_lastData = 0.0f;
+		static DWORD s_dwLastCall = 0;
+		DWORD dwCurTC = ::GetTickCount();
+		DWORD dwPeriod = dwCurTC - s_dwLastCall;
+		if (dwPeriod > 1000*10)
+		{
+			err = THSAPI_GetAllStockMarketValue(s_lastData);
+			s_dwLastCall = dwCurTC;
+		}
+		allStockMarketValue = s_lastData;
+	}
 	TESTLOG("   THSAPI_GetAllStockMarketValue err(%d) AllStockMarketValue(%f)\n",err,allStockMarketValue);
 
 	jclass jcls_ResultAllStockMarketValue = env->FindClass("stormstock/ori/capi/CATHSAccount$ResultAllStockMarketValue");
@@ -214,8 +248,19 @@ JNIEXPORT jobject JNICALL Java_stormstock_ori_capi_CATHSAccount_getHoldStockList
 
 	int err = 0;
 	std::list<HoldStock> cResultList;
-	err = THSAPI_GetHoldStockList(cResultList);
-
+	// frequency limit
+	{
+		static std::list<HoldStock> s_lastData;
+		static DWORD s_dwLastCall = 0;
+		DWORD dwCurTC = ::GetTickCount();
+		DWORD dwPeriod = dwCurTC - s_dwLastCall;
+		if (dwPeriod > 1000*10)
+		{
+			err = THSAPI_GetHoldStockList(s_lastData);
+			s_dwLastCall = dwCurTC;
+		}
+		cResultList = s_lastData;
+	}
 	TESTLOG("   THSAPI_GetHoldStockList err(%d) cResultList size(%d)\n",err,cResultList.size());
 
 	// 构建对象

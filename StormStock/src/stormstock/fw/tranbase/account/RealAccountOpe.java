@@ -91,6 +91,6 @@ public class RealAccountOpe extends IAccountOpe {
         }
 	        
 		return cResultHoldStockList.error;
+		
 	}
-	
 }

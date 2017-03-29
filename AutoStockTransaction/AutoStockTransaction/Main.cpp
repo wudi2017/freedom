@@ -124,7 +124,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						cHoldStock.refPrimeCostPrice,
 						cHoldStock.curPrice);
 				}
-				Sleep(3000);
+				Sleep(1000);
 			}
 
 		}

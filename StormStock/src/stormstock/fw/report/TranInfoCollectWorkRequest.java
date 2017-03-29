@@ -10,6 +10,7 @@ import stormstock.fw.base.BTypeDefine.RefFloat;
 import stormstock.fw.base.BImageCurve;
 import stormstock.fw.event.ReportAnalysis;
 import stormstock.fw.tranbase.account.AccountControlIF;
+import stormstock.fw.tranbase.account.AccountPublicDef.CommissionOrder;
 import stormstock.fw.tranbase.account.AccountPublicDef.DealOrder;
 import stormstock.fw.tranbase.account.AccountPublicDef.HoldStock;
 import stormstock.fw.tranbase.account.AccountPublicDef.TRANACT;
@@ -51,10 +52,10 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		cAccountControlIF.getAvailableMoney(availableMoney);
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 		cAccountControlIF.getHoldStockList(m_date, m_time, cHoldStockList);
-		List<DealOrder> cDealOrderList = new ArrayList<DealOrder>();
-		cAccountControlIF.getDealOrderList(cDealOrderList);
 		List<String> cStockSelectList = new ArrayList<String>();
 		cAccountControlIF.getStockSelectList(cStockSelectList);
+		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
+		cAccountControlIF.getCommissionOrderList(cCommissionOrderList);
 		
 		// 打印添加当前总资产，可用钱
 		cDailyReport.fTotalAssets = fTotalAssets;
@@ -73,35 +74,19 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 					cHoldStock.refPrimeCostPrice, cHoldStock.curPrice, cHoldStock.totalAmount*cHoldStock.curPrice, 
 					cHoldStock.investigationDays);
 		}
-		// 打印当日成交
-		for(int i=0; i<cDealOrderList.size(); i++ )
-		{
-			DealOrder cDealOrder = cDealOrderList.get(i);
-			String tranOpe = "BUY"; 
-			if(cDealOrder.tranAct == TRANACT.SELL ) tranOpe = "SELL";
-				
-			BLog.output("REPORT", "    -DealOrder: %s %s %s %d %.3f\n", 
-					cDealOrder.time, tranOpe, cDealOrder.stockID, 
-					cDealOrder.amount, cDealOrder.price);
-			
-			// 判断清仓交割单
-			boolean bIsClearDealOrder = false;
-			for(int j=0; j<cHoldStockList.size(); j++ )
-			{
-				HoldStock cHoldStock = cHoldStockList.get(j);
-				if(cHoldStock.stockID.equals(cDealOrder.stockID))
-				{
-					bIsClearDealOrder = false;
-					break;
-				}
-			}
-			if(bIsClearDealOrder)
-			{
-				// 添加清仓交割单
-				cDailyReport.cClearDealOrder.add(cDealOrder);
-			}
-		}
 		
+		// 打印委托单
+		for(int i=0; i<cCommissionOrderList.size(); i++ )
+		{
+			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
+			String tranOpe = "BUY"; 
+			if(cCommissionOrder.tranAct == TRANACT.SELL ) tranOpe = "SELL";
+				
+			BLog.output("REPORT", "    -CommissionOrder: %s %s %s %d %.3f\n", 
+					cCommissionOrder.time, tranOpe, cCommissionOrder.stockID, 
+					cCommissionOrder.amount, cCommissionOrder.price);
+		}
+
 		// 打印晚间选股
 		if(cStockSelectList.size() > 0)
 		{

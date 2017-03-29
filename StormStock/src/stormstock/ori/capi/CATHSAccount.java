@@ -131,33 +131,7 @@ public class CATHSAccount {
 		public float refPrimeCostPrice; // 参考成本价
 		public float curPrice; // 当前价
 	}
-	
-	/*
-	 * 当日股票委托单定义
-	 */
-	public static class CommissionOrder 
-	{
-		public String time;
-		public String stockID;
-		public TRANACT tranAct;
-		public int commissionAmount; // 委托数量
-		public float commissionPrice; // 委托价格
-		public int dealAmount; // 成交数量
-		public float dealPrice; // 成交价格
-	}
-	
-	/*
-	 * 当日成交单定义
-	 */
-	public static class DealOrder 
-	{
-		public String time;
-		public String stockID;        // 股票ID
-		public TRANACT tranAct;       // 交易动作
-		public int dealAmount; // 成交数量
-		public float dealPrice; // 成交价格
-	}
-	
+
 	/*
 	 * 持股列表结果
 	 */
@@ -170,34 +144,6 @@ public class CATHSAccount {
 		}
 		public int error;
 		public List<HoldStock> resultList;
-	}
-	
-	/*
-	 * 当日委托列表结果
-	 */
-	public static class ResultCommissionOrderList
-	{
-		public ResultCommissionOrderList()
-		{
-			error = -1;
-			resultList = null;
-		}
-		public int error;
-		public List<CommissionOrder> resultList;
-	}
-	
-	/*
-	 * 当日成交列表结果
-	 */
-	public static class ResultDealOrderList
-	{
-		public ResultDealOrderList()
-		{
-			error = -1;
-			resultList = null;
-		}
-		public int error;
-		public List<DealOrder> resultList;
 	}
 	
 	/*
@@ -236,18 +182,6 @@ public class CATHSAccount {
 	 * 获取持股列表
 	 */
 	public static native ResultHoldStockList getHoldStockList();
-
-	/*
-	 * getCommissionOrderList
-	 * 获取当日委托列表
-	 */
-	public static native ResultCommissionOrderList getCommissionOrderList();
-
-	/*
-	 * getDealOrderList
-	 * 获取当日成交列表
-	 */
-	public static native ResultDealOrderList getDealOrderList();
 	
 	/*
 	 * buyStock

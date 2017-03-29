@@ -31,8 +31,9 @@ public class Account {
 		}
 		m_cIAccountOpe = cIAccountOpe;
 		m_lockedMoney = 100000.0f; // 默认锁定10w
-		m_holdStockInvestigationDaysMap = new HashMap<String, Integer>();
 		m_stockSelectList = new ArrayList<String>();
+		m_commissionOrderList = new ArrayList<CommissionOrder>();
+		m_holdStockInvestigationDaysMap = new HashMap<String, Integer>();
 		m_accountStore = new AccountStore(accountID, password);
 
 		load(); // 加载数据
@@ -45,10 +46,10 @@ public class Account {
 	// 隔日开始账户初始化
 	public int newDayInit(String date, String time)
 	{
-		int iNewDayInit = m_cIAccountOpe.newDayInit(date, time);
-		
 		load();
-		
+		int iNewDayInit = m_cIAccountOpe.newDayInit(date, time);
+		m_commissionOrderList.clear();
+		store();
 		return iNewDayInit;
 	}
 	
@@ -100,13 +101,37 @@ public class Account {
 	// 推送买单委托，返回实际下单量
 	public int pushBuyOrder(String date, String time, String id, int amount, float price)
 	{
-		return m_cIAccountOpe.pushBuyOrder(date, time, id, amount, price);
+		int ret = m_cIAccountOpe.pushBuyOrder(date, time, id, amount, price);
+		if(0 == ret)
+		{
+			CommissionOrder cCommissionOrder = new CommissionOrder();
+			cCommissionOrder.time = time;
+			cCommissionOrder.tranAct = TRANACT.BUY;
+			cCommissionOrder.stockID = id;
+			cCommissionOrder.amount = amount;
+			cCommissionOrder.price = price;
+			m_commissionOrderList.add(cCommissionOrder);
+		}
+		store();
+		return ret;
 	}
 	
 	// 推送卖单委托，返回实际下单量
 	public int pushSellOrder(String date, String time, String id, int amount, float price)
 	{
-		return m_cIAccountOpe.pushSellOrder(date, time, id, amount, price);
+		int ret = m_cIAccountOpe.pushSellOrder(date, time, id, amount, price);
+		if(0 == ret)
+		{
+			CommissionOrder cCommissionOrder = new CommissionOrder();
+			cCommissionOrder.time = time;
+			cCommissionOrder.tranAct = TRANACT.SELL;
+			cCommissionOrder.stockID = id;
+			cCommissionOrder.amount = amount;
+			cCommissionOrder.price = price;
+			m_commissionOrderList.add(cCommissionOrder);
+		}
+		store();
+		return ret;
 	}
 	
 	// 获得账户锁定资金（现金）
@@ -134,10 +159,29 @@ public class Account {
 		return iRetGetAvailableMoney + iRetGetLockedMoney;
 	}
 	
-	// 获得委托列表(未成交的，包含买入和卖出的)
 	public int getCommissionOrderList(List<CommissionOrder> out_list)
 	{
-		return m_cIAccountOpe.getCommissionOrderList(out_list);
+		out_list.clear();
+		out_list.addAll(m_commissionOrderList);
+		return 0;
+	}
+	// 获得买委托列表(未成交的)
+	public List<CommissionOrder> getBuyCommissionOrderList()
+	{
+		List<CommissionOrder> cBuyCommissionOrderList = new ArrayList<CommissionOrder>();
+		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
+		this.getCommissionOrderList(cCommissionOrderList);
+		for(int i= 0;i<cCommissionOrderList.size();i++)
+		{
+			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
+			if(cCommissionOrder.tranAct == TRANACT.BUY)
+			{
+				CommissionOrder cNewCommissionOrder = new CommissionOrder();
+				cNewCommissionOrder.CopyFrom(cCommissionOrder);
+				cBuyCommissionOrderList.add(cNewCommissionOrder);
+			}
+		}
+		return cBuyCommissionOrderList;
 	}
 	
 	// 获得持股列表（包含已经持有的，与当天下单成交的）
@@ -160,12 +204,6 @@ public class Account {
 	        }
 		}
 		return iGetHoldStockList;
-	}
-	
-	// 获得当日交割单列表（已成交的，包含买入和卖出的）
-	public int getDealOrderList(List<DealOrder> out_list)
-	{
-		return m_cIAccountOpe.getDealOrderList(out_list);
 	}
 		
 	// ***********************************************************************
@@ -233,24 +271,7 @@ public class Account {
 		return false;
 	}
 	
-	// 获得买委托列表(未成交的)
-	public List<CommissionOrder> getBuyCommissionOrderList()
-	{
-		List<CommissionOrder> cBuyCommissionOrderList = new ArrayList<CommissionOrder>();
-		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
-		this.getCommissionOrderList(cCommissionOrderList);
-		for(int i= 0;i<cCommissionOrderList.size();i++)
-		{
-			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
-			if(cCommissionOrder.tranAct == TRANACT.BUY)
-			{
-				CommissionOrder cNewCommissionOrder = new CommissionOrder();
-				cNewCommissionOrder.CopyFrom(cCommissionOrder);
-				cBuyCommissionOrderList.add(cNewCommissionOrder);
-			}
-		}
-		return cBuyCommissionOrderList;
-	}
+
 	
 	// 获得卖委托列表(未成交的)
 	public List<CommissionOrder> getSellCommissionOrderList()
@@ -269,44 +290,6 @@ public class Account {
 			}
 		}
 		return cSellCommissionOrderList;
-	}
-	
-	// 获得买交割单列表(已成交的)
-	public List<DealOrder> getBuyDealOrderList()
-	{
-		List<DealOrder> cBuyDealOrderList = new ArrayList<DealOrder>();
-		List<DealOrder> cDealOrderList = new ArrayList<DealOrder>();
-		getDealOrderList(cDealOrderList);
-		for(int i= 0;i<cDealOrderList.size();i++)
-		{
-			DealOrder cDealOrder = cDealOrderList.get(i);
-			if(cDealOrder.tranAct == TRANACT.BUY)
-			{
-				DealOrder cNewcDealOrder = new DealOrder();
-				cNewcDealOrder.CopyFrom(cDealOrder);
-				cBuyDealOrderList.add(cNewcDealOrder);
-			}
-		}
-		return cBuyDealOrderList;
-	}
-	
-	// 获得卖交割单列表(已成交的)
-	public List<DealOrder> getSellDealOrderList()
-	{
-		List<DealOrder> cSellDealOrderList = new ArrayList<DealOrder>();
-		List<DealOrder> cDealOrderList = new ArrayList<DealOrder>();
-		getDealOrderList(cDealOrderList);
-		for(int i= 0;i<cDealOrderList.size();i++)
-		{
-			DealOrder cDealOrder = cDealOrderList.get(i);
-			if(cDealOrder.tranAct == TRANACT.SELL)
-			{
-				DealOrder cNewDealOrder = new DealOrder();
-				cNewDealOrder.CopyFrom(cDealOrder);
-				cSellDealOrderList.add(cNewDealOrder);
-			}
-		}
-		return cSellDealOrderList;
 	}
 	
 	// 获得账户总资产
@@ -341,6 +324,11 @@ public class Account {
 		    if(null != cStoreEntity.stockSelectList)
 		    	m_stockSelectList.addAll(cStoreEntity.stockSelectList);
 		    
+		    // 
+		    m_commissionOrderList.clear();
+		    if(null != cStoreEntity.commissionOrderList)
+		    	m_commissionOrderList.addAll(cStoreEntity.commissionOrderList);
+		    
 		    // load holdStockInvestigationDaysMap
 		    m_holdStockInvestigationDaysMap.clear();
 			if(null != cStoreEntity.holdStockInvestigationDaysMap)
@@ -355,6 +343,8 @@ public class Account {
 		cStoreEntity.lockedMoney = m_lockedMoney;
 		// stockSelectList
 		cStoreEntity.stockSelectList = m_stockSelectList;
+		// commissionOrderList
+		cStoreEntity.commissionOrderList = m_commissionOrderList;
 		// holdStockInvestigationDaysMap
 		cStoreEntity.holdStockInvestigationDaysMap = m_holdStockInvestigationDaysMap;
 		m_accountStore.store(cStoreEntity);
@@ -371,8 +361,6 @@ public class Account {
 		this.getAvailableMoney(availableMoney);
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 		this.getHoldStockList(date, time, cHoldStockList);
-		List<DealOrder> cDealOrderList = new ArrayList<DealOrder>();
-		this.getDealOrderList(cDealOrderList);
 		
 		// 打印资产
 		BLog.output("ACCOUNT", "    -LockedMoney: %.3f\n", lockedMoney.value);
@@ -390,16 +378,16 @@ public class Account {
 					cHoldStock.investigationDays);
 		}
 		
-		// 打印成交单
-		for(int i=0; i<cDealOrderList.size(); i++ )
+		// 打印委托单
+		for(int i=0; i<m_commissionOrderList.size(); i++ )
 		{
-			DealOrder cDealOrder = cDealOrderList.get(i);
+			CommissionOrder cCommissionOrder = m_commissionOrderList.get(i);
 			String tranOpe = "BUY"; 
-			if(cDealOrder.tranAct == TRANACT.SELL ) tranOpe = "SELL";
+			if(cCommissionOrder.tranAct == TRANACT.SELL ) tranOpe = "SELL";
 				
-			BLog.output("ACCOUNT", "    -DealOrder: %s %s %s %d %.3f\n", 
-					cDealOrder.time, tranOpe, cDealOrder.stockID, 
-					cDealOrder.amount, cDealOrder.price);
+			BLog.output("ACCOUNT", "    -CommissionOrder: %s %s %s %d %.3f\n", 
+					cCommissionOrder.time, tranOpe, cCommissionOrder.stockID, 
+					cCommissionOrder.amount, cCommissionOrder.price);
 		}
 		
 		// 选股
@@ -425,8 +413,10 @@ public class Account {
 	 * 账户操作接口，可以设置为模拟或真实
 	 */
 	private IAccountOpe m_cIAccountOpe;
+	
 	private float m_lockedMoney;
-	private Map<String, Integer> m_holdStockInvestigationDaysMap;
 	private List<String> m_stockSelectList; // 选股列表
+	private List<CommissionOrder> m_commissionOrderList; // 委托列表
+	private Map<String, Integer> m_holdStockInvestigationDaysMap; // 持股调查表
 	private AccountStore m_accountStore;
 }

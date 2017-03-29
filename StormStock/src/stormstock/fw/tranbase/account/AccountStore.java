@@ -44,6 +44,7 @@ public class AccountStore {
 	{
 		public Float lockedMoney;
 		public List<String> stockSelectList;
+		public List<CommissionOrder> commissionOrderList;
 		public Map<String, Integer> holdStockInvestigationDaysMap;
 	}
 	
@@ -143,6 +144,31 @@ public class AccountStore {
             		Element Node_Stock = doc.createElement("Stock");
             		Node_Stock.setAttribute("stockID", stockID);
             		Node_StockSelectList.appendChild(Node_Stock);
+            	}
+        	}
+        	
+        	// CommissionOrderList
+        	if(null != cStoreEntity.commissionOrderList)
+        	{
+        		Element Node_CommissionOrderList=doc.createElement("CommissionOrderList");
+            	root.appendChild(Node_CommissionOrderList);
+            	for(int i=0;i<cStoreEntity.commissionOrderList.size();i++)
+            	{
+            		CommissionOrder cCommissionOrder = cStoreEntity.commissionOrderList.get(i);
+            		String tranactVal = "";
+            		if(cCommissionOrder.tranAct == TRANACT.BUY) tranactVal= "BUY";
+            		if(cCommissionOrder.tranAct == TRANACT.SELL) tranactVal= "SELL";
+            		String amountVal = String.format("%d", cCommissionOrder.amount);
+            		String priceVal =String.format("%.3f", cCommissionOrder.price);
+            				
+            		Element Node_Stock = doc.createElement("Stock");
+            		Node_Stock.setAttribute("time", cCommissionOrder.time);
+            		Node_Stock.setAttribute("tranAct", tranactVal);
+            		Node_Stock.setAttribute("stockID", cCommissionOrder.stockID);
+            		Node_Stock.setAttribute("amount", amountVal);
+            		Node_Stock.setAttribute("price", priceVal);
+            		
+            		Node_CommissionOrderList.appendChild(Node_Stock);
             	}
         	}
 
@@ -304,6 +330,37 @@ public class AccountStore {
 	        	}
 		    }
 		    
+		    // Î¯ÍÐµ¥¼ÓÔØ
+		    List<CommissionOrder> commissionOrderList = new ArrayList<CommissionOrder>();
+		    {
+		    	NodeList nodelist_CommissionOrderList = rootElement.getElementsByTagName("CommissionOrderList");
+		        if(nodelist_CommissionOrderList.getLength() == 1)
+	        	{
+		        	Node Node_CommissionOrderList = nodelist_CommissionOrderList.item(0);
+		        	NodeList nodelist_Stock = Node_CommissionOrderList.getChildNodes();
+			        for (int i = 0; i < nodelist_Stock.getLength(); i++) {
+			        	Node node_Stock = nodelist_Stock.item(i);
+			        	if(node_Stock.getNodeType() == Node.ELEMENT_NODE)
+			        	{
+			        		String time = ((Element)node_Stock).getAttribute("time");
+				        	String tranAct = ((Element)node_Stock).getAttribute("tranAct");
+				        	String stockID = ((Element)node_Stock).getAttribute("stockID");
+				        	String amount = ((Element)node_Stock).getAttribute("amount");
+				        	String price = ((Element)node_Stock).getAttribute("price");
+				        	
+				        	CommissionOrder cCommissionOrder = new CommissionOrder();
+				        	cCommissionOrder.time = time;
+				        	if(tranAct.equals("BUY")) cCommissionOrder.tranAct = TRANACT.BUY;
+				        	if(tranAct.equals("SELL")) cCommissionOrder.tranAct = TRANACT.SELL;
+				        	cCommissionOrder.stockID = stockID;
+				        	cCommissionOrder.amount = Integer.parseInt(amount);
+				        	cCommissionOrder.price = Float.parseFloat(price);
+				        	commissionOrderList.add(cCommissionOrder);
+			        	}
+			        }
+	        	}
+		    }
+		    
         	// holdStockInvestigationDaysMap
 		    Map<String, Integer> holdStockInvestigationDaysMap = null;
 		    {
@@ -330,6 +387,7 @@ public class AccountStore {
 		    StoreEntity cStoreEntity = new StoreEntity();
 		    cStoreEntity.lockedMoney = lockedMoney;
 		    cStoreEntity.stockSelectList = stockSelectList;
+		    cStoreEntity.commissionOrderList = commissionOrderList;
 		    cStoreEntity.holdStockInvestigationDaysMap = holdStockInvestigationDaysMap;
 		    return cStoreEntity;
 		}

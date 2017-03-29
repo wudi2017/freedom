@@ -20,10 +20,6 @@ abstract public class IAccountOpe {
 	abstract public int pushSellOrder(String date, String time, String id, int amount, float price);
 	// 获得账户可用资金
 	abstract public int getAvailableMoney(RefFloat out_availableMoney);
-	// 获得委托单列表
-	abstract public int getCommissionOrderList(List<CommissionOrder> out_list);
 	// 获得持股列表
 	abstract public int getHoldStockList(String date, String time, List<HoldStock> out_list);
-	// 获得当日成交单列表
-	abstract public int getDealOrderList(List<DealOrder> out_list);
 }

@@ -165,12 +165,6 @@ public class AccountControlIF {
 		return null;
 	}
 	
-	// 获得交割单列表
-	public int getDealOrderList(List<DealOrder> out_list)
-	{
-		return m_account.getDealOrderList(out_list);
-	}
-	
 	/**
 	 * 成员-----------------------------------------------------------------
 	 */

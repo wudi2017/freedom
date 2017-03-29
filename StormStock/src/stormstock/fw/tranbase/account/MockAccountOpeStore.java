@@ -40,9 +40,7 @@ public class MockAccountOpeStore {
 	public static class StoreEntity
 	{
 		public float money;
-		List<CommissionOrder> commissionOrderList;
 		List<HoldStock> holdStockList;
-		List<DealOrder> dealOrderList;
 	}
 	
 	public MockAccountOpeStore(String accountID, String password)
@@ -126,29 +124,7 @@ public class MockAccountOpeStore {
         	Element Node_Money=doc.createElement("Money");
         	Node_Money.setAttribute("total", totalVal);
         	root.appendChild(Node_Money);
-        	
-        	// CommissionOrderList
-        	Element Node_CommissionOrderList=doc.createElement("CommissionOrderList");
-        	root.appendChild(Node_CommissionOrderList);
-        	for(int i=0;i<cStoreEntity.commissionOrderList.size();i++)
-        	{
-        		CommissionOrder cCommissionOrder = cStoreEntity.commissionOrderList.get(i);
-        		String tranactVal = "";
-        		if(cCommissionOrder.tranAct == TRANACT.BUY) tranactVal= "BUY";
-        		if(cCommissionOrder.tranAct == TRANACT.SELL) tranactVal= "SELL";
-        		String amountVal = String.format("%d", cCommissionOrder.amount);
-        		String priceVal =String.format("%.3f", cCommissionOrder.price);
-        				
-        		Element Node_Stock = doc.createElement("Stock");
-        		Node_Stock.setAttribute("time", cCommissionOrder.time);
-        		Node_Stock.setAttribute("tranAct", tranactVal);
-        		Node_Stock.setAttribute("stockID", cCommissionOrder.stockID);
-        		Node_Stock.setAttribute("amount", amountVal);
-        		Node_Stock.setAttribute("price", priceVal);
-        		
-        		Node_CommissionOrderList.appendChild(Node_Stock);
-        	}
-        	
+
         	// HoldStockList
         	Element Node_HoldStockList=doc.createElement("HoldStockList");
         	root.appendChild(Node_HoldStockList);
@@ -167,28 +143,6 @@ public class MockAccountOpeStore {
         		Node_Stock.setAttribute("refPrimeCostPrice", refPrimeCostPriceVal);
         		Node_Stock.setAttribute("curPrice", curPriceVal);
         		Node_HoldStockList.appendChild(Node_Stock);
-        	}
-        	
-        	// CommissionOrderList
-        	Element Node_DealOrderList=doc.createElement("DealOrderList");
-        	root.appendChild(Node_DealOrderList);
-        	for(int i=0;i<cStoreEntity.dealOrderList.size();i++)
-        	{
-        		DealOrder cDealOrder = cStoreEntity.dealOrderList.get(i);
-        		String tranactVal = "";
-        		if(cDealOrder.tranAct == TRANACT.BUY) tranactVal= "BUY";
-        		if(cDealOrder.tranAct == TRANACT.SELL) tranactVal= "SELL";
-        		String amountVal = String.format("%d", cDealOrder.amount);
-        		String priceVal =String.format("%.3f", cDealOrder.price);
-        				
-        		Element Node_Stock = doc.createElement("Stock");
-        		Node_Stock.setAttribute("time", cDealOrder.time);
-        		Node_Stock.setAttribute("tranAct", tranactVal);
-        		Node_Stock.setAttribute("stockID", cDealOrder.stockID);
-        		Node_Stock.setAttribute("amount", amountVal);
-        		Node_Stock.setAttribute("price", priceVal);
-        		
-        		Node_DealOrderList.appendChild(Node_Stock);
         	}
         }
 		
@@ -314,58 +268,7 @@ public class MockAccountOpeStore {
 		    		money = Float.parseFloat(total);
 		    	}
 		    }
-		    
-		    // 选股列表加载
-		    List<String> stockSelectList = new ArrayList<String>();
-		    {
-		    	NodeList nodelist_SelectList = rootElement.getElementsByTagName("SelectList");
-		        if(nodelist_SelectList.getLength() == 1)
-	        	{
-		        	Node Node_SelectList = nodelist_SelectList.item(0);
-		        	NodeList nodelist_Stock = Node_SelectList.getChildNodes();
-			        for (int i = 0; i < nodelist_Stock.getLength(); i++) {
-			        	Node node_Stock = nodelist_Stock.item(i);
-			        	if(node_Stock.getNodeType() == Node.ELEMENT_NODE)
-			        	{
-				        	String stockID = ((Element)node_Stock).getAttribute("stockID");
-				        	//BLog.output("ACCOUNT", "stockID:%s \n", stockID);
-				        	stockSelectList.add(stockID); 
-			        	}
-			        }
-	        	}
-		    }
-		    
-		    // 委托单加载
-		    List<CommissionOrder> commissionOrderList = new ArrayList<CommissionOrder>();
-		    {
-		    	NodeList nodelist_CommissionOrderList = rootElement.getElementsByTagName("CommissionOrderList");
-		        if(nodelist_CommissionOrderList.getLength() == 1)
-	        	{
-		        	Node Node_CommissionOrderList = nodelist_CommissionOrderList.item(0);
-		        	NodeList nodelist_Stock = Node_CommissionOrderList.getChildNodes();
-			        for (int i = 0; i < nodelist_Stock.getLength(); i++) {
-			        	Node node_Stock = nodelist_Stock.item(i);
-			        	if(node_Stock.getNodeType() == Node.ELEMENT_NODE)
-			        	{
-			        		String time = ((Element)node_Stock).getAttribute("time");
-				        	String tranAct = ((Element)node_Stock).getAttribute("tranAct");
-				        	String stockID = ((Element)node_Stock).getAttribute("stockID");
-				        	String amount = ((Element)node_Stock).getAttribute("amount");
-				        	String price = ((Element)node_Stock).getAttribute("price");
-				        	
-				        	CommissionOrder cCommissionOrder = new CommissionOrder();
-				        	cCommissionOrder.time = time;
-				        	if(tranAct.equals("BUY")) cCommissionOrder.tranAct = TRANACT.BUY;
-				        	if(tranAct.equals("SELL")) cCommissionOrder.tranAct = TRANACT.SELL;
-				        	cCommissionOrder.stockID = stockID;
-				        	cCommissionOrder.amount = Integer.parseInt(amount);
-				        	cCommissionOrder.price = Float.parseFloat(price);
-				        	commissionOrderList.add(cCommissionOrder);
-			        	}
-			        }
-	        	}
-		    }
-		    
+
 		    // 持股加载
 		    List<HoldStock> holdStockList = new ArrayList<HoldStock>();
 		    {
@@ -397,43 +300,9 @@ public class MockAccountOpeStore {
 	        	}
 		    }
 		    
-		    // 交割单加载 
-		    List<DealOrder> dealOrderList = new ArrayList<DealOrder>();
-		    {
-		    	NodeList nodelist_DealOrderList = rootElement.getElementsByTagName("DealOrderList");
-		        if(nodelist_DealOrderList.getLength() == 1)
-	        	{
-		        	Node Node_DealOrderList = nodelist_DealOrderList.item(0);
-		        	NodeList nodelist_Stock = Node_DealOrderList.getChildNodes();
-			        for (int i = 0; i < nodelist_Stock.getLength(); i++) {
-			        	Node node_Stock = nodelist_Stock.item(i);
-			        	if(node_Stock.getNodeType() == Node.ELEMENT_NODE)
-			        	{
-			        		String date = ((Element)node_Stock).getAttribute("date");
-			        		String time = ((Element)node_Stock).getAttribute("time");
-				        	String tranAct = ((Element)node_Stock).getAttribute("tranAct");
-				        	String stockID = ((Element)node_Stock).getAttribute("stockID");
-				        	String amount = ((Element)node_Stock).getAttribute("amount");
-				        	String price = ((Element)node_Stock).getAttribute("price");
-				        	
-				        	DealOrder cDealOrder = new DealOrder();
-				        	cDealOrder.time = time;
-				        	if(tranAct.equals("BUY")) cDealOrder.tranAct = TRANACT.BUY;
-				        	if(tranAct.equals("SELL")) cDealOrder.tranAct = TRANACT.SELL;
-				        	cDealOrder.stockID = stockID;
-				        	cDealOrder.amount = Integer.parseInt(amount);
-				        	cDealOrder.price = Float.parseFloat(price);
-				        	dealOrderList.add(cDealOrder);
-			        	}
-			        }
-	        	}
-		    }
-		    
 		    StoreEntity cStoreEntity = new StoreEntity();
 		    cStoreEntity.money = money;
-		    cStoreEntity.commissionOrderList = commissionOrderList;
 		    cStoreEntity.holdStockList = holdStockList;
-		    cStoreEntity.dealOrderList = dealOrderList;
 		    return cStoreEntity;
 		}
 		catch(Exception e)

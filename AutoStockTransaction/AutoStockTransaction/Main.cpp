@@ -130,52 +130,52 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetCommissionOrderList
-		{
-			std::list<CommissionOrder> cResultList;
-			for (int i=0; i<1; i++)
-			{
-				err = THSAPI_GetCommissionOrderList(cResultList);
-				printf("[TEST] THSAPI_GetCommissionOrderList Error[%d]\n", err);
-				printf("[TEST] THSAPI_GetCommissionOrderList list size %d\n", cResultList.size());
-			}
-			
-			std::list<CommissionOrder>::iterator it;
-			for (it = cResultList.begin(); it != cResultList.end(); it++)
-			{
-				CommissionOrder cCommissionOrder = *it;
-				printf("    {%s %s %d %d %.3f %d %.3f}\n",
-					cCommissionOrder.time.c_str(),
-					cCommissionOrder.stockID.c_str(),
-					cCommissionOrder.tranAct,
-					cCommissionOrder.commissionAmount,
-					cCommissionOrder.commissionPrice,
-					cCommissionOrder.dealAmount,
-					cCommissionOrder.dealPrice);
-			}
-		}
+		//{
+		//	std::list<CommissionOrder> cResultList;
+		//	for (int i=0; i<1; i++)
+		//	{
+		//		err = THSAPI_GetCommissionOrderList(cResultList);
+		//		printf("[TEST] THSAPI_GetCommissionOrderList Error[%d]\n", err);
+		//		printf("[TEST] THSAPI_GetCommissionOrderList list size %d\n", cResultList.size());
+		//	}
+		//	
+		//	std::list<CommissionOrder>::iterator it;
+		//	for (it = cResultList.begin(); it != cResultList.end(); it++)
+		//	{
+		//		CommissionOrder cCommissionOrder = *it;
+		//		printf("    {%s %s %d %d %.3f %d %.3f}\n",
+		//			cCommissionOrder.time.c_str(),
+		//			cCommissionOrder.stockID.c_str(),
+		//			cCommissionOrder.tranAct,
+		//			cCommissionOrder.commissionAmount,
+		//			cCommissionOrder.commissionPrice,
+		//			cCommissionOrder.dealAmount,
+		//			cCommissionOrder.dealPrice);
+		//	}
+		//}
 
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetDealOrderList
-		{
-			std::list<DealOrder> cResultList;
-			for (int i=0; i<1; i++)
-			{
-				err = THSAPI_GetDealOrderList(cResultList);
-				printf("[TEST] THSAPI_GetDealOrderList Error[%d]\n", err);
-				printf("[TEST] THSAPI_GetDealOrderList list size %d\n", cResultList.size());
-				std::list<DealOrder>::iterator it;
-				for (it = cResultList.begin(); it != cResultList.end(); it++)
-				{
-					DealOrder cDealOrder = *it;
-					printf("    {%s %s %d %d %.3f}\n",
-						cDealOrder.time.c_str(),
-						cDealOrder.stockID.c_str(),
-						cDealOrder.tranAct,
-						cDealOrder.dealAmount,
-						cDealOrder.dealPrice);
-				}
-			}
+		//{
+		//	std::list<DealOrder> cResultList;
+		//	for (int i=0; i<1; i++)
+		//	{
+		//		err = THSAPI_GetDealOrderList(cResultList);
+		//		printf("[TEST] THSAPI_GetDealOrderList Error[%d]\n", err);
+		//		printf("[TEST] THSAPI_GetDealOrderList list size %d\n", cResultList.size());
+		//		std::list<DealOrder>::iterator it;
+		//		for (it = cResultList.begin(); it != cResultList.end(); it++)
+		//		{
+		//			DealOrder cDealOrder = *it;
+		//			printf("    {%s %s %d %d %.3f}\n",
+		//				cDealOrder.time.c_str(),
+		//				cDealOrder.stockID.c_str(),
+		//				cDealOrder.tranAct,
+		//				cDealOrder.dealAmount,
+		//				cDealOrder.dealPrice);
+		//		}
+		//	}
 
-		}
+		//}
 
 	}
 	//////////////////////////////////////////////////////////////////////////

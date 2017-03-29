@@ -29,11 +29,6 @@ public class AccountAccessor {
 		return m_accountControlIF.getAvailableMoney(out_availableMoney);
 	}
 	
-	public int getCommissionOrderList(List<CommissionOrder> out_list)
-	{
-		return m_accountControlIF.getCommissionOrderList(out_list);
-	}
-	
 	public int getHoldStockList(List<HoldStock> out_list)
 	{
 		return m_accountControlIF.getHoldStockList(m_date, m_time, out_list);
@@ -42,11 +37,6 @@ public class AccountAccessor {
 	public HoldStock getHoldStock(String stockID)
 	{
 		return m_accountControlIF.getHoldStock(m_date, m_time, stockID);
-	}
-	
-	public int getDealOrderList(List<DealOrder> out_list)
-	{
-		return m_accountControlIF.getDealOrderList(out_list);
 	}
 
 	private String m_date;

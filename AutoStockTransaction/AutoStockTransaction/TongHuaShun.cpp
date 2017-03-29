@@ -107,27 +107,27 @@ int THSAPI_TongHuaShunInit()
 	s_hHoldStockWin = hHoldStockWin;
 	TESTLOG("THSAPI_TongHuaShunInit# search HoldStockWin ok\n");
 
-	// 初始化当日委托窗口句柄
-	selectMasterTreeViewItem(s_hLeftTreeView, 3); 
-	HWND hCommissionOrderWin = findCommissionOrderWin(hWnd);
-	if (NULL == hCommissionOrderWin)
-	{
-		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] findCommissionOrderWin error\n");
-		return -40;
-	}
-	s_hCommissionOrderWin = hCommissionOrderWin;
-	TESTLOG("THSAPI_TongHuaShunInit# search CommissionOrderWin ok\n");
+	//// 初始化当日委托窗口句柄
+	//selectMasterTreeViewItem(s_hLeftTreeView, 3); 
+	//HWND hCommissionOrderWin = findCommissionOrderWin(hWnd);
+	//if (NULL == hCommissionOrderWin)
+	//{
+	//	TESTLOG("THSAPI_TongHuaShunInit# [ERROR] findCommissionOrderWin error\n");
+	//	return -40;
+	//}
+	//s_hCommissionOrderWin = hCommissionOrderWin;
+	//TESTLOG("THSAPI_TongHuaShunInit# search CommissionOrderWin ok\n");
 
-	// 初始化当日成交窗口句柄
-	selectMasterTreeViewItem(s_hLeftTreeView, 4); 
-	HWND hDealOrderWin = findDealOrderWin(hWnd);
-	if (NULL == hDealOrderWin)
-	{
-		TESTLOG("THSAPI_TongHuaShunInit# [ERROR] findDealOrderWin error\n");
-		return -50;
-	}
-	s_hDealOrderWin = hDealOrderWin;
-	TESTLOG("THSAPI_TongHuaShunInit# search DealOrderWin ok\n");
+	//// 初始化当日成交窗口句柄
+	//selectMasterTreeViewItem(s_hLeftTreeView, 4); 
+	//HWND hDealOrderWin = findDealOrderWin(hWnd);
+	//if (NULL == hDealOrderWin)
+	//{
+	//	TESTLOG("THSAPI_TongHuaShunInit# [ERROR] findDealOrderWin error\n");
+	//	return -50;
+	//}
+	//s_hDealOrderWin = hDealOrderWin;
+	//TESTLOG("THSAPI_TongHuaShunInit# search DealOrderWin ok\n");
 
 	// 初始化买入窗口句柄
 	selectMasterTreeViewItem(s_hLeftTreeView, 0); 

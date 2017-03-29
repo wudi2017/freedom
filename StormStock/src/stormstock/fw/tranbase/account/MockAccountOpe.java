@@ -33,9 +33,7 @@ public class MockAccountOpe extends IAccountOpe {
 		// 交易流数据
 		{
 			m_money = 200000.00f; // 模拟账户默认20w
-			m_commissionOrderList = new ArrayList<CommissionOrder>();
 			m_holdStockList = new ArrayList<HoldStock>();
-			m_dealOrderList = new ArrayList<DealOrder>();
 			
 			//load
 			load();
@@ -51,9 +49,6 @@ public class MockAccountOpe extends IAccountOpe {
 	@Override
 	public int newDayInit(String date, String time) 
 	{ 
-		// 新一天时，未成交委托单清空
-		m_commissionOrderList.clear();
-		
 		// 新一天时，所有持股均可卖
 		HoldStock cHoldStock = null;
 		for(int i = 0; i< m_holdStockList.size(); i++)
@@ -61,9 +56,6 @@ public class MockAccountOpe extends IAccountOpe {
 			cHoldStock = m_holdStockList.get(i);
 			cHoldStock.availableAmount = cHoldStock.totalAmount;
 		}
-		
-		// 新一天时，交割单清空
-		m_dealOrderList.clear();
 		
 		store();
 		
@@ -124,19 +116,9 @@ public class MockAccountOpe extends IAccountOpe {
 				date, time,
 				stockID, realBuyAmount, price, realBuyAmount*price, transactionCosts, m_money);
 		
-		// 生成交割单
-		DealOrder cDealOrder = new DealOrder();
-		cDealOrder.time = time;
-		cDealOrder.tranAct = TRANACT.BUY;
-		cDealOrder.stockID = stockID;
-		cDealOrder.amount = realBuyAmount;
-		cDealOrder.price = price;
-		
-		m_dealOrderList.add(cDealOrder);
-		
 		store();
 		
-		return realBuyAmount;
+		return 0;
 	}
 
 	@Override
@@ -185,19 +167,10 @@ public class MockAccountOpe extends IAccountOpe {
 			BLog.output("ACCOUNT", " @MockAccountOpe pushSellOrder [%s %s] [%s %d %.3f %.3f(%.3f) %.3f] \n", 
 					date, time,
 					stockID, realSellAmount, price, realSellAmount*price, transactionCosts, m_money);
-			
-			// 生成交割单
-			DealOrder cDealOrder = new DealOrder();
-			cDealOrder.time = time;
-			cDealOrder.tranAct = TRANACT.SELL;
-			cDealOrder.stockID = stockID;
-			cDealOrder.price = price;
-			cDealOrder.amount = realSellAmount;
-			m_dealOrderList.add(cDealOrder);
-			
+
 			store();
 			
-			return realSellAmount;
+			return 0;
 		}
 	
 		return 0;
@@ -206,13 +179,6 @@ public class MockAccountOpe extends IAccountOpe {
 	@Override
 	public int getAvailableMoney(RefFloat out_availableMoney) {
 		out_availableMoney.value = m_money;
-		return 0;
-	}
-	
-	@Override
-	public int getCommissionOrderList(List<CommissionOrder> out_list) {
-		out_list.clear();
-		out_list.addAll(m_commissionOrderList);
 		return 0;
 	}
 	
@@ -235,12 +201,6 @@ public class MockAccountOpe extends IAccountOpe {
 		return 0;
 	}
 	
-	@Override
-	public int getDealOrderList(List<DealOrder> out_list) {
-		out_list.addAll(m_dealOrderList);
-		return 0;
-	}
-	
 	private void load()
 	{
 		if(m_dataSyncFlag)
@@ -249,12 +209,8 @@ public class MockAccountOpe extends IAccountOpe {
 			if(null != cStoreEntity)
 			{
 			    m_money = cStoreEntity.money;
-			    m_commissionOrderList.clear();
-			    m_commissionOrderList.addAll(cStoreEntity.commissionOrderList);
 			    m_holdStockList.clear();
 			    m_holdStockList.addAll(cStoreEntity.holdStockList);
-			    m_dealOrderList.clear();
-			    m_dealOrderList.addAll(cStoreEntity.dealOrderList);
 			}
 		}
 	}
@@ -265,9 +221,7 @@ public class MockAccountOpe extends IAccountOpe {
 		{
 			StoreEntity cStoreEntity = new StoreEntity();
 			cStoreEntity.money = m_money;
-			cStoreEntity.commissionOrderList = m_commissionOrderList;
 			cStoreEntity.holdStockList = m_holdStockList;
-			cStoreEntity.dealOrderList = m_dealOrderList;
 			m_mockAccountOpeStore.store(cStoreEntity);
 		}
 	}
@@ -284,7 +238,5 @@ public class MockAccountOpe extends IAccountOpe {
 	private MockAccountOpeStore m_mockAccountOpeStore;
 	
 	private float m_money;
-	private List<CommissionOrder> m_commissionOrderList; // 模拟账户中  下单直接成交, 委托单一直未空
 	private List<HoldStock> m_holdStockList;
-	private List<DealOrder> m_dealOrderList;
 }

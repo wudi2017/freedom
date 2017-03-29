@@ -119,10 +119,7 @@ public class CreateWorkRequest extends BQThreadRequest {
 							stockTimeList.get(iBegin).time, stockTimeList.get(iBegin).price,
 							stockTimeList.get(iEnd).time, stockTimeList.get(iEnd).price, 
 							cnt);
-					if(m_date.equals("2016-03-29") && m_time.equals("13:08:00"))
-					{
-						BLog.output("CREATE", "TEST!\n");
-					}
+
 					// 回调给用户
 					cIStrategyCreate.strategy_create(ctx, cCreateResultWrapper.createRes);
 					

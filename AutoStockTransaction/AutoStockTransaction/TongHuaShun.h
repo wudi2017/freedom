@@ -45,6 +45,8 @@ struct DealOrder
 	float dealPrice; // 成交价格
 };
 
+// flush, max call frequency 30 sec
+int FlushData();
 
 /////////////////////////////////////////////////////////////////////////
 

@@ -7,18 +7,9 @@
 #include "commctrl.h"
 #include "WinHandle.h"
 
-class FlushingTimer: public DTimer
-{
-public:
-	FlushingTimer():DTimer(1000*60*30, true) {}
-	virtual void Run()
-	{
-		TESTLOG("FlushingTimer Run\n");
-		Flush_F5();
-	}
-};
 
-static FlushingTimer * s_pflushingTimer = NULL;
+static DSyncObj s_syncObj;
+
 static bool s_initFLag = false;
 static HWND s_hMainWin = NULL;
 static HWND s_hLeftTreeView = NULL;
@@ -31,9 +22,41 @@ static HWND s_hDealOrderWin = NULL;
 static HWND s_hBuyWin = NULL;
 static HWND s_hSellWin = NULL;
 
+class FlushingTimer: public DTimer
+{
+public:
+	FlushingTimer():DTimer(1000*60*30, true) {}
+	virtual void Run()
+	{
+		DAutoSync sync(s_syncObj);
+		TESTLOG("FlushingTimer Run\n");
+		Flush_F5(1000);
+	}
+};
+static FlushingTimer s_flushingTimer;
+
+int FlushData()
+{
+	DAutoSync sync(s_syncObj);
+
+	static DWORD dwLastFlush = 0;
+	DWORD dwCurTC = ::GetTickCount();
+	DWORD dwPeriod = dwCurTC - dwLastFlush;
+
+	if (dwPeriod > 1000*30)
+	{
+		selectMasterTreeViewItem(s_hLeftTreeView, -1);
+		Flush_F5(1000);
+		dwLastFlush = dwCurTC;
+	}
+
+	return 0;
+}
 
 int THSAPI_TongHuaShunInit()
 {
+	DAutoSync sync(s_syncObj);
+
 	TESTLOG("THSAPI_TongHuaShunInit#\n");
 
 	// 初始化窗口句柄
@@ -64,6 +87,7 @@ int THSAPI_TongHuaShunInit()
 	}
 
 	// 初始化资金股票主窗口句柄
+	selectMasterTreeViewItem(s_hLeftTreeView, 2); 
 	HWND hZijinGupiaoWin = findZijinGupiaoWin(hWnd);
 	if (NULL == hZijinGupiaoWin)
 	{
@@ -74,7 +98,6 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search ZijinGupiaoWin ok\n");
 
 	// 初始化持股窗口句柄
-	Sleep(2000);
 	HWND hHoldStockWin = findHoldStockWin(hWnd);
 	if (NULL == hHoldStockWin)
 	{
@@ -85,7 +108,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search HoldStockWin ok\n");
 
 	// 初始化当日委托窗口句柄
-	Sleep(2000);
+	selectMasterTreeViewItem(s_hLeftTreeView, 3); 
 	HWND hCommissionOrderWin = findCommissionOrderWin(hWnd);
 	if (NULL == hCommissionOrderWin)
 	{
@@ -96,7 +119,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search CommissionOrderWin ok\n");
 
 	// 初始化当日成交窗口句柄
-	Sleep(2000);
+	selectMasterTreeViewItem(s_hLeftTreeView, 4); 
 	HWND hDealOrderWin = findDealOrderWin(hWnd);
 	if (NULL == hDealOrderWin)
 	{
@@ -107,6 +130,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search DealOrderWin ok\n");
 
 	// 初始化买入窗口句柄
+	selectMasterTreeViewItem(s_hLeftTreeView, 0); 
 	HWND hBuyWin = findBuyWin(hWnd);
 	if (NULL == hBuyWin)
 	{
@@ -117,6 +141,7 @@ int THSAPI_TongHuaShunInit()
 	TESTLOG("THSAPI_TongHuaShunInit# search BuyWin ok\n");
 
 	// 初始化卖出窗口句柄
+	selectMasterTreeViewItem(s_hLeftTreeView, 1); 
 	HWND hSellWin = findSellWin(hWnd);
 	if (NULL == hSellWin)
 	{
@@ -133,26 +158,27 @@ int THSAPI_TongHuaShunInit()
 		return -80;
 	}
 
-	Flush_F5();
-	Hide_MainWin();
+	//Hide_MainWin();
+
+	FlushData();
 
 	s_initFLag = true;
 	// 启动刷新timer
-	s_pflushingTimer = new FlushingTimer();
-	s_pflushingTimer->Start();
+	s_flushingTimer.Start();
 
 	return 0;
 }
 
 int THSAPI_GetAvailableMoney(float & availableMoney)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	TESTLOG("THSAPI_GetAvailableMoney#\n");
 	if (!s_initFLag)
 	{
 		return -10;
 	}
-	selectMasterTreeViewItem(s_hLeftTreeView, 2);
-	Flush_F5();
 	if (!s_hZijinGupiaoWin)
 	{
 		TESTLOG("THSAPI_GetAvailableMoney# [ERROR] ZijinGupiaoWin error\n");
@@ -195,13 +221,14 @@ int THSAPI_GetAvailableMoney(float & availableMoney)
 
 int THSAPI_GetTotalAssets(float & totalAssets)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	TESTLOG("THSAPI_GetTotalAssets#\n");
 	if (!s_initFLag)
 	{
 		return -10;
 	}
-	selectMasterTreeViewItem(s_hLeftTreeView, 2);
-	Flush_F5();
 	if (!s_hZijinGupiaoWin)
 	{
 		TESTLOG("THSAPI_GetTotalAssets# [ERROR] ZijinGupiaoWin error\n");
@@ -244,13 +271,14 @@ int THSAPI_GetTotalAssets(float & totalAssets)
 
 int THSAPI_GetAllStockMarketValue(float & allStockMarketValue)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	TESTLOG("THSAPI_GetAllStockMarketValue#\n");
 	if (!s_initFLag)
 	{
 		return -10;
 	}
-	selectMasterTreeViewItem(s_hLeftTreeView, 2);
-	Flush_F5();
 	if (!s_hZijinGupiaoWin)
 	{
 		TESTLOG("THSAPI_GetAllStockMarketValue# [ERROR] ZijinGupiaoWin error\n");
@@ -293,18 +321,30 @@ int THSAPI_GetAllStockMarketValue(float & allStockMarketValue)
 
 int THSAPI_GetHoldStockList(std::list<HoldStock> & resultList)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	if (!s_initFLag)
 	{
 		return -10;
 	}
 
 	resultList.clear();
-	selectMasterTreeViewItem(s_hLeftTreeView, 0);
-	Flush_F5();
 	if (s_hHoldStockWin)
 	{
 		std::string buf;
-		bool bCopy = getCtrlVFormWin(s_hHoldStockWin,buf);
+		bool bCopy = false;
+		// try copy 5 times
+		for(int i=0;i<5;i++)
+		{
+			Sleep(10);
+			bCopy = getCtrlVFormWin(s_hHoldStockWin,buf);
+			if(buf.length()>30)
+			{
+				break;
+			}
+			Sleep(190);
+		}
 		 
 		// 解析拷贝数据
 		if(bCopy && buf.length()>0)
@@ -427,18 +467,30 @@ int THSAPI_GetHoldStockList(std::list<HoldStock> & resultList)
 
 int THSAPI_GetCommissionOrderList(std::list<CommissionOrder> & resultList)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	if (!s_initFLag)
 	{
 		return -10;
 	}
 
 	resultList.clear();
-	selectMasterTreeViewItem(s_hLeftTreeView, 3);
-	Flush_F5();
 	if (s_hCommissionOrderWin)
 	{
 		std::string buf;
-		bool bCopy = getCtrlVFormWin(s_hCommissionOrderWin,buf);
+		bool bCopy = false;
+		// try copy 5 times
+		for(int i=0;i<5;i++)
+		{
+			Sleep(10);
+			bCopy = getCtrlVFormWin(s_hCommissionOrderWin,buf);
+			if(buf.length()>30)
+			{
+				break;
+			}
+			Sleep(190);
+		}
 
 		// 解析拷贝数据
 		if(bCopy && buf.length()>0)
@@ -576,18 +628,30 @@ int THSAPI_GetCommissionOrderList(std::list<CommissionOrder> & resultList)
 
 int THSAPI_GetDealOrderList(std::list<DealOrder> & resultList)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	if (!s_initFLag)
 	{
 		return -10;
 	}
 
 	resultList.clear();
-	selectMasterTreeViewItem(s_hLeftTreeView, 4);
-	Flush_F5();
 	if (s_hDealOrderWin)
 	{
 		std::string buf;
-		bool bCopy = getCtrlVFormWin(s_hDealOrderWin,buf);
+		bool bCopy = false;
+		// try copy 5 times
+		for(int i=0;i<5;i++)
+		{
+			Sleep(10);
+			bCopy = getCtrlVFormWin(s_hDealOrderWin,buf);
+			if(buf.length()>30)
+			{
+				break;
+			}
+			Sleep(190);
+		}
 
 		// 解析拷贝数据
 		if(bCopy && buf.length()>0)
@@ -705,13 +769,14 @@ int THSAPI_GetDealOrderList(std::list<DealOrder> & resultList)
 
 int THSAPI_BuyStock(const char* stockId, const int buyAmount, const float price)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	TESTLOG("THSAPI_BuyStock#\n");
 	if (!s_initFLag)
 	{
 		return -10;
 	}
-
-	Flush_F5();
 	HWND hStockIDWin = NULL;
 	HWND hStockPriceWin = NULL;
 	HWND hStockAmountWin = NULL;
@@ -928,13 +993,14 @@ int THSAPI_BuyStock(const char* stockId, const int buyAmount, const float price)
 
 int THSAPI_SellStock(const char* stockId, const int sellAmount, const float price)
 {
+	DAutoSync sync(s_syncObj);
+	FlushData();
+
 	TESTLOG("THSAPI_SellStock#\n");
 	if (!s_initFLag)
 	{
 		return -10;
 	}
-
-	Flush_F5();
 	HWND hStockIDWin = NULL;
 	HWND hStockPriceWin = NULL;
 	HWND hStockAmountWin = NULL;

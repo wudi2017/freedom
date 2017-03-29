@@ -842,6 +842,31 @@ private:
 };
 
 /*
+* DAutoSync class
+**/
+class DCLIB_API DSyncObj
+{
+public:
+	DSyncObj();
+	virtual ~DSyncObj();
+	VOID SyncStart();
+	bool TrySyncStart();
+	VOID SyncEnd();
+private:
+	CRITICAL_SECTION cs;
+};
+class DCLIB_API DAutoSync
+{
+public:
+	DAutoSync(DSyncObj& cSync);
+	virtual ~DAutoSync();
+private:
+	DAutoSync(const DAutoSync& cSync);
+	DAutoSync& operator=(const DAutoSync& cSync);
+	DSyncObj& m_cSync;
+};
+
+/*
 * DGUID class
 **/
 class DCLIB_API DGUID

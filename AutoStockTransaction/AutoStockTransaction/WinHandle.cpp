@@ -5,6 +5,7 @@
 #include "windows.h"
 #include "commctrl.h"
 
+static DSyncObj s_syncObjWinOP;
 
 //////////////////////////////////////////////////////////////////////////
 // find sub windows in tonghuashun
@@ -12,11 +13,15 @@
 HWND s_hMainWin = NULL;
 void setMainWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	s_hMainWin = hWnd;
 }
 
 int Hide_MainWin()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hMainWin = s_hMainWin;
 	::ShowWindow(hMainWin, SW_MINIMIZE);
 	return 0;
@@ -25,6 +30,8 @@ int Hide_MainWin()
 
 HWND findLeftTreeView(HWND hWnd) // and select expend 
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findLeftTreeView#\n");
 	HWND hLeftTreeView = NULL;
 	HWND hChildL1 = NULL;
@@ -127,6 +134,8 @@ HWND findLeftTreeView(HWND hWnd) // and select expend
 
 int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("selectMasterTreeViewItem#\n");
 	if (-1 == index)
 	{
@@ -358,6 +367,8 @@ int selectMasterTreeViewItem(HWND hTreeView, int index = -1)
 
 HWND findZijinGupiaoWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findZijinGupiaoWin#\n");
 	HWND hChildL1 = NULL;
 	for(;;) {
@@ -427,6 +438,8 @@ HWND findZijinGupiaoWin(HWND hWnd)
 
 HWND findHoldStockWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findHoldStockWin#\n");
 	
 	HWND hZijinGupiao = findZijinGupiaoWin(hWnd);
@@ -490,6 +503,8 @@ HWND findHoldStockWin(HWND hWnd)
 
 HWND findCommissionOrderWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findCommissionOrderWin#\n");
 
 	HWND hChildL1 = NULL;
@@ -589,11 +604,19 @@ HWND findCommissionOrderWin(HWND hWnd)
 									{
 										// 找到了参考CVirtualGridCtrl，从中CtrlV测试内容
 										std::string buf;
-										bool bCtrlV = getCtrlVFormWin(hChildL5,buf);
-										int pos=buf.find("委托时间");
-										if (bCtrlV && pos >= 0 && pos<20)
+										// try copy 3 times
+										for(int i=0;i<5;i++)
 										{
-											return hChildL5;
+											Sleep(200);
+											bool bCtrlV = getCtrlVFormWin(hChildL5,buf);
+											if(buf.length()>30)
+											{
+												int pos=buf.find("委托时间");
+												if (bCtrlV && pos >= 0 && pos<20)
+												{
+													return hChildL5;
+												}
+											}
 										}
 									}
 								}
@@ -609,6 +632,8 @@ HWND findCommissionOrderWin(HWND hWnd)
 
 HWND findDealOrderWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findDealOrderWin#\n");
 	HWND hChildL1 = NULL;
 	for(;;) {
@@ -707,11 +732,19 @@ HWND findDealOrderWin(HWND hWnd)
 									{
 										// 找到了参考CVirtualGridCtrl，从中CtrlV测试内容
 										std::string buf;
-										bool bCtrlV = getCtrlVFormWin(hChildL5,buf);
-										int pos=buf.find("成交时间");
-										if (bCtrlV && pos >= 0 && pos<20)
+										// try copy 5 times
+										for(int i=0;i<5;i++)
 										{
-											return hChildL5;
+											Sleep(200);
+											bool bCtrlV = getCtrlVFormWin(hChildL5,buf);
+											if(buf.length()>30)
+											{
+												int pos=buf.find("成交时间");
+												if (bCtrlV && pos >= 0 && pos<20)
+												{
+													return hChildL5;
+												}
+											}
 										}
 									}
 								}
@@ -727,6 +760,8 @@ HWND findDealOrderWin(HWND hWnd)
 
 HWND findBuyWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findBuyWin#\n");
 
 	HWND hChildL1 = NULL;
@@ -785,6 +820,8 @@ HWND findBuyWin(HWND hWnd)
 
 HWND findSellWin(HWND hWnd)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	TESTLOG("findSellWin#\n");
 
 	HWND hChildL1 = NULL;
@@ -846,11 +883,15 @@ HWND findSellWin(HWND hWnd)
 
 HWND FindTongHuaShunMainWin()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	return FindWindowW(0, L"网上股票交易系统5.0");
 }
 
 int CancelAllMainWin()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	int iCloseZhangDieXianZhi =  CloseZhangDieXianZhi_Cancel();
 	int iCloseWeiTuoQueRen = CloseWeiTuoQueRen_Cancel();
 	int iCloseTijiaoShiBai = CloseTijiaoShiBai();
@@ -872,6 +913,8 @@ int CancelAllMainWin()
 // zhangdiexianzhi
 HWND Find_ZhangDieXianZhi()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hZhangDieXianZhiTishi = NULL;
 	HWND hWndDesktop = GetDesktopWindow();
 	HWND hMainWin = NULL;
@@ -920,6 +963,8 @@ HWND Find_ZhangDieXianZhi()
 }
 HWND FindZhangDieXianZhiCloseBtn(HWND hZhangDieXianZhi)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hCloseBtn = NULL;
 	HWND hChildL1 = NULL;
 	int index = 0;
@@ -946,6 +991,8 @@ HWND FindZhangDieXianZhiCloseBtn(HWND hZhangDieXianZhi)
 
 int CloseZhangDieXianZhi_Cancel()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	for (int i=0; i<500; i++)
 	{
 		HWND hZhangDieXianZhi = Find_ZhangDieXianZhi();
@@ -971,6 +1018,8 @@ int CloseZhangDieXianZhi_Cancel()
 // WeiTuoQueRen
 HWND Find_WeiTuoQueRen(int& iflag,string& id, int& amount, float& price)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hWeiTuoQueRen = NULL;
 	HWND hWndDesktop = GetDesktopWindow();
 	HWND hMainWin = NULL;
@@ -1058,6 +1107,8 @@ HWND Find_WeiTuoQueRen(int& iflag,string& id, int& amount, float& price)
 }
 HWND FindWeiTuoQueRenOKBtn(HWND hWeiTuoQueRen)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hOKBtn = NULL;
 	HWND hChildL1 = NULL;
 	int index = 0;
@@ -1083,6 +1134,8 @@ HWND FindWeiTuoQueRenOKBtn(HWND hWeiTuoQueRen)
 }
 HWND FindWeiTuoQueRenCancelBtn(HWND hWeiTuoQueRen)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hCancelBtn = NULL;
 	HWND hChildL1 = NULL;
 	int index = 0;
@@ -1108,6 +1161,8 @@ HWND FindWeiTuoQueRenCancelBtn(HWND hWeiTuoQueRen)
 }
 int CloseWeiTuoQueRen_OK()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	for (int i=0; i<500; i++)
 	{
 		int iFlag =0;
@@ -1135,6 +1190,8 @@ int CloseWeiTuoQueRen_OK()
 }
 int CloseWeiTuoQueRen_Cancel()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	for (int i=0; i<500; i++)
 	{
 		int iFlag =0;
@@ -1164,6 +1221,8 @@ int CloseWeiTuoQueRen_Cancel()
 // TiJiaoShiBai
 HWND Find_TijiaoShiBai()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hTijiaoShiBai = NULL;
 	HWND hWndDesktop = GetDesktopWindow();
 	HWND hMainWin = NULL;
@@ -1220,6 +1279,8 @@ HWND Find_TijiaoShiBai()
 }
 HWND FindTijiaoShiBaiOKBtn(HWND hTijiaoShiBai)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hOKBtn = NULL;
 	HWND hChildL1 = NULL;
 	int index = 0;
@@ -1245,6 +1306,8 @@ HWND FindTijiaoShiBaiOKBtn(HWND hTijiaoShiBai)
 }
 int CloseTijiaoShiBai()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	for (int i=0; i<500; i++)
 	{
 		HWND hTijiaoShiBai = Find_TijiaoShiBai();
@@ -1270,6 +1333,8 @@ int CloseTijiaoShiBai()
 // TijiaoChengGong
 HWND Find_TijiaoChengGong()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hTijiaoChengGong = NULL;
 	HWND hWndDesktop = GetDesktopWindow();
 	HWND hMainWin = NULL;
@@ -1326,6 +1391,8 @@ HWND Find_TijiaoChengGong()
 }
 HWND FindTijiaoChengGongOKBtn(HWND hTijiaoChengGong)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hOKBtn = NULL;
 	HWND hChildL1 = NULL;
 	int index = 0;
@@ -1350,6 +1417,9 @@ HWND FindTijiaoChengGongOKBtn(HWND hTijiaoChengGong)
 	return hOKBtn;
 }
 int CloseTijiaoChengGong(){
+
+	DAutoSync sync(s_syncObjWinOP);
+
 	for (int i=0; i<500; i++)
 	{
 		HWND hTijiaoChengGong = Find_TijiaoChengGong();
@@ -1372,18 +1442,22 @@ int CloseTijiaoChengGong(){
 	return -1;
 }
 
-int Flush_F5()
+int Flush_F5(int wait_msec)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	HWND hWndWin = FindTongHuaShunMainWin();
 	::PostMessage(hWndWin, WM_KEYDOWN, VK_F5, 0);
-	Sleep(50);
+	Sleep(5);
 	::PostMessage(hWndWin, WM_KEYUP, VK_F5, 0);
-	Sleep(1000);
+	Sleep(wait_msec);
 	return 0;
 }
 
 bool isAvailableClipboard()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	bool bRet = false;
 	if (::OpenClipboard(NULL))
 	{
@@ -1398,6 +1472,8 @@ bool isAvailableClipboard()
 
 bool setClipboard(std::string in_buf)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	bool bRet = false;
 	if(::OpenClipboard(NULL))
 	{
@@ -1418,6 +1494,8 @@ bool setClipboard(std::string in_buf)
 
 bool getClipboard(std::string & out_buf)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	bool bRet = false;
 	if(::OpenClipboard(NULL))
 	{
@@ -1453,6 +1531,8 @@ bool getClipboard(std::string & out_buf)
 
 bool clearClipboard()
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	bool bRet = false;
 	if(::OpenClipboard(NULL))
 	{
@@ -1467,6 +1547,8 @@ bool clearClipboard()
 
 bool getCtrlVFormWin(HWND hWnd,std::string & out_buf)
 {
+	DAutoSync sync(s_syncObjWinOP);
+
 	// 缓存剪切板现有内容
 	std::string buf_save;
 	bool bBufSaved = false;
@@ -1491,13 +1573,15 @@ bool getCtrlVFormWin(HWND hWnd,std::string & out_buf)
 		{
 			if (isAvailableClipboard())
 			{
+				Sleep(30);
 				keybd_event(VK_CONTROL, (BYTE)0, 0, 0);
-				Sleep(50);
+				Sleep(5);
 				::SendMessage(hWnd, WM_KEYDOWN, 'C', MapVirtualKey('C', 0));
+				Sleep(5);
 				::SendMessage(hWnd, WM_KEYUP, 'C', MapVirtualKey('C', 0));
-				Sleep(50);
+				Sleep(5);
 				keybd_event(VK_CONTROL, (BYTE)0, KEYEVENTF_KEYUP, 0);
-				Sleep(100);
+				Sleep(10);
 
 				if (getClipboard(buf) && buf.size() > 0)
 				{

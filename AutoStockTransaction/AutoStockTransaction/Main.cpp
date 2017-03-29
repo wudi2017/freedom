@@ -107,7 +107,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetHoldStockList
 		{
 			std::list<HoldStock> cResultList;
-			for (int i=0; i<1000; i++)
+			for (int i=0; i<10000; i++)
 			{
 				err = THSAPI_GetHoldStockList(cResultList);
 				printf("[TEST] THSAPI_GetHoldStockList Error[%d]\n", err);
@@ -124,6 +124,7 @@ int _tmain(int argc, _TCHAR* argv[])
 						cHoldStock.refPrimeCostPrice,
 						cHoldStock.curPrice);
 				}
+				Sleep(3000);
 			}
 
 		}
@@ -156,7 +157,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		////////////////////////////////////////////////////////////////////////// -> test THSAPI_GetDealOrderList
 		{
 			std::list<DealOrder> cResultList;
-			for (int i=0; i<11; i++)
+			for (int i=0; i<1; i++)
 			{
 				err = THSAPI_GetDealOrderList(cResultList);
 				printf("[TEST] THSAPI_GetDealOrderList Error[%d]\n", err);

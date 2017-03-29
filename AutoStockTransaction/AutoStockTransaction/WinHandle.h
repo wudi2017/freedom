@@ -57,7 +57,7 @@ HWND Find_TijiaoChengGong();
 int CloseTijiaoChengGong();
 
 // flush
-int Flush_F5();
+int Flush_F5(int msec);
 
 // Clipboard
 bool setClipboard(std::string in_buf);

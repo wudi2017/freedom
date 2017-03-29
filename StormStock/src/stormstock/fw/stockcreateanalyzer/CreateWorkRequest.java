@@ -12,6 +12,7 @@ import stormstock.fw.event.StockCreateAnalysis;
 import stormstock.fw.event.Transaction;
 import stormstock.fw.tranbase.account.AccountAccessor;
 import stormstock.fw.tranbase.account.AccountControlIF;
+import stormstock.fw.tranbase.account.AccountPublicDef.CommissionOrder;
 import stormstock.fw.tranbase.account.AccountPublicDef.HoldStock;
 import stormstock.fw.tranbase.com.GlobalUserObj;
 import stormstock.fw.tranbase.com.IStrategyCreate;
@@ -139,7 +140,34 @@ public class CreateWorkRequest extends BQThreadRequest {
 		
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 		accIF.getHoldStockList(null, null, cHoldStockList);
-		int alreadyCount = cHoldStockList.size() + accIF.getBuyCommissionOrderList().size();
+		List<CommissionOrder> cCommissionOrderList = accIF.getBuyCommissionOrderList();
+		int alreadyCount = 0;
+		for(int i=0;i<cHoldStockList.size();i++)
+		{
+			HoldStock cHoldStock = cHoldStockList.get(i);
+			if(cHoldStock.totalAmount > 0)
+			{
+				alreadyCount++;
+			}
+		}
+		for(int i=0;i<cCommissionOrderList.size();i++)
+		{
+			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
+			boolean bExitInHold = false;
+			for(int j=0;i<cHoldStockList.size();i++)
+			{
+				HoldStock cHoldStock = cHoldStockList.get(j);
+				if(cHoldStock.stockID.equals(cCommissionOrder.stockID))
+				{
+					bExitInHold = true;
+					break;
+				}
+			}
+			if(!bExitInHold)
+			{
+				alreadyCount++;
+			}
+		}
 		int buyStockCount = create_max_count - alreadyCount;
 		buyStockCount = Math.min(buyStockCount,cCreateResultWrapperList.size());
 		

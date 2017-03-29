@@ -53,7 +53,7 @@ public class CreateWorkRequest extends BQThreadRequest {
 	@Override
 	public void doAction() {
 		BLog.output("CREATE", "CreateWorkRequest.doAction [%s %s]\n", m_date, m_time);
-		
+
 		StockDataIF stockDataIF = GlobalUserObj.getCurStockDataIF();
 		AccountControlIF accIF = GlobalUserObj.getCurAccountControlIF();
 		
@@ -119,7 +119,10 @@ public class CreateWorkRequest extends BQThreadRequest {
 							stockTimeList.get(iBegin).time, stockTimeList.get(iBegin).price,
 							stockTimeList.get(iEnd).time, stockTimeList.get(iEnd).price, 
 							cnt);
-					
+					if(m_date.equals("2016-03-29") && m_time.equals("13:08:00"))
+					{
+						BLog.output("CREATE", "TEST!\n");
+					}
 					// 回调给用户
 					cIStrategyCreate.strategy_create(ctx, cCreateResultWrapper.createRes);
 					
@@ -135,6 +138,7 @@ public class CreateWorkRequest extends BQThreadRequest {
 			}
 		}
 			
+
 		// 根据建仓策略，做成建仓项
 		int create_max_count = cIStrategyCreate.strategy_create_max_count();
 		
@@ -154,7 +158,7 @@ public class CreateWorkRequest extends BQThreadRequest {
 		{
 			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
 			boolean bExitInHold = false;
-			for(int j=0;i<cHoldStockList.size();i++)
+			for(int j=0;j<cHoldStockList.size();j++)
 			{
 				HoldStock cHoldStock = cHoldStockList.get(j);
 				if(cHoldStock.stockID.equals(cCommissionOrder.stockID))

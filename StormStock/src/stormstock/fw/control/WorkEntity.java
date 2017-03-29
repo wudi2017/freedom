@@ -139,15 +139,7 @@ public class WorkEntity {
 						timestr = BUtilsDateTime.getTimeStrForSpecifiedTimeOffsetM(timestr, interval_min);
 						if(timestr.compareTo(timestr_end) > 0) break;
 					}
-					
-					// 15:10 账户当日交易结束
-					timestr = "15:10:00";
-					if(waitForDateTime(dateStr, timestr))
-					{
-						BLog.output("CTRL", "[%s %s] account newDayTranEnd\n", dateStr, timestr);
-						accIF.newDayTranEnd(dateStr, timestr);
-					}
-					
+
 					// 20:00 更新历史数据通知 等待更新完毕通知
 					timestr = "20:00:00";
 					if(waitForDateTime(dateStr, timestr))
@@ -171,6 +163,14 @@ public class WorkEntity {
 					{
 						BLog.output("CTRL", "[%s %s] transaction info collection \n", dateStr, timestr);
 						m_entityReport.tranInfoCollect(dateStr, timestr);
+					}
+					
+					// 23:50  账户当日交易结束
+					timestr = "23:50:00";
+					if(waitForDateTime(dateStr, timestr))
+					{
+						BLog.output("CTRL", "[%s %s] account newDayTranEnd\n", dateStr, timestr);
+						accIF.newDayTranEnd(dateStr, timestr);
 					}
 				}
 				else

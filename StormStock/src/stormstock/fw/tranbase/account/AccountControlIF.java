@@ -71,6 +71,7 @@ public class AccountControlIF {
 		boolean bRet = true;
 		BLog.output("ACCOUNT", "[%s %s] account new day tran end \n", date, time);
 		// 账户当日结束
+		// 更新股票调查天数，清空委托表等
 		int err = m_account.newDayTranEnd(date, time);
 		if(0 != err)
 		{

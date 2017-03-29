@@ -48,8 +48,6 @@ public class Account {
 	{
 		load();
 		int iNewDayInit = m_cIAccountOpe.newDayInit(date, time);
-		m_commissionOrderList.clear();
-		store();
 		return iNewDayInit;
 	}
 	
@@ -93,6 +91,10 @@ public class Account {
 			{
 				iNewDayTranEnd = -201;
 			}
+			
+			// Çå¿ÕÎ¯ÍÐ±í
+			m_commissionOrderList.clear();
+			store();
 		}
 		
 		return iNewDayTranEnd; 

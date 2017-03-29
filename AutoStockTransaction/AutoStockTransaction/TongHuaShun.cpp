@@ -172,6 +172,13 @@ int THSAPI_TongHuaShunInit()
 int THSAPI_GetAvailableMoney(float & availableMoney)
 {
 	DAutoSync sync(s_syncObj);
+
+	// reinit
+	if (NULL == s_hZijinGupiaoWin)
+	{
+		THSAPI_TongHuaShunInit();
+	}
+
 	FlushData();
 
 	TESTLOG("THSAPI_GetAvailableMoney#\n");
@@ -179,7 +186,7 @@ int THSAPI_GetAvailableMoney(float & availableMoney)
 	{
 		return -10;
 	}
-	if (!s_hZijinGupiaoWin)
+	if (NULL == s_hZijinGupiaoWin)
 	{
 		TESTLOG("THSAPI_GetAvailableMoney# [ERROR] ZijinGupiaoWin error\n");
 		return -20;
@@ -222,6 +229,13 @@ int THSAPI_GetAvailableMoney(float & availableMoney)
 int THSAPI_GetTotalAssets(float & totalAssets)
 {
 	DAutoSync sync(s_syncObj);
+
+	// reinit
+	if (NULL == s_hZijinGupiaoWin)
+	{
+		THSAPI_TongHuaShunInit();
+	}
+
 	FlushData();
 
 	TESTLOG("THSAPI_GetTotalAssets#\n");
@@ -229,7 +243,7 @@ int THSAPI_GetTotalAssets(float & totalAssets)
 	{
 		return -10;
 	}
-	if (!s_hZijinGupiaoWin)
+	if (NULL == s_hZijinGupiaoWin)
 	{
 		TESTLOG("THSAPI_GetTotalAssets# [ERROR] ZijinGupiaoWin error\n");
 		return -20;
@@ -272,6 +286,13 @@ int THSAPI_GetTotalAssets(float & totalAssets)
 int THSAPI_GetAllStockMarketValue(float & allStockMarketValue)
 {
 	DAutoSync sync(s_syncObj);
+
+	// reinit
+	if (NULL == s_hZijinGupiaoWin)
+	{
+		THSAPI_TongHuaShunInit();
+	}
+
 	FlushData();
 
 	TESTLOG("THSAPI_GetAllStockMarketValue#\n");
@@ -279,7 +300,7 @@ int THSAPI_GetAllStockMarketValue(float & allStockMarketValue)
 	{
 		return -10;
 	}
-	if (!s_hZijinGupiaoWin)
+	if (NULL == s_hZijinGupiaoWin)
 	{
 		TESTLOG("THSAPI_GetAllStockMarketValue# [ERROR] ZijinGupiaoWin error\n");
 		return -20;
@@ -322,15 +343,27 @@ int THSAPI_GetAllStockMarketValue(float & allStockMarketValue)
 int THSAPI_GetHoldStockList(std::list<HoldStock> & resultList)
 {
 	DAutoSync sync(s_syncObj);
+
+	// reinit
+	if (NULL == s_hHoldStockWin)
+	{
+		THSAPI_TongHuaShunInit();
+	}
+
 	FlushData();
 
 	if (!s_initFLag)
 	{
 		return -10;
 	}
+	if (NULL == s_hHoldStockWin)
+	{
+		TESTLOG("THSAPI_GetHoldStockList# [ERROR] hHoldStockWin error\n");
+		return -11;
+	}
 
 	resultList.clear();
-	if (s_hHoldStockWin)
+	if (NULL != s_hHoldStockWin)
 	{
 		std::string buf;
 		bool bCopy = false;
@@ -770,6 +803,12 @@ int THSAPI_GetDealOrderList(std::list<DealOrder> & resultList)
 int THSAPI_BuyStock(const char* stockId, const int buyAmount, const float price)
 {
 	DAutoSync sync(s_syncObj);
+
+	if (NULL == s_hBuyWin)
+	{
+		THSAPI_TongHuaShunInit();
+	}
+
 	FlushData();
 
 	TESTLOG("THSAPI_BuyStock#\n");
@@ -994,6 +1033,12 @@ int THSAPI_BuyStock(const char* stockId, const int buyAmount, const float price)
 int THSAPI_SellStock(const char* stockId, const int sellAmount, const float price)
 {
 	DAutoSync sync(s_syncObj);
+
+	if (NULL == s_hSellWin)
+	{
+		THSAPI_TongHuaShunInit();
+	}
+
 	FlushData();
 
 	TESTLOG("THSAPI_SellStock#\n");

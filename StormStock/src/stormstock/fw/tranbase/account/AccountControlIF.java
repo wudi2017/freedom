@@ -2,6 +2,7 @@ package stormstock.fw.tranbase.account;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BTypeDefine.RefFloat;
@@ -152,16 +153,18 @@ public class AccountControlIF {
 	{
 		return m_account.getHoldStockList(date, time, out_list);
 	}
-	public int getHoldStock(String date, String time, String stockID, HoldStock out_holdStock)
+	public int getHoldStock(String date, String time, String stockID, Vector<HoldStock> out_vector)
 	{
-		out_holdStock.Clear();
+		out_vector.clear();
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 		int iRet = getHoldStockList(date, time, cHoldStockList);
 		for(int i=0;i<cHoldStockList.size();i++)
 		{
 			if(cHoldStockList.get(i).stockID.equals(stockID))
 			{
-				out_holdStock.CopyFrom(cHoldStockList.get(i));
+				HoldStock cNewHoldStock = new HoldStock();
+				cNewHoldStock.CopyFrom(cHoldStockList.get(i));
+				out_vector.add(cNewHoldStock);
 				break;
 			}
 		}

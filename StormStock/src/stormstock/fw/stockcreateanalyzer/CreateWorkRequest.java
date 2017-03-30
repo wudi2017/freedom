@@ -3,10 +3,12 @@ package stormstock.fw.stockcreateanalyzer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Vector;
 
 import stormstock.fw.base.BEventSys;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BQThread.BQThreadRequest;
+import stormstock.fw.base.BTypeDefine.RefFloat;
 import stormstock.fw.base.BUtilsDateTime;
 import stormstock.fw.event.StockCreateAnalysis;
 import stormstock.fw.event.Transaction;
@@ -94,39 +96,53 @@ public class CreateWorkRequest extends BQThreadRequest {
 				// 做成 ctx
 				AccountAccessor cAccountAccessor = accIF.getAccountAccessor(m_date, m_time);
 				StockDataAccessor cStockDataAccessor = stockDataIF.getStockDataAccessor(yesterday_date, m_time);
-				Target cTarget = new Target(cStock, cAccountAccessor.getHoldStock(stockID));
-				TranContext ctx = new TranContext(m_date, m_time, 
-						cTarget,  // 目标对象带有 股票数据与持股信息
-						cAccountAccessor, // ctx带有账户访问器
-						cStockDataAccessor);// ctx带有昨日数据访问器（用户不能查看今天得其他k线）
-				
-				// 构造CreateResultWrapper
-				CreateResultWrapper cCreateResultWrapper = new CreateResultWrapper();
-				cCreateResultWrapper.stockId = stockID;
-				cCreateResultWrapper.fPrice = cResultStockTime.stockTime().price;
-				
-				List<StockTime> stockTimeList = ctx.target().stock().getLatestStockTimeList();
-				if(stockTimeList.size()>0)
+				Vector<HoldStock> holdStockVector = new Vector<HoldStock>();
+				int iRetHoldStock = cAccountAccessor.getHoldStock(stockID, holdStockVector);
+				if(0 == iRetHoldStock)
 				{
-					// log
-					int iBegin = 0;
-					int iEnd = stockTimeList.size()-1;
-					int cnt = stockTimeList.size();
-					
-					BLog.output("CREATE", "    [%s %s] strategy_create stockID:%s (%s) (%s %.2f)...(%s %.2f) cnt(%d)\n", 
-							ctx.date(), ctx.time(), 
-							ctx.target().stock().getCurLatestStockInfo().ID,ctx.target().stock().GetLastDate(),
-							stockTimeList.get(iBegin).time, stockTimeList.get(iBegin).price,
-							stockTimeList.get(iEnd).time, stockTimeList.get(iEnd).price, 
-							cnt);
-
-					// 回调给用户
-					cIStrategyCreate.strategy_create(ctx, cCreateResultWrapper.createRes);
-					
-					if(cCreateResultWrapper.createRes.bCreate)
+					HoldStock cHoldStock = null;
+					if(holdStockVector.size()==1)
 					{
-						cCreateResultWrapperList.add(cCreateResultWrapper);
+						cHoldStock = holdStockVector.get(0);
 					}
+					Target cTarget = new Target(cStock, cHoldStock);
+					TranContext ctx = new TranContext(m_date, m_time, 
+							cTarget,  // 目标对象带有 股票数据与持股信息
+							cAccountAccessor, // ctx带有账户访问器
+							cStockDataAccessor);// ctx带有昨日数据访问器（用户不能查看今天得其他k线）
+					
+					// 构造CreateResultWrapper
+					CreateResultWrapper cCreateResultWrapper = new CreateResultWrapper();
+					cCreateResultWrapper.stockId = stockID;
+					cCreateResultWrapper.fPrice = cResultStockTime.stockTime().price;
+					
+					List<StockTime> stockTimeList = ctx.target().stock().getLatestStockTimeList();
+					if(stockTimeList.size()>0)
+					{
+						// log
+						int iBegin = 0;
+						int iEnd = stockTimeList.size()-1;
+						int cnt = stockTimeList.size();
+						
+						BLog.output("CREATE", "    [%s %s] strategy_create stockID:%s (%s) (%s %.2f)...(%s %.2f) cnt(%d)\n", 
+								ctx.date(), ctx.time(), 
+								ctx.target().stock().getCurLatestStockInfo().ID,ctx.target().stock().GetLastDate(),
+								stockTimeList.get(iBegin).time, stockTimeList.get(iBegin).price,
+								stockTimeList.get(iEnd).time, stockTimeList.get(iEnd).price, 
+								cnt);
+
+						// 回调给用户
+						cIStrategyCreate.strategy_create(ctx, cCreateResultWrapper.createRes);
+						
+						if(cCreateResultWrapper.createRes.bCreate)
+						{
+							cCreateResultWrapperList.add(cCreateResultWrapper);
+						}
+					}
+				}
+				else
+				{
+					BLog.output("CREATE", "    getHoldStock failed\n");
 				}
 			}
 			else
@@ -140,37 +156,44 @@ public class CreateWorkRequest extends BQThreadRequest {
 		int create_max_count = cIStrategyCreate.strategy_create_max_count();
 		
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
-		accIF.getHoldStockList(null, null, cHoldStockList);
-		List<CommissionOrder> cCommissionOrderList = accIF.getBuyCommissionOrderList();
+		int iRetHoldStockList = accIF.getHoldStockList(null, null, cHoldStockList);
+		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
+		int iRetBuyCommissionOrderList = accIF.getBuyCommissionOrderList(cCommissionOrderList);
+	
 		int alreadyCount = 0;
-		for(int i=0;i<cHoldStockList.size();i++)
+		int buyStockCount = 0;
+		if(0 == iRetHoldStockList 
+				&& 0 == iRetBuyCommissionOrderList)
 		{
-			HoldStock cHoldStock = cHoldStockList.get(i);
-			if(cHoldStock.totalAmount > 0)
+			for(int i=0;i<cHoldStockList.size();i++)
 			{
-				alreadyCount++;
-			}
-		}
-		for(int i=0;i<cCommissionOrderList.size();i++)
-		{
-			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
-			boolean bExitInHold = false;
-			for(int j=0;j<cHoldStockList.size();j++)
-			{
-				HoldStock cHoldStock = cHoldStockList.get(j);
-				if(cHoldStock.stockID.equals(cCommissionOrder.stockID))
+				HoldStock cHoldStock = cHoldStockList.get(i);
+				if(cHoldStock.totalAmount > 0)
 				{
-					bExitInHold = true;
-					break;
+					alreadyCount++;
 				}
 			}
-			if(!bExitInHold)
+			for(int i=0;i<cCommissionOrderList.size();i++)
 			{
-				alreadyCount++;
+				CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
+				boolean bExitInHold = false;
+				for(int j=0;j<cHoldStockList.size();j++)
+				{
+					HoldStock cHoldStock = cHoldStockList.get(j);
+					if(cHoldStock.stockID.equals(cCommissionOrder.stockID))
+					{
+						bExitInHold = true;
+						break;
+					}
+				}
+				if(!bExitInHold)
+				{
+					alreadyCount++;
+				}
 			}
+			buyStockCount = create_max_count - alreadyCount;
+			buyStockCount = Math.min(buyStockCount,cCreateResultWrapperList.size());
 		}
-		int buyStockCount = create_max_count - alreadyCount;
-		buyStockCount = Math.min(buyStockCount,cCreateResultWrapperList.size());
 		
 		StockCreateAnalysis.StockCreateAnalysisCompleteNotify.Builder msg_builder = StockCreateAnalysis.StockCreateAnalysisCompleteNotify.newBuilder();
 		msg_builder.setDate(m_date);
@@ -178,20 +201,29 @@ public class CreateWorkRequest extends BQThreadRequest {
 		for(int i = 0; i< buyStockCount; i++)
 		{
 			CreateResultWrapper cCreateResultWrapper = cCreateResultWrapperList.get(i);
-			StockCreateAnalysis.StockCreateAnalysisCompleteNotify.CreateItem.Builder cItemBuild = msg_builder.addItemBuilder();
-			cItemBuild.setStockID(cCreateResultWrapper.stockId);
-			cItemBuild.setPrice(cCreateResultWrapper.fPrice);
-			
+
 			// 买入量
-			float totalAssets = accIF.getTotalAssets(m_date, m_time);
-			float fMaxPositionRatio = cCreateResultWrapper.createRes.fMaxPositionRatio; 
-			float fMaxPositionMoney = totalAssets*fMaxPositionRatio; // 最大买入仓位钱
-			float fMaxMoney = cCreateResultWrapper.createRes.fMaxMoney; // 最大买入钱
-			float buyMoney = Math.min(fMaxMoney, fMaxPositionMoney);
-			
-			int amount = (int)(buyMoney/cCreateResultWrapper.fPrice);
-			amount = amount/100*100; // 买入整手化
-			cItemBuild.setAmount(amount);
+			RefFloat totalAssets = new RefFloat();
+			int iRetTotalAssets = accIF.getTotalAssets(m_date, m_time, totalAssets);
+			if(0 == iRetTotalAssets)
+			{
+				float fMaxPositionRatio = cCreateResultWrapper.createRes.fMaxPositionRatio; 
+				float fMaxPositionMoney = totalAssets.value*fMaxPositionRatio; // 最大买入仓位钱
+				float fMaxMoney = cCreateResultWrapper.createRes.fMaxMoney; // 最大买入钱
+				float buyMoney = Math.min(fMaxMoney, fMaxPositionMoney);
+				
+				int amount = (int)(buyMoney/cCreateResultWrapper.fPrice);
+				amount = amount/100*100; // 买入整手化
+				
+				StockCreateAnalysis.StockCreateAnalysisCompleteNotify.CreateItem.Builder cItemBuild = msg_builder.addItemBuilder();
+				cItemBuild.setStockID(cCreateResultWrapper.stockId);
+				cItemBuild.setPrice(cCreateResultWrapper.fPrice);
+				cItemBuild.setAmount(amount);
+			}
+			else
+			{
+				BLog.output("CREATE", "    getTotalAssets failed\n");
+			}
 		}
 		StockCreateAnalysis.StockCreateAnalysisCompleteNotify msg = msg_builder.build();
 		BEventSys.EventSender cSender = new BEventSys.EventSender();

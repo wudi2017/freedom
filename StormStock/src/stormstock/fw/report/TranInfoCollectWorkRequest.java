@@ -46,67 +46,82 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		cDailyReport.fSHComposite = cSHCompositeList.get(0).close();
 		
 		RefFloat lockedMoney = new RefFloat();
-		cAccountControlIF.getLockedMoney(lockedMoney);
-		float fTotalAssets = cAccountControlIF.getTotalAssets(m_date, m_time);
+		int iRetLockedMoney = cAccountControlIF.getLockedMoney(lockedMoney);
+		RefFloat totalAssets = new  RefFloat();
+		int iRetTotalAssets = cAccountControlIF.getTotalAssets(m_date, m_time, totalAssets);
 		RefFloat availableMoney = new RefFloat();
-		cAccountControlIF.getAvailableMoney(availableMoney);
+		int iRetAvailableMoney = cAccountControlIF.getAvailableMoney(availableMoney);
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
-		cAccountControlIF.getHoldStockList(m_date, m_time, cHoldStockList);
+		int iRetHoldStockList = cAccountControlIF.getHoldStockList(m_date, m_time, cHoldStockList);
 		List<String> cStockSelectList = new ArrayList<String>();
-		cAccountControlIF.getStockSelectList(cStockSelectList);
+		int iRetStockSelectList = cAccountControlIF.getStockSelectList(cStockSelectList);
 		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
-		cAccountControlIF.getCommissionOrderList(cCommissionOrderList);
+		int iRetCommissionOrderList = cAccountControlIF.getCommissionOrderList(cCommissionOrderList);
 		
-		// 打印添加当前总资产，可用钱
-		cDailyReport.fTotalAssets = fTotalAssets;
-		cDailyReport.fAvailableMoney = availableMoney.value;
-		BLog.output("REPORT", "    -LockedMoney: %.3f\n", lockedMoney.value);
-		BLog.output("REPORT", "    -TotalAssets: %.3f\n", fTotalAssets);
-		BLog.output("REPORT", "    -AvailableMoney: %.3f\n", availableMoney.value);
-		
-		// 打印持股
-		for(int i=0; i<cHoldStockList.size(); i++ )
+		if(0 == iRetLockedMoney
+				&& 0 == iRetTotalAssets
+				&& 0 == iRetAvailableMoney
+				&& 0 == iRetHoldStockList
+				&& 0 == iRetStockSelectList
+				&& 0 == iRetCommissionOrderList)
 		{
-			HoldStock cHoldStock = cHoldStockList.get(i);
-			BLog.output("REPORT", "    -HoldStock: %s %d %d %.3f %.3f %.3f %d\n", 
-					cHoldStock.stockID,
-					cHoldStock.totalAmount, cHoldStock.availableAmount, 
-					cHoldStock.refPrimeCostPrice, cHoldStock.curPrice, cHoldStock.totalAmount*cHoldStock.curPrice, 
-					cHoldStock.investigationDays);
-		}
-		
-		// 打印委托单
-		for(int i=0; i<cCommissionOrderList.size(); i++ )
-		{
-			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
-			String tranOpe = "BUY"; 
-			if(cCommissionOrder.tranAct == TRANACT.SELL ) tranOpe = "SELL";
-				
-			BLog.output("REPORT", "    -CommissionOrder: %s %s %s %d %.3f\n", 
-					cCommissionOrder.time, tranOpe, cCommissionOrder.stockID, 
-					cCommissionOrder.amount, cCommissionOrder.price);
-		}
-
-		// 打印晚间选股
-		if(cStockSelectList.size() > 0)
-		{
-			String logStr = "";
-			logStr += String.format("    -SelectList(%d):[ ", cStockSelectList.size());
-			for(int i=0; i<cStockSelectList.size(); i++ )
+			// 打印添加当前总资产，可用钱
+			cDailyReport.fTotalAssets = totalAssets.value;
+			cDailyReport.fAvailableMoney = availableMoney.value;
+			BLog.output("REPORT", "    -LockedMoney: %.3f\n", lockedMoney.value);
+			BLog.output("REPORT", "    -TotalAssets: %.3f\n", totalAssets.value);
+			BLog.output("REPORT", "    -AvailableMoney: %.3f\n", availableMoney.value);
+			
+			// 打印持股
+			for(int i=0; i<cHoldStockList.size(); i++ )
 			{
-				String stockId = cStockSelectList.get(i);
-				logStr += String.format("%s ", stockId);
-				if (i >= 7 && cStockSelectList.size()-1 > 16) {
-					logStr += String.format("... ", stockId);
-					break;
-				}
+				HoldStock cHoldStock = cHoldStockList.get(i);
+				BLog.output("REPORT", "    -HoldStock: %s %d %d %.3f %.3f %.3f %d\n", 
+						cHoldStock.stockID,
+						cHoldStock.totalAmount, cHoldStock.availableAmount, 
+						cHoldStock.refPrimeCostPrice, cHoldStock.curPrice, cHoldStock.totalAmount*cHoldStock.curPrice, 
+						cHoldStock.investigationDays);
 			}
-			logStr += String.format("]");
-			BLog.output("REPORT", "%s\n", logStr);
+			
+			// 打印委托单
+			for(int i=0; i<cCommissionOrderList.size(); i++ )
+			{
+				CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
+				String tranOpe = "BUY"; 
+				if(cCommissionOrder.tranAct == TRANACT.SELL ) tranOpe = "SELL";
+					
+				BLog.output("REPORT", "    -CommissionOrder: %s %s %s %d %.3f\n", 
+						cCommissionOrder.time, tranOpe, cCommissionOrder.stockID, 
+						cCommissionOrder.amount, cCommissionOrder.price);
+			}
+
+			// 打印晚间选股
+			if(cStockSelectList.size() > 0)
+			{
+				String logStr = "";
+				logStr += String.format("    -SelectList(%d):[ ", cStockSelectList.size());
+				for(int i=0; i<cStockSelectList.size(); i++ )
+				{
+					String stockId = cStockSelectList.get(i);
+					logStr += String.format("%s ", stockId);
+					if (i >= 7 && cStockSelectList.size()-1 > 16) {
+						logStr += String.format("... ", stockId);
+						break;
+					}
+				}
+				logStr += String.format("]");
+				BLog.output("REPORT", "%s\n", logStr);
+			}
+			
+			// 添加DailyReport
+			m_cInfoCollector.addDailyReport(cDailyReport);
 		}
-		
-		// 添加DailyReport
-		m_cInfoCollector.addDailyReport(cDailyReport);
+		else
+		{
+			BLog.output("REPORT", "    Get Account Info failed (%d %d %d %d %d %d)\n", 
+					iRetLockedMoney, iRetTotalAssets, iRetAvailableMoney,
+					iRetHoldStockList, iRetStockSelectList, iRetCommissionOrderList);
+		}
 		
 		ReportAnalysis.TranInfoCollectCompleteNotify.Builder msg_builder = ReportAnalysis.TranInfoCollectCompleteNotify.newBuilder();
 		msg_builder.setDate(m_date);

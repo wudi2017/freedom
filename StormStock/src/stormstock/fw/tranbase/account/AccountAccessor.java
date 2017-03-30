@@ -1,6 +1,7 @@
 package stormstock.fw.tranbase.account;
 
 import java.util.List;
+import java.util.Vector;
 
 import stormstock.fw.base.BTypeDefine.RefFloat;
 import stormstock.fw.tranbase.account.AccountPublicDef.CommissionOrder;
@@ -34,9 +35,9 @@ public class AccountAccessor {
 		return m_accountControlIF.getHoldStockList(m_date, m_time, out_list);
 	}
 	
-	public int getHoldStock(String stockID, HoldStock out_holdStock)
+	public int getHoldStock(String stockID, Vector<HoldStock> out_vector)
 	{
-		return m_accountControlIF.getHoldStock(m_date, m_time, stockID, out_holdStock);
+		return m_accountControlIF.getHoldStock(m_date, m_time, stockID, out_vector);
 	}
 
 	private String m_date;

@@ -1574,15 +1574,19 @@ bool getCtrlVFormWin(HWND hWnd,std::string & out_buf)
 		{
 			if (isAvailableClipboard())
 			{
-				Sleep(30);
-				keybd_event(VK_CONTROL, (BYTE)0, 0, 0);
-				Sleep(5);
-				::SendMessage(hWnd, WM_KEYDOWN, 'C', MapVirtualKey('C', 0));
-				Sleep(5);
-				::SendMessage(hWnd, WM_KEYUP, 'C', MapVirtualKey('C', 0));
-				Sleep(5);
-				keybd_event(VK_CONTROL, (BYTE)0, KEYEVENTF_KEYUP, 0);
-				Sleep(10);
+				//通过spy++工具截获窗口事件获取
+				::SendMessage(hWnd, WM_COMMAND, 0x0000E122, 0x00000000);
+
+				// 硬性发送事件，此方法好用，但是远程桌面关闭后keybd_event失效
+				//Sleep(30);
+				//keybd_event(VK_CONTROL, (BYTE)0, 0, 0);
+				//Sleep(5);
+				//::SendMessage(hWnd, WM_KEYDOWN, 'C', MapVirtualKey('C', 0));
+				//Sleep(5);
+				//::SendMessage(hWnd, WM_KEYUP, 'C', MapVirtualKey('C', 0));
+				//Sleep(5);
+				//keybd_event(VK_CONTROL, (BYTE)0, KEYEVENTF_KEYUP, 0);
+				//Sleep(10);
 
 				if (getClipboard(buf) && buf.size() > 0)
 				{

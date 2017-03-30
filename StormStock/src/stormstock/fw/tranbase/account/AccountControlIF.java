@@ -87,9 +87,9 @@ public class AccountControlIF {
 	}
 	
 	// 获取账户总资产（根据日期时间来确定股价）
-	public float getTotalAssets(String date, String time)
+	public int getTotalAssets(String date, String time, RefFloat out_totalAssets)
 	{
-		return m_account.getTotalAssets(date, time);
+		return m_account.getTotalAssets(date, time, out_totalAssets);
 	}
 	
 	
@@ -131,15 +131,15 @@ public class AccountControlIF {
 	{
 		return m_account.getCommissionOrderList(out_list);
 	}
-	// 获得买单委托列表（未成交）
-	public List<CommissionOrder> getBuyCommissionOrderList()
+	// 获得买单委托列表
+	public int getBuyCommissionOrderList(List<CommissionOrder> out_list)
 	{
-		return m_account.getBuyCommissionOrderList();
+		return m_account.getBuyCommissionOrderList(out_list);
 	}
-	// 获得卖单委托列表（未成交）
-	public List<CommissionOrder> getSellCommissionOrderList()
+	// 获得卖单委托列表
+	public int getSellCommissionOrderList(List<CommissionOrder> out_list)
 	{
-		return m_account.getSellCommissionOrderList();
+		return m_account.getSellCommissionOrderList(out_list);
 	}
 	
 	
@@ -152,18 +152,20 @@ public class AccountControlIF {
 	{
 		return m_account.getHoldStockList(date, time, out_list);
 	}
-	public HoldStock getHoldStock(String date, String time, String stockID)
+	public int getHoldStock(String date, String time, String stockID, HoldStock out_holdStock)
 	{
+		out_holdStock.Clear();
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
-		getHoldStockList(date, time, cHoldStockList);
+		int iRet = getHoldStockList(date, time, cHoldStockList);
 		for(int i=0;i<cHoldStockList.size();i++)
 		{
 			if(cHoldStockList.get(i).stockID.equals(stockID))
 			{
-				return cHoldStockList.get(i);
+				out_holdStock.CopyFrom(cHoldStockList.get(i));
+				break;
 			}
 		}
-		return null;
+		return iRet;
 	}
 	
 	/**

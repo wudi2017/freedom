@@ -75,6 +75,11 @@ public class AccountPublicDef {
 		
 		public HoldStock()
 		{
+			Clear();
+		}
+		
+		public void Clear()
+		{
 			stockID = "";
 			totalAmount = 0;
 			availableAmount = 0;

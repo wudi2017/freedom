@@ -167,12 +167,12 @@ public class Account {
 		out_list.addAll(m_commissionOrderList);
 		return 0;
 	}
-	// 获得买委托列表(未成交的)
-	public List<CommissionOrder> getBuyCommissionOrderList()
+	// 买委托单
+	public int getBuyCommissionOrderList(List<CommissionOrder> out_list)
 	{
-		List<CommissionOrder> cBuyCommissionOrderList = new ArrayList<CommissionOrder>();
+		out_list.clear();
 		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
-		this.getCommissionOrderList(cCommissionOrderList);
+		int iRet = this.getCommissionOrderList(cCommissionOrderList);
 		for(int i= 0;i<cCommissionOrderList.size();i++)
 		{
 			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
@@ -180,10 +180,28 @@ public class Account {
 			{
 				CommissionOrder cNewCommissionOrder = new CommissionOrder();
 				cNewCommissionOrder.CopyFrom(cCommissionOrder);
-				cBuyCommissionOrderList.add(cNewCommissionOrder);
+				out_list.add(cNewCommissionOrder);
 			}
 		}
-		return cBuyCommissionOrderList;
+		return iRet;
+	}
+	// 卖委托单
+	public int getSellCommissionOrderList(List<CommissionOrder> out_list)
+	{
+		out_list.clear();
+		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
+		int iRet = this.getCommissionOrderList(cCommissionOrderList);
+		for(int i= 0;i<cCommissionOrderList.size();i++)
+		{
+			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
+			if(cCommissionOrder.tranAct == TRANACT.SELL)
+			{
+				CommissionOrder cNewCommissionOrder = new CommissionOrder();
+				cNewCommissionOrder.CopyFrom(cCommissionOrder);
+				out_list.add(cNewCommissionOrder);
+			}
+		}
+		return iRet;
 	}
 	
 	// 获得持股列表（包含已经持有的，与当天下单成交的）
@@ -273,42 +291,25 @@ public class Account {
 		return false;
 	}
 	
-
-	
-	// 获得卖委托列表(未成交的)
-	public List<CommissionOrder> getSellCommissionOrderList()
-	{
-		List<CommissionOrder> cSellCommissionOrderList = new ArrayList<CommissionOrder>();
-		List<CommissionOrder> cCommissionOrderList = new ArrayList<CommissionOrder>();
-		this.getCommissionOrderList(cCommissionOrderList);
-		for(int i= 0;i<cCommissionOrderList.size();i++)
-		{
-			CommissionOrder cCommissionOrder = cCommissionOrderList.get(i);
-			if(cCommissionOrder.tranAct == TRANACT.SELL)
-			{
-				CommissionOrder cNewCommissionOrder = new CommissionOrder();
-				cNewCommissionOrder.CopyFrom(cCommissionOrder);
-				cSellCommissionOrderList.add(cNewCommissionOrder);
-			}
-		}
-		return cSellCommissionOrderList;
-	}
-	
 	// 获得账户总资产
-	public float getTotalAssets(String date, String time) {
+	public int getTotalAssets(String date, String time, RefFloat out_totalAssets) {
 		
 		float all_marketval = 0.0f;
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
-		getHoldStockList(date, time, cHoldStockList);
+		int iRetHoldStock = getHoldStockList(date, time, cHoldStockList);
 		for(int i=0;i<cHoldStockList.size();i++)
 		{
 			HoldStock cHoldStock = cHoldStockList.get(i);
 			all_marketval = all_marketval + cHoldStock.curPrice*cHoldStock.totalAmount;
 		}
 		RefFloat availableMoney = new RefFloat();
-		getAvailableMoney(availableMoney);
-		float all_asset = all_marketval + availableMoney.value;
-		return all_asset;
+		int iRetAvailableMoney = getAvailableMoney(availableMoney);
+		out_totalAssets.value = all_marketval + availableMoney.value;
+		if(0 == iRetHoldStock && 0 == iRetAvailableMoney)
+		{
+			return 0;
+		}
+		return -99;
 	}
 	
 	// 加载锁定资金，选股表，股票调查天数表
@@ -358,7 +359,8 @@ public class Account {
 		
 		RefFloat lockedMoney = new RefFloat();
 		this.getLockedMoney(lockedMoney);
-		float fTotalAssets = this.getTotalAssets(date, time);
+		RefFloat totalAssets = new RefFloat();
+		this.getTotalAssets(date, time, totalAssets);
 		RefFloat availableMoney = new RefFloat();
 		this.getAvailableMoney(availableMoney);
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
@@ -366,7 +368,7 @@ public class Account {
 		
 		// 打印资产
 		BLog.output("ACCOUNT", "    -LockedMoney: %.3f\n", lockedMoney.value);
-		BLog.output("ACCOUNT", "    -TotalAssets: %.3f\n", fTotalAssets);
+		BLog.output("ACCOUNT", "    -TotalAssets: %.3f\n", totalAssets.value);
 		BLog.output("ACCOUNT", "    -AvailableMoney: %.3f\n", availableMoney.value);
 		
 		// 打印持股

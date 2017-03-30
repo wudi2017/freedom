@@ -19,9 +19,9 @@ public class AccountAccessor {
 		m_accountControlIF = cAccountControlIF;
 	}
 	
-	public float getTotalAssets()
+	public int getTotalAssets(RefFloat out_totalAssets)
 	{
-		return m_accountControlIF.getTotalAssets(m_date, m_time);
+		return m_accountControlIF.getTotalAssets(m_date, m_time, out_totalAssets);
 	}
 	
 	public int getAvailableMoney(RefFloat out_availableMoney)
@@ -34,9 +34,9 @@ public class AccountAccessor {
 		return m_accountControlIF.getHoldStockList(m_date, m_time, out_list);
 	}
 	
-	public HoldStock getHoldStock(String stockID)
+	public int getHoldStock(String stockID, HoldStock out_holdStock)
 	{
-		return m_accountControlIF.getHoldStock(m_date, m_time, stockID);
+		return m_accountControlIF.getHoldStock(m_date, m_time, stockID, out_holdStock);
 	}
 
 	private String m_date;

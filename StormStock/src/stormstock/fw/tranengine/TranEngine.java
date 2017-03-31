@@ -93,23 +93,23 @@ public class TranEngine {
 	{
 		public void command(String cmd)
 		{
-			String tranDate = GlobalTranDateTime.getTranDate();
-			String tranTime =  GlobalTranDateTime.getTranTime();
+			String curDate = BUtilsDateTime.GetCurDateStr();
+			String curTime =  BUtilsDateTime.GetCurTimeStr();
 			if(cmd.equals("pa")) 
 			{
 				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
-				cAccountControlIF.printAccount(tranDate, tranTime);
+				cAccountControlIF.printAccount(curDate, curTime);
 			}
 			else if(cmd.equals("ai"))
 			{
 				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
-				cAccountControlIF.newDayInit(BUtilsDateTime.GetCurDateStr(), BUtilsDateTime.GetCurTimeStr());
+				cAccountControlIF.newDayInit(curDate, curTime);
 			}
 			else if(cmd.equals("gr"))
 			{
 				ReportAnalysis.GenerateReportRequest.Builder msg_builder = ReportAnalysis.GenerateReportRequest.newBuilder();
-				msg_builder.setDate(tranDate);
-				msg_builder.setTime(tranTime);
+				msg_builder.setDate(curDate);
+				msg_builder.setTime(curTime);
 				
 				ReportAnalysis.GenerateReportRequest msg = msg_builder.build();
 				BEventSys.EventSender cSender = new BEventSys.EventSender();

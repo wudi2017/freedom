@@ -38,7 +38,8 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
 		
 		// 创建DailyReport
-		DailyReport cDailyReport = new DailyReport(m_date);
+		DailyReport cDailyReport = new DailyReport();
+		cDailyReport.date = m_date;
 		
 		// 添加当天上证指数
 		ResultHistoryData cResultHistoryData = cStockDataIF.getHistoryData("999999", m_date, m_date);
@@ -67,7 +68,6 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		{
 			// 打印添加当前总资产，可用钱
 			cDailyReport.fTotalAssets = totalAssets.value;
-			cDailyReport.fAvailableMoney = availableMoney.value;
 			BLog.output("REPORT", "    -LockedMoney: %.3f\n", lockedMoney.value);
 			BLog.output("REPORT", "    -TotalAssets: %.3f\n", totalAssets.value);
 			BLog.output("REPORT", "    -AvailableMoney: %.3f\n", availableMoney.value);

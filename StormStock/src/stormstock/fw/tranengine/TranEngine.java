@@ -67,8 +67,6 @@ public class TranEngine {
 		m_cModuleMgr.regModule(new StockCreateAnalyzer()); 	// Create Module
 		m_cModuleMgr.regModule(new StockClearAnalyzer()); 		// Clear Module
 		m_cModuleMgr.regModule(new ReportModule()); 	// ReportEngine Module
-		m_cModuleMgr.initialize();
-		m_cModuleMgr.start();
 		
 		// 初始化用户设置
 		m_cTranStockSet = null; 
@@ -259,6 +257,10 @@ public class TranEngine {
 		// 股票数据接口全局设置
 		StockDataIF cStockDataIF = new StockDataIF();
 		GlobalUserObj.setCurrentStockDataIF(cStockDataIF);
+		
+		// 启动所有模块
+		m_cModuleMgr.initialize();
+		m_cModuleMgr.start();
 		
 		// 发送开始交易命令到控制器
 		BLog.output("TRAN", "Start Trasection\n");

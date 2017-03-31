@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<account ID="mock001" date="2016-04-01" password="mock001_password" time="20:00:00">
+  <LockedMoney value="100000.0"/>
+  <SelectList>
+    <Stock stockID="000028"/>
+    <Stock stockID="000049"/>
+    <Stock stockID="000020"/>
+  </SelectList>
+  <CommissionOrderList/>
+  <holdStockInvestigationDaysMap/>
+</account>

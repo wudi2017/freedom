@@ -23,6 +23,11 @@ public class AccountControlIF {
 		m_account = null;
 	}
 	
+	public String getAccountID()
+	{
+		return m_account.getAccountID();
+	}
+	
 	/*
 	 * 获得某日期时间的账户访问器
 	 * 可以获取账户信息

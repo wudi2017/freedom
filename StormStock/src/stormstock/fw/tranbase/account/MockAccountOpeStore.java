@@ -47,7 +47,7 @@ public class MockAccountOpeStore {
 	{
 		m_accountID = accountID;
 		m_password = password;
-		m_accXMLFile = "account\\MOCK_ACCOUNT_" + m_accountID + ".xml";
+		m_accXMLFile = "rw\\MOCK_ACCOUNT_" + m_accountID + ".xml";
 	}
 	
 	public boolean storeInit()

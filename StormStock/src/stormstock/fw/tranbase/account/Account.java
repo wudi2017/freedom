@@ -20,6 +20,7 @@ public class Account {
 	// 构造账户实体时，需要传入操作接口（模拟，真实）
 	public Account(ACCOUNTTYPE eAccType, String accountID, String password)
 	{
+		m_accountID = accountID;
 		IAccountOpe cIAccountOpe = null;
 		if(eAccType == ACCOUNTTYPE.MOCK)
 		{
@@ -38,6 +39,11 @@ public class Account {
 
 		load(); // 加载数据
 		store(null, null); // 存储数据
+	}
+	
+	public String getAccountID()
+	{
+		return m_accountID;
 	}
 	
 	// ***********************************************************************
@@ -418,6 +424,7 @@ public class Account {
 	/** **********************************************************************
 	 * 账户操作接口，可以设置为模拟或真实
 	 */
+	private String m_accountID;
 	private IAccountOpe m_cIAccountOpe;
 	
 	private float m_lockedMoney;

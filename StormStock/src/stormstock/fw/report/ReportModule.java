@@ -25,7 +25,8 @@ public class ReportModule extends BModuleBase {
 	@Override
 	public void initialize() {
 		// TODO Auto-generated method stub
-		m_infoCollector = new InfoCollector();
+		AccountControlIF accIF = GlobalUserObj.getCurAccountControlIF();
+		m_infoCollector = new InfoCollector(accIF.getAccountID());
 		m_qThread = new BQThread();
 		m_eventRecever = new EventReceiver("ReportReceiver");
 		m_eventRecever.Subscribe("BEV_TRAN_TRANINFOCOLLECTREQUEST", this, "onTranInfoCollectRequest");

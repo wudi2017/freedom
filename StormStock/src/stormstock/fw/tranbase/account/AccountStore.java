@@ -61,7 +61,7 @@ public class AccountStore {
 	{
 		m_accountID = accountID;
 		m_password = password;
-		m_accXMLFile = "account\\ACCOUNT_EXTEND_" + m_accountID + ".xml";
+		m_accXMLFile = "rw\\ACCOUNT_EXTEND_" + m_accountID + ".xml";
 	}
 	
 	public boolean storeInit()

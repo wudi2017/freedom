@@ -37,7 +37,7 @@ public class Account {
 		m_accountStore = new AccountStore(accountID, password);
 
 		load(); // 加载数据
-		store(); // 存储数据
+		store(null, null); // 存储数据
 	}
 	
 	// ***********************************************************************
@@ -85,7 +85,7 @@ public class Account {
 				m_holdStockInvestigationDaysMap.clear();
 				m_holdStockInvestigationDaysMap.putAll(newholdStockInvestigationDaysMap);
 				
-				store();
+				store(date, time);
 			}
 			else
 			{
@@ -94,7 +94,7 @@ public class Account {
 			
 			// 清空委托表
 			m_commissionOrderList.clear();
-			store();
+			store(date, time);
 		}
 		
 		return iNewDayTranEnd; 
@@ -114,7 +114,7 @@ public class Account {
 			cCommissionOrder.price = price;
 			m_commissionOrderList.add(cCommissionOrder);
 		}
-		store();
+		store(date, time);
 		return ret;
 	}
 	
@@ -132,7 +132,7 @@ public class Account {
 			cCommissionOrder.price = price;
 			m_commissionOrderList.add(cCommissionOrder);
 		}
-		store();
+		store(date, time);
 		return ret;
 	}
 	
@@ -230,7 +230,7 @@ public class Account {
 	// 扩展接口，用于实现在基础功能之上的扩展
 	
 	// 选股列表设置
-	public int setStockSelectList(List<String> stockIDList)
+	public int setStockSelectList(String date, String time, List<String> stockIDList)
 	{
 		m_stockSelectList.clear();
 		for(int i=0; i<stockIDList.size();i++)
@@ -247,7 +247,7 @@ public class Account {
 			m_stockSelectList.remove(cHoldStockList.get(i).stockID);
 		}
 		
-		store();
+		store(date, time);
 		
 		return 0;
 	}
@@ -339,9 +339,11 @@ public class Account {
 		}
 	}
 	// 保存选股表
-	private void store()
+	private void store(String date, String time)
 	{
 		StoreEntity cStoreEntity = new StoreEntity();
+		cStoreEntity.date = date;
+		cStoreEntity.time = time;
 		// locked money
 		cStoreEntity.lockedMoney = m_lockedMoney;
 		// stockSelectList

@@ -102,7 +102,6 @@ public class WorkEntity {
 					}
 					BThread.sleep(3000);
 				}
-	
 				BLog.output("CTRL", "[%s %s] account newDayInit = %b \n", dateStr, timestr, bAccInit);
 				
 				if(bAccInit)
@@ -139,37 +138,29 @@ public class WorkEntity {
 						if(timestr.compareTo(timestr_end) > 0) break;
 					}
 
-					// 20:00 更新历史数据通知 等待更新完毕通知
-					timestr = "20:00:00";
-					if(waitForDateTime(dateStr, timestr))
-					{
-						BLog.output("CTRL", "[%s %s] updateStockData \n", dateStr, timestr);
-						StockDataIF stockDataIF = GlobalUserObj.getCurStockDataIF();
-						stockDataIF.updateAllLocalStocks(dateStr);
-					}
-					
-					// 22:00 选股 等待选股完毕
-					timestr = "22:00:00";
-					if(waitForDateTime(dateStr, timestr))
-					{
-						BLog.output("CTRL", "[%s %s] StockSelectAnalysis \n", dateStr, timestr);
-						m_entitySelect.selectStock(dateStr, timestr);
-					}
-					
-					// 22:30 当日报告信息收集
-					timestr = "22:30:00";
-					if(waitForDateTime(dateStr, timestr))
-					{
-						BLog.output("CTRL", "[%s %s] transaction info collection \n", dateStr, timestr);
-						m_entityReport.tranInfoCollect(dateStr, timestr);
-					}
-					
-					// 23:50  账户当日交易结束
-					timestr = "23:50:00";
+					// 16:00 账户当日交易结束
+					timestr = "16:00:00";
 					if(waitForDateTime(dateStr, timestr))
 					{
 						BLog.output("CTRL", "[%s %s] account newDayTranEnd\n", dateStr, timestr);
 						accIF.newDayTranEnd(dateStr, timestr);
+					}
+					
+					// 20:00 
+					timestr = "20:00:00";
+					if(waitForDateTime(dateStr, timestr))
+					{
+						BLog.output("CTRL", "[%s %s] updateStockData & StockSelectAnalysis & transaction info collection \n", dateStr, timestr);
+						
+						// 更新历史数据
+						StockDataIF stockDataIF = GlobalUserObj.getCurStockDataIF();
+						stockDataIF.updateAllLocalStocks(dateStr);
+						
+						// 选股 等待选股完毕
+						m_entitySelect.selectStock(dateStr, timestr);
+						
+						// 当日报告信息收集
+						m_entityReport.tranInfoCollect(dateStr, timestr);
 					}
 				}
 				else

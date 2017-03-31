@@ -8,6 +8,7 @@ import stormstock.fw.base.BEventSys;
 import stormstock.fw.base.BLog;
 import stormstock.fw.base.BModuleManager;
 import stormstock.fw.base.BPath;
+import stormstock.fw.base.BUtilsDateTime;
 import stormstock.fw.base.BEventSys.EventReceiver;
 import stormstock.fw.event.EventDef;
 import stormstock.fw.event.ReportAnalysis;
@@ -101,6 +102,11 @@ public class TranEngine {
 				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
 				cAccountControlIF.printAccount(tranDate, tranTime);
 			}
+			else if(cmd.equals("ai"))
+			{
+				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
+				cAccountControlIF.newDayInit(BUtilsDateTime.GetCurDateStr(), BUtilsDateTime.GetCurTimeStr());
+			}
 			else if(cmd.equals("gr"))
 			{
 				ReportAnalysis.GenerateReportRequest.Builder msg_builder = ReportAnalysis.GenerateReportRequest.newBuilder();
@@ -115,6 +121,7 @@ public class TranEngine {
 			{
 				BLog.output( "TEST", "command invalid!\n");
 				BLog.output( "TEST", "pa :  print account\n");
+				BLog.output( "TEST", "ai :  account init\n");
 				BLog.output( "TEST", "gr :  generate report\n");
 			}
 		}

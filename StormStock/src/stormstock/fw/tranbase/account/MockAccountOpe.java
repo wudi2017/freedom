@@ -48,8 +48,14 @@ public class MockAccountOpe extends IAccountOpe {
 	
 	@Override
 	public int newDayInit(String date, String time) 
-	{ 
-		// 新一天时，所有持股均可卖
+	{
+		return 0; 
+	}
+
+	@Override
+	public int newDayTranEnd(String date, String time) {
+		
+		// 所有持股均可卖
 		HoldStock cHoldStock = null;
 		for(int i = 0; i< m_holdStockList.size(); i++)
 		{
@@ -57,15 +63,9 @@ public class MockAccountOpe extends IAccountOpe {
 			cHoldStock.availableAmount = cHoldStock.totalAmount;
 		}
 		
-		store();
-		
-		return 0; 
-	}
-
-	@Override
-	public int newDayTranEnd(String date, String time) {
+		// 更新现价
 		List<HoldStock> list = new ArrayList<HoldStock>();
-		getHoldStockList(date, time, list); // 更新现价
+		getHoldStockList(date, time, list); 
 		store(); // 保存
 		return 0;
 	}

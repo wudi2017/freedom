@@ -99,9 +99,9 @@ public class AccountControlIF {
 		return m_account.getAvailableMoney(out_availableMoney);
 	}
 	
-	public int setStockSelectList(List<String> stockIDList)
+	public int setStockSelectList(String date, String time, List<String> stockIDList)
 	{
-		return m_account.setStockSelectList(stockIDList);
+		return m_account.setStockSelectList(date, time, stockIDList);
 	}
 	
 	public int getStockSelectList(List<String> out_list)

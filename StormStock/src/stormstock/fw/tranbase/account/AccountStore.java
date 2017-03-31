@@ -38,10 +38,19 @@ import stormstock.fw.tranbase.account.AccountPublicDef.TRANACT;
 
 public class AccountStore {
 	
-	
-	
 	public static class StoreEntity
 	{
+		public StoreEntity()
+		{
+			date = null;
+			time = null;
+			lockedMoney = null;
+			stockSelectList = null;
+			commissionOrderList = null;
+			holdStockInvestigationDaysMap = null;
+		}
+		public String date;
+		public String time;
 		public Float lockedMoney;
 		public List<String> stockSelectList;
 		public List<CommissionOrder> commissionOrderList;
@@ -124,6 +133,16 @@ public class AccountStore {
         
         if(null != cStoreEntity)
         {
+        	// date time
+        	if(null != cStoreEntity.date)
+        	{
+        		root.setAttribute("date", cStoreEntity.date);
+        	}
+        	if(null != cStoreEntity.time)
+        	{
+        		root.setAttribute("time", cStoreEntity.time);
+        	}
+        	
         	// locked Money
         	if(null != cStoreEntity.lockedMoney)
         	{
@@ -293,6 +312,10 @@ public class AccountStore {
 				return null; // 账号秘密不对 load失败
 			}
 		    
+        	// date time
+		    String accDate = rootElement.getAttribute("date");
+		    String accTime = rootElement.getAttribute("time");
+		    
 		    // 加载锁定资金
 		    Float lockedMoney = null;
 		    {
@@ -385,6 +408,8 @@ public class AccountStore {
 		    }
 		 
 		    StoreEntity cStoreEntity = new StoreEntity();
+		    cStoreEntity.date = accDate;
+		    cStoreEntity.time = accTime;
 		    cStoreEntity.lockedMoney = lockedMoney;
 		    cStoreEntity.stockSelectList = stockSelectList;
 		    cStoreEntity.commissionOrderList = commissionOrderList;

@@ -18,10 +18,12 @@ public class Application {
 		cTranEngine.setClearPositonStrategy(new Strategy_D1.EStockComplexDZCZX.StrategyClear());
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.REAL); 
-		
-		//cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		//cTranEngine.setHistoryTimeSpan("2016-06-01", "2017-03-01");
 		cTranEngine.setTranMode(TRANTIMEMODE.REALTIME);
+		
+//		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
+//		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
+//		cTranEngine.setHistoryTimeSpan("2017-03-29", "2017-04-04");
+		
 
 		cTranEngine.run();
 		

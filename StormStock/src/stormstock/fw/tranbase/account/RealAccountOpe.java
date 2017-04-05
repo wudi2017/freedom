@@ -11,6 +11,7 @@ import stormstock.fw.tranbase.account.AccountPublicDef.HoldStock;
 import stormstock.ori.capi.CATHSAccount;
 import stormstock.ori.capi.CATHSAccount.ResultAvailableMoney;
 import stormstock.ori.capi.CATHSAccount.ResultHoldStockList;
+import stormstock.ori.capi.CATHSAccount.ResultTotalAssets;
 
 public class RealAccountOpe extends IAccountOpe {
 
@@ -58,12 +59,37 @@ public class RealAccountOpe extends IAccountOpe {
 	}
 
 	@Override
-	public int getAvailableMoney(RefFloat out_availableMoney) {
+	public int getAvailableMoney(String date, String time, RefFloat out_availableMoney) {
 		ResultAvailableMoney cResultAvailableMoney = CATHSAccount.getAvailableMoney();
 		out_availableMoney.value = cResultAvailableMoney.availableMoney;
 		BLog.output("ACCOUNT", " @RealAccountOpe getAvailableMoney err(%d) availableMoney(%.3f) \n", 
 				cResultAvailableMoney.error, cResultAvailableMoney.availableMoney);
 		return cResultAvailableMoney.error;
+	}
+	
+	@Override
+	public int getMoney(String date, String time, RefFloat out_totalAssets) {
+		ResultHoldStockList cResultHoldStockList = CATHSAccount.getHoldStockList();
+		BLog.output("ACCOUNT", " @RealAccountOpe getHoldStockList err(%d) HoldStockList size(%d) \n", 
+				cResultHoldStockList.error, cResultHoldStockList.resultList.size());
+		ResultTotalAssets cResultTotalAssets = CATHSAccount.getTotalAssets();
+		BLog.output("ACCOUNT", " @RealAccountOpe getHoldStockList err(%d) TotalAssets(%.3f) \n", 
+				cResultTotalAssets.error, cResultTotalAssets.totalAssets);
+		
+		if(0 == cResultHoldStockList.error && 0 == cResultTotalAssets.error)
+		{
+			out_totalAssets.value = cResultTotalAssets.totalAssets;
+			 for(int i=0;i<cResultHoldStockList.resultList.size();i++)
+	        {
+	        	stormstock.ori.capi.CATHSAccount.HoldStock cHoldStock = cResultHoldStockList.resultList.get(i);
+	        	out_totalAssets.value = out_totalAssets.value - cHoldStock.totalAmount * cHoldStock.curPrice;
+	        }
+			return 0;
+		}
+		else
+		{
+			return -98;
+		}
 	}
 	
 	@Override

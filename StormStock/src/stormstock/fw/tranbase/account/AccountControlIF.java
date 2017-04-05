@@ -97,11 +97,15 @@ public class AccountControlIF {
 	{
 		return m_account.getTotalAssets(date, time, out_totalAssets);
 	}
-	
-	
-	public int getAvailableMoney(RefFloat out_availableMoney)
+
+	public int getAvailableMoney(String date, String time, RefFloat out_availableMoney)
 	{
-		return m_account.getAvailableMoney(out_availableMoney);
+		return m_account.getAvailableMoney(date, time, out_availableMoney);
+	}
+	
+	public int getMoney(String date, String time, RefFloat out_money)
+	{
+		return m_account.getMoney(date, time, out_money);
 	}
 	
 	public int setStockSelectList(String date, String time, List<String> stockIDList)

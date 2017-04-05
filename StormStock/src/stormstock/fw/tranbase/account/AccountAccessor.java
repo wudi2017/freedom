@@ -25,9 +25,9 @@ public class AccountAccessor {
 		return m_accountControlIF.getTotalAssets(m_date, m_time, out_totalAssets);
 	}
 	
-	public int getAvailableMoney(RefFloat out_availableMoney)
+	public int getAvailableMoney(String date, String time, RefFloat out_availableMoney)
 	{
-		return m_accountControlIF.getAvailableMoney(out_availableMoney);
+		return m_accountControlIF.getAvailableMoney(m_date, m_time, out_availableMoney);
 	}
 	
 	public int getHoldStockList(List<HoldStock> out_list)

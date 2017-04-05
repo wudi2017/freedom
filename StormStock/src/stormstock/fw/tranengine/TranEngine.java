@@ -1,6 +1,7 @@
 package stormstock.fw.tranengine;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import stormstock.fw.base.BConsole;
@@ -12,9 +13,11 @@ import stormstock.fw.base.BUtilsDateTime;
 import stormstock.fw.base.BEventSys.EventReceiver;
 import stormstock.fw.event.EventDef;
 import stormstock.fw.event.ReportAnalysis;
+import stormstock.fw.event.StockSelectAnalysis;
 import stormstock.fw.event.Transaction;
 import stormstock.fw.event.Transaction.ControllerStartNotify;
 import stormstock.fw.control.FlowController;
+import stormstock.fw.control.StockObjFlow;
 import stormstock.fw.report.ReportModule;
 import stormstock.fw.stockclearanalyzer.StockClearAnalyzer;
 import stormstock.fw.stockcreateanalyzer.StockCreateAnalyzer;
@@ -105,6 +108,11 @@ public class TranEngine {
 				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
 				cAccountControlIF.newDayInit(curDate, curTime);
 			}
+			else if(cmd.equals("ae"))
+			{
+				AccountControlIF cAccountControlIF = GlobalUserObj.getCurAccountControlIF();
+				cAccountControlIF.newDayTranEnd(curDate, curTime);
+			}
 			else if(cmd.equals("gr"))
 			{
 				ReportAnalysis.GenerateReportRequest.Builder msg_builder = ReportAnalysis.GenerateReportRequest.newBuilder();
@@ -115,12 +123,37 @@ public class TranEngine {
 				BEventSys.EventSender cSender = new BEventSys.EventSender();
 				cSender.Send("BEV_TRAN_GENERATEREPORTREQUEST", msg);
 			}
+			else if(cmd.equals("ud"))
+			{
+				StockDataIF stockDataIF = GlobalUserObj.getCurStockDataIF();
+				stockDataIF.updateAllLocalStocks(curDate);
+			}
+			else if(cmd.equals("sa"))
+			{
+				StockSelectAnalysis.StockSelectAnalysisRequest.Builder msg_builder = StockSelectAnalysis.StockSelectAnalysisRequest.newBuilder();
+				msg_builder.setDate(curDate);
+				msg_builder.setTime(curTime);
+				List<String> cTranStockIDSet = StockObjFlow.getTranStockIDSet();
+				for(int i=0;i<cTranStockIDSet.size();i++)
+				{
+					msg_builder.addStockID(cTranStockIDSet.get(i));
+				}
+				StockSelectAnalysis.StockSelectAnalysisRequest msg = msg_builder.build();
+				if(msg.getStockIDList().size() > 0)
+				{
+					BEventSys.EventSender cSender = new BEventSys.EventSender();
+					cSender.Send("BEV_TRAN_STOCKSELECTANALYSISREQUEST", msg);
+				}
+			}	
 			else
 			{
 				BLog.output( "TEST", "command invalid!\n");
 				BLog.output( "TEST", "pa :  print account\n");
 				BLog.output( "TEST", "ai :  account init\n");
+				BLog.output( "TEST", "ae :  account end\n");
 				BLog.output( "TEST", "gr :  generate report\n");
+				BLog.output( "TEST", "ud :  update data\n");
+				BLog.output( "TEST", "sa :  select analysis\n");
 			}
 		}
 	}

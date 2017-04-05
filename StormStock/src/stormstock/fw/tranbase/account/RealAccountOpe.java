@@ -73,7 +73,7 @@ public class RealAccountOpe extends IAccountOpe {
 		BLog.output("ACCOUNT", " @RealAccountOpe getHoldStockList err(%d) HoldStockList size(%d) \n", 
 				cResultHoldStockList.error, cResultHoldStockList.resultList.size());
 		ResultTotalAssets cResultTotalAssets = CATHSAccount.getTotalAssets();
-		BLog.output("ACCOUNT", " @RealAccountOpe getHoldStockList err(%d) TotalAssets(%.3f) \n", 
+		BLog.output("ACCOUNT", " @RealAccountOpe getTotalAssets err(%d) TotalAssets(%.3f) \n", 
 				cResultTotalAssets.error, cResultTotalAssets.totalAssets);
 		
 		if(0 == cResultHoldStockList.error && 0 == cResultTotalAssets.error)

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<account ID="mock001" password="mock001_password">
-  <Money total="207561.906"/>
-  <HoldStockList/>
-</account>

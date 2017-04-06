@@ -49,13 +49,13 @@ public class EStockComplexDZCZX {
 	public static class TranStockSet extends ITranStockSetFilter {
 		@Override
 		public boolean tran_stockset_byLatestStockInfo(StockInfo cStockInfo) {
-//			if(cStockInfo.ID.compareTo("002123") >= 0 && cStockInfo.ID.compareTo("002123") <= 0) {	
-//				return true;
-//			}
-			if(cStockInfo.circulatedMarketValue < 1000.0f)
-			{
+			if(cStockInfo.ID.compareTo("000778") >= 0 && cStockInfo.ID.compareTo("000778") <= 0) {	
 				return true;
 			}
+//			if(cStockInfo.circulatedMarketValue < 1000.0f)
+//			{
+//				return true;
+//			}
 			return false;
 		}
 	}
@@ -121,6 +121,15 @@ public class EStockComplexDZCZX {
 			List<StockTime> list_stockTime = ctx.target().stock().getLatestStockTimeList();
 			float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 			float fNowPrice = ctx.target().stock().getLatestPrice();
+			
+			// 跌停不买进
+			float fYC = BUtilsMath.saveNDecimal(fYesterdayClosePrice, 2);
+			float fDieTing = BUtilsMath.saveNDecimal(fYC*0.9f, 2);
+			if(0 == Float.compare(fDieTing, fNowPrice))
+			{
+				out_sr.bCreate = false;
+				return;
+			}
 			
 //			CalcParam(ctx);
 //			
@@ -194,10 +203,22 @@ public class EStockComplexDZCZX {
 			
 			CalcParam(ctx);
 			
-			if(cHoldStock.investigationDays >= 30) // 调查天数控制
+			// 涨停不卖出
+			float fYC = BUtilsMath.saveNDecimal(fYesterdayClosePrice, 2);
+			float fZhangTing = BUtilsMath.saveNDecimal(fYC*1.1f, 2);
+			if(0 == Float.compare(fZhangTing, fNowPrice))
+			{
+				out_sr.bClear = false;
+				return;
+			}
+			
+			// 持股超时卖出
+			if(cHoldStock.investigationDays >= 30) 
 			{
 				out_sr.bClear = true;
+				return;
 			}
+
 
 //			float checkSellH = fStarHigh + (fStarHigh-fStarLow)/2;
 //			if(cHoldStock.curPrice >= checkSellH)
@@ -211,9 +232,11 @@ public class EStockComplexDZCZX {
 //				out_sr.bClear = true;
 //			}
 			
-			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.8) // 止盈止损x个点卖
+			// 止盈止损卖出
+			if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.15) // 止盈止损x个点卖
 			{
 				out_sr.bClear = true;
+				return;
 			}
 		}
 	}
@@ -424,7 +447,7 @@ public class EStockComplexDZCZX {
 		
 		cTranEngine.setAccountType(TRANACCOUNTTYPE.MOCK); 
 		cTranEngine.setTranMode(TRANTIMEMODE.HISTORYMOCK);
-		cTranEngine.setHistoryTimeSpan("2009-01-01", "2017-01-01");
+		cTranEngine.setHistoryTimeSpan("2017-03-29", "2017-04-06");
 		
 		cTranEngine.run();
 		cTranEngine.mainLoop();

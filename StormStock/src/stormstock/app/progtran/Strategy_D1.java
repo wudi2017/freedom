@@ -413,6 +413,15 @@ public class Strategy_D1 {
 				float fYesterdayClosePrice = ctx.target().stock().GetLastYesterdayClosePrice();
 				float fNowPrice = ctx.target().stock().getLatestPrice();
 				
+				// 跌停不买进
+				float fYC = BUtilsMath.saveNDecimal(fYesterdayClosePrice, 2);
+				float fDieTing = BUtilsMath.saveNDecimal(fYC*0.9f, 2);
+				if(0 == Float.compare(fDieTing, fNowPrice))
+				{
+					out_sr.bCreate = false;
+					return;
+				}
+				
 //				CalcParam(ctx);
 //				
 //				if(bCheckFlg)
@@ -484,11 +493,23 @@ public class Strategy_D1 {
 				HoldStock cHoldStock = ctx.target().holdStock();
 				
 				CalcParam(ctx);
+
+				// 涨停不卖出
+				float fYC = BUtilsMath.saveNDecimal(fYesterdayClosePrice, 2);
+				float fZhangTing = BUtilsMath.saveNDecimal(fYC*1.1f, 2);
+				if(0 == Float.compare(fZhangTing, fNowPrice))
+				{
+					out_sr.bClear = false;
+					return;
+				}
 				
-				if(cHoldStock.investigationDays >= 30) // 调查天数控制
+				// 持股超时卖出
+				if(cHoldStock.investigationDays >= 30) 
 				{
 					out_sr.bClear = true;
+					return;
 				}
+
 
 //				float checkSellH = fStarHigh + (fStarHigh-fStarLow)/2;
 //				if(cHoldStock.curPrice >= checkSellH)
@@ -502,9 +523,11 @@ public class Strategy_D1 {
 //					out_sr.bClear = true;
 //				}
 				
+				// 止盈止损卖出
 				if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.15) // 止盈止损x个点卖
 				{
 					out_sr.bClear = true;
+					return;
 				}
 			}
 		}

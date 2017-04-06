@@ -48,10 +48,13 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		
 		RefFloat lockedMoney = new RefFloat();
 		int iRetLockedMoney = cAccountControlIF.getLockedMoney(lockedMoney);
+		RefFloat availableMoney = new RefFloat();
+		int iRetAvailableMoney = cAccountControlIF.getAvailableMoney(m_date, m_time, availableMoney);
+		
 		RefFloat totalAssets = new  RefFloat();
 		int iRetTotalAssets = cAccountControlIF.getTotalAssets(m_date, m_time, totalAssets);
-		RefFloat availableMoney = new RefFloat();
-		int iRetAvailableMoney = cAccountControlIF.getAvailableMoney(availableMoney);
+		RefFloat money = new RefFloat();
+		int iRetMoney = cAccountControlIF.getMoney(m_date, m_time, money);
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 		int iRetHoldStockList = cAccountControlIF.getHoldStockList(m_date, m_time, cHoldStockList);
 		List<String> cStockSelectList = new ArrayList<String>();
@@ -60,17 +63,26 @@ public class TranInfoCollectWorkRequest extends BQThreadRequest {
 		int iRetCommissionOrderList = cAccountControlIF.getCommissionOrderList(cCommissionOrderList);
 		
 		if(0 == iRetLockedMoney
-				&& 0 == iRetTotalAssets
 				&& 0 == iRetAvailableMoney
+				&& 0 == iRetTotalAssets
+				&& 0 == iRetMoney
 				&& 0 == iRetHoldStockList
 				&& 0 == iRetStockSelectList
 				&& 0 == iRetCommissionOrderList)
 		{
-			// 打印添加当前总资产，可用钱
+			// 打印资产
 			cDailyReport.fTotalAssets = totalAssets.value;
-			BLog.output("REPORT", "    -LockedMoney: %.3f\n", lockedMoney.value);
+			BLog.output("REPORT", "    [LockedMoney] %.3f\n", lockedMoney.value);
+			BLog.output("REPORT", "    [AvailableMoney] %.3f\n", availableMoney.value);
 			BLog.output("REPORT", "    -TotalAssets: %.3f\n", totalAssets.value);
-			BLog.output("REPORT", "    -AvailableMoney: %.3f\n", availableMoney.value);
+			BLog.output("REPORT", "    -Money: %.3f\n", money.value);
+			float fStockMarketValue = 0.0f;
+			for(int i=0; i<cHoldStockList.size(); i++ )
+			{
+				HoldStock cHoldStock = cHoldStockList.get(i);
+				fStockMarketValue = fStockMarketValue + cHoldStock.totalAmount * cHoldStock.curPrice;
+			}
+			BLog.output("REPORT", "    -StockMarketValue: %.3f\n", fStockMarketValue);
 			
 			// 打印持股
 			for(int i=0; i<cHoldStockList.size(); i++ )

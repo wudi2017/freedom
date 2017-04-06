@@ -150,10 +150,10 @@ public class Account {
 	}
 	
 	// 获得账户可用资金（现金）
-	public int getAvailableMoney(RefFloat out_availableMoney)
+	public int getAvailableMoney(String date, String time, RefFloat out_availableMoney)
 	{
 		RefFloat availableMoney= new RefFloat();
-		int iRetGetAvailableMoney = m_cIAccountOpe.getAvailableMoney(availableMoney);
+		int iRetGetAvailableMoney = m_cIAccountOpe.getAvailableMoney(date, time, availableMoney);
 		
 		RefFloat lockedMoney= new RefFloat();
 		int iRetGetLockedMoney = this.getLockedMoney(lockedMoney);
@@ -165,6 +165,44 @@ public class Account {
 		}
 		
 		return iRetGetAvailableMoney + iRetGetLockedMoney;
+	}
+	
+	// 获得账户资金
+	public int getMoney(String date, String time, RefFloat out_money)
+	{
+		RefFloat money= new RefFloat();
+		int iRetGetMoney = m_cIAccountOpe.getMoney(date, time, money);
+		
+		RefFloat lockedMoney= new RefFloat();
+		int iRetGetLockedMoney = this.getLockedMoney(lockedMoney);
+		
+		out_money.value = money.value - lockedMoney.value;
+		if(out_money.value < 0)
+		{
+			out_money.value = 0.0f;
+		}
+		
+		return iRetGetMoney + iRetGetLockedMoney;
+	}
+	
+	// 获得账户总资产
+	public int getTotalAssets(String date, String time, RefFloat out_totalAssets) {
+		float all_marketval = 0.0f;
+		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
+		int iRetHoldStock = getHoldStockList(date, time, cHoldStockList);
+		for(int i=0;i<cHoldStockList.size();i++)
+		{
+			HoldStock cHoldStock = cHoldStockList.get(i);
+			all_marketval = all_marketval + cHoldStock.curPrice*cHoldStock.totalAmount;
+		}
+		RefFloat money = new RefFloat();
+		int iRetMoney = getMoney(date, time, money);
+		out_totalAssets.value = all_marketval + money.value;
+		if(0 == iRetHoldStock && 0 == iRetMoney)
+		{
+			return 0;
+		}
+		return -99;
 	}
 	
 	public int getCommissionOrderList(List<CommissionOrder> out_list)
@@ -297,27 +335,6 @@ public class Account {
 		return false;
 	}
 	
-	// 获得账户总资产
-	public int getTotalAssets(String date, String time, RefFloat out_totalAssets) {
-		
-		float all_marketval = 0.0f;
-		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
-		int iRetHoldStock = getHoldStockList(date, time, cHoldStockList);
-		for(int i=0;i<cHoldStockList.size();i++)
-		{
-			HoldStock cHoldStock = cHoldStockList.get(i);
-			all_marketval = all_marketval + cHoldStock.curPrice*cHoldStock.totalAmount;
-		}
-		RefFloat availableMoney = new RefFloat();
-		int iRetAvailableMoney = getAvailableMoney(availableMoney);
-		out_totalAssets.value = all_marketval + availableMoney.value;
-		if(0 == iRetHoldStock && 0 == iRetAvailableMoney)
-		{
-			return 0;
-		}
-		return -99;
-	}
-	
 	// 加载锁定资金，选股表，股票调查天数表
 	private void load()
 	{
@@ -367,17 +384,28 @@ public class Account {
 		
 		RefFloat lockedMoney = new RefFloat();
 		this.getLockedMoney(lockedMoney);
+		RefFloat availableMoney = new RefFloat();
+		this.getAvailableMoney(date, time, availableMoney);
+		
 		RefFloat totalAssets = new RefFloat();
 		this.getTotalAssets(date, time, totalAssets);
-		RefFloat availableMoney = new RefFloat();
-		this.getAvailableMoney(availableMoney);
+		RefFloat money = new RefFloat();
+		this.getMoney(date, time, money);
 		List<HoldStock> cHoldStockList = new ArrayList<HoldStock>();
 		this.getHoldStockList(date, time, cHoldStockList);
 		
 		// 打印资产
-		BLog.output("ACCOUNT", "    -LockedMoney: %.3f\n", lockedMoney.value);
+		BLog.output("ACCOUNT", "    [LockedMoney] %.3f\n", lockedMoney.value);
+		BLog.output("ACCOUNT", "    [AvailableMoney] %.3f\n", availableMoney.value);
 		BLog.output("ACCOUNT", "    -TotalAssets: %.3f\n", totalAssets.value);
-		BLog.output("ACCOUNT", "    -AvailableMoney: %.3f\n", availableMoney.value);
+		BLog.output("ACCOUNT", "    -Money: %.3f\n", money.value);
+		float fStockMarketValue = 0.0f;
+		for(int i=0; i<cHoldStockList.size(); i++ )
+		{
+			HoldStock cHoldStock = cHoldStockList.get(i);
+			fStockMarketValue = fStockMarketValue + cHoldStock.totalAmount * cHoldStock.curPrice;
+		}
+		BLog.output("ACCOUNT", "    -StockMarketValue: %.3f\n", fStockMarketValue);
 		
 		// 打印持股
 		for(int i=0; i<cHoldStockList.size(); i++ )

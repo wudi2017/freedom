@@ -19,7 +19,9 @@ abstract public class IAccountOpe {
 	// 推送卖单委托
 	abstract public int pushSellOrder(String date, String time, String id, int amount, float price);
 	// 获得账户可用资金
-	abstract public int getAvailableMoney(RefFloat out_availableMoney);
+	abstract public int getAvailableMoney(String date, String time, RefFloat out_availableMoney);
+	// 获得资金
+	abstract public int getMoney(String date, String time, RefFloat out_totalAssets);
 	// 获得持股列表
 	abstract public int getHoldStockList(String date, String time, List<HoldStock> out_list);
 }

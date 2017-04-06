@@ -177,8 +177,14 @@ public class MockAccountOpe extends IAccountOpe {
 	}
 
 	@Override
-	public int getAvailableMoney(RefFloat out_availableMoney) {
+	public int getAvailableMoney(String date, String time, RefFloat out_availableMoney) {
 		out_availableMoney.value = m_money;
+		return 0;
+	}
+	
+	@Override
+	public int getMoney(String date, String time, RefFloat out_money) {
+		out_money.value = m_money;
 		return 0;
 	}
 	

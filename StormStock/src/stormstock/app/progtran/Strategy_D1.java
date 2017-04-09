@@ -389,7 +389,7 @@ public class Strategy_D1 {
 				
 				String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
 				List<StockDay> list = ctx.target().stock().getCurStockDayData();
-				int iCheck = list.size()-1;
+				int iCheck = list.size()-2;
 				
 				int iBegin = iCheck-5;
 				int iEnd = iCheck;
@@ -421,11 +421,20 @@ public class Strategy_D1 {
 					out_sr.bCreate = false;
 					return;
 				}
-				
-//				CalcParam(ctx);
-//				
-//				if(bCheckFlg)
-//				{
+
+				// 查找参数
+				CalcParam(ctx);
+				if(bCheckFlg)
+				{
+					// 近期涨幅过大不买进
+					float fStdPaZCZX = (fStarHigh + fStarLow)/2;
+					float fZhang = (fNowPrice-fStdPaZCZX)/fStdPaZCZX;
+					if(fZhang > 0.08)
+					{
+						out_sr.bCreate = false;
+						return;
+					}
+					
 //					// 一次下跌
 //					ResultXiaCuoQiWen cResultXiaCuoQiWen = ETDropStable.checkXiaCuoQiWen_2Times(list_stockTime, list_stockTime.size()-1);
 //					if (cResultXiaCuoQiWen.bCheck && fNowPrice < fStarHigh)
@@ -443,7 +452,7 @@ public class Strategy_D1 {
 //						out_sr.bCreate = true;
 //						out_sr.fMaxPositionRatio = 0.2f;
 //					}
-//				}	
+				}	
 				
 				out_sr.fMaxPositionRatio = 0.1f;
 				out_sr.bCreate = true;
@@ -467,7 +476,7 @@ public class Strategy_D1 {
 				
 				String stockId = ctx.target().stock().getCurLatestStockInfo().ID;
 				List<StockDay> list = ctx.target().stock().getCurStockDayData();
-				int iCheck = list.size()-1;
+				int iCheck = list.size()-2;
 				
 				int iBegin = iCheck-5;
 				int iEnd = iCheck;
@@ -510,7 +519,6 @@ public class Strategy_D1 {
 					return;
 				}
 
-
 //				float checkSellH = fStarHigh + (fStarHigh-fStarLow)/2;
 //				if(cHoldStock.curPrice >= checkSellH)
 //				{
@@ -524,7 +532,7 @@ public class Strategy_D1 {
 //				}
 				
 				// 止盈止损卖出
-				if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.15) // 止盈止损x个点卖
+				if(cHoldStock.profitRatio() > 0.1 || cHoldStock.profitRatio() < -0.12) // 止盈止损x个点卖
 				{
 					out_sr.bClear = true;
 					return;

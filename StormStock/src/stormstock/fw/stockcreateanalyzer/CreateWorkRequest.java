@@ -124,7 +124,7 @@ public class CreateWorkRequest extends BQThreadRequest {
 						int iEnd = stockTimeList.size()-1;
 						int cnt = stockTimeList.size();
 						
-						BLog.output("CREATE", "    [%s %s] strategy_create stockID:%s (%s) (%s %.2f)...(%s %.2f) cnt(%d)\n", 
+						BLog.output("CREATE", "    [%s %s] strategy_create %s (%s) (%s %.2f)...(%s %.2f) cnt(%d)\n", 
 								ctx.date(), ctx.time(), 
 								ctx.target().stock().getCurLatestStockInfo().ID,ctx.target().stock().GetLastDate(),
 								stockTimeList.get(iBegin).time, stockTimeList.get(iBegin).price,

@@ -123,9 +123,12 @@ public class ClearWorkRequest extends BQThreadRequest {
 						int iEnd = stockTimeList.size()-1;
 						int cnt = stockTimeList.size();
 						
-						BLog.output("CLEAR", "    [%s %s] strategy_clear stockID:%s (%s) (%s %.2f)...(%s %.2f) cnt(%d)\n", 
+						BLog.output("CLEAR", "    [%s %s] strategy_clear %s %.3f %.3f (%s) (%s %.2f)...(%s %.2f) cnt(%d)\n", 
 								ctx.date(), ctx.time(), 
-								ctx.target().stock().getCurLatestStockInfo().ID,ctx.target().stock().GetLastDate(),
+								ctx.target().stock().getCurLatestStockInfo().ID,
+								ctx.target().holdStock().refPrimeCostPrice,
+								ctx.target().holdStock().curPrice,
+								ctx.target().stock().GetLastDate(),
 								stockTimeList.get(iBegin).time, stockTimeList.get(iBegin).price,
 								stockTimeList.get(iEnd).time, stockTimeList.get(iEnd).price, 
 								cnt);

@@ -4,11 +4,20 @@ import java.util.Random;
 
 public class BUtilsMath {
 	// 保留2位小数，非四舍五入
-	public static float saveNDecimal(float val, int n)
+	public static float saveNDecimalIgnore(float val, int n)
 	{
 		float newVal = 0.0f;
 		int iScale = (int) Math.pow(10,n);
 		newVal = (int)(val*iScale)/(float)iScale;
+		return newVal;
+	}
+	
+	// 保留N位小数，四舍五入
+	public static float saveNDecimal(float val, int n)
+	{
+		float newVal = 0.0f;
+		int iScale = (int) Math.pow(10,n);
+		newVal= (float)(Math.round(val*100)/100.0f);
 		return newVal;
 	}
 	
